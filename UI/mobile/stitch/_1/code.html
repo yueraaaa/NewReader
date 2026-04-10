@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>REAL READER - 文章流</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-error-container": "#93000a",
+                        "outline": "#717782",
+                        "tertiary-fixed": "#ffdcc6",
+                        "tertiary-fixed-dim": "#ffb784",
+                        "on-secondary-fixed-variant": "#324863",
+                        "on-tertiary-fixed": "#301400",
+                        "surface-container-low": "#f4f4f2",
+                        "secondary-fixed": "#d1e4ff",
+                        "on-primary-fixed": "#001d36",
+                        "secondary-container": "#c8dfff",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "tertiary": "#713700",
+                        "surface-container-highest": "#e2e3e1",
+                        "outline-variant": "#c1c7d2",
+                        "on-primary-fixed-variant": "#00497d",
+                        "on-primary-container": "#c0dbff",
+                        "secondary": "#4a607c",
+                        "inverse-surface": "#2f3130",
+                        "primary-fixed-dim": "#9fcaff",
+                        "primary": "#00497d",
+                        "surface-container-high": "#e8e8e6",
+                        "on-error": "#ffffff",
+                        "on-surface-variant": "#414750",
+                        "on-background": "#1a1c1b",
+                        "surface-tint": "#0061a4",
+                        "inverse-on-surface": "#f1f1ef",
+                        "on-tertiary-container": "#ffceaf",
+                        "on-secondary-fixed": "#021d35",
+                        "tertiary-container": "#944a00",
+                        "surface-dim": "#dadad8",
+                        "on-primary": "#ffffff",
+                        "surface-bright": "#f9f9f7",
+                        "on-surface": "#1a1c1b",
+                        "error-container": "#ffdad6",
+                        "on-secondary-container": "#4c627e",
+                        "surface-variant": "#e2e3e1",
+                        "primary-container": "#0061a4",
+                        "surface-container": "#eeeeec",
+                        "secondary-fixed-dim": "#b1c8e8",
+                        "error": "#ba1a1a",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-fixed": "#d1e4ff",
+                        "on-tertiary-fixed-variant": "#713700",
+                        "surface": "#f9f9f7",
+                        "inverse-primary": "#9fcaff",
+                        "background": "#f9f9f7"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Newsreader"],
+                        "body": ["Newsreader", "PingFang SC", "Microsoft YaHei", "sans-serif"],
+                        "label": ["Inter", "PingFang SC", "sans-serif"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #f9f9f7;
+            -webkit-font-smoothing: antialiased;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="font-body text-on-surface">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-[#f9f9f7]/80 backdrop-blur-xl">
+<div class="flex items-center justify-between px-6 h-16 w-full max-w-screen-xl mx-auto">
+<button class="text-slate-500 hover:bg-slate-200/50 transition-colors p-2 rounded-full active:scale-95 duration-200 ease-in-out">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<h1 class="text-2xl font-bold tracking-tighter text-slate-900 font-['Newsreader'] italic">REAL READER</h1>
+<button class="text-slate-500 hover:bg-slate-200/50 transition-colors p-2 rounded-full active:scale-95 duration-200 ease-in-out">
+<span class="material-symbols-outlined">search</span>
+</button>
+</div>
+</header>
+<!-- Reading Progress Indicator -->
+<div class="fixed top-16 left-0 w-full h-[2px] z-50 bg-surface-container">
+<div class="h-full bg-primary-container" style="width: 35%;"></div>
+</div>
+<main class="pt-24 pb-28 px-6 max-w-screen-xl mx-auto">
+<!-- Category Tabs -->
+<nav class="flex gap-2 mb-10 overflow-x-auto pb-2 scrollbar-hide">
+<button class="px-6 py-2 rounded-sm bg-primary text-on-primary font-label text-[11px] font-medium tracking-wide uppercase shadow-sm">全部</button>
+<button class="px-6 py-2 rounded-sm bg-surface-container-highest text-on-surface-variant font-label text-[11px] font-medium tracking-wide uppercase hover:bg-surface-container-high transition-colors">科技</button>
+<button class="px-6 py-2 rounded-sm bg-surface-container-highest text-on-surface-variant font-label text-[11px] font-medium tracking-wide uppercase hover:bg-surface-container-high transition-colors">设计</button>
+<button class="px-6 py-2 rounded-sm bg-surface-container-highest text-on-surface-variant font-label text-[11px] font-medium tracking-wide uppercase hover:bg-surface-container-high transition-colors">新闻</button>
+</nav>
+<!-- Asymmetric Hero Article -->
+<article class="mb-16 md:grid md:grid-cols-12 md:gap-12 items-center">
+<div class="md:col-span-7 mb-6 md:mb-0">
+<div class="relative overflow-hidden rounded-lg aspect-[16/10] bg-surface-container-low group">
+<img alt="数字界面概念" class="object-cover w-full h-full transition-transform duration-700 group-hover:scale-105" data-alt="Abstract cinematic macro of digital code reflecting on glass with deep blue shadows and soft amber highlights" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD3L7myP0TmGXleh8Ys4OG3kht9cpOv_INMEIMch2-JNw0s9LC0K7uSOoeX2UJcZA-Eb0R0YmRtkJU-tt8x7iUcKJF5Xpgr8rgYrcD92T4822FZ8MYloNrjOOg7wVYK3YrujAGufNKB61wxmsMNa0ZA_4jn5fGGcGfN4jBqiwnssb41QxRPcORfQnt_z1cng2W0j_AIOg4YTUq-EZHz1v6Ll2DZiTR-pW41OpBVNecdifQqi9TPD3lVr3QZDyinaHsksns7nI7IU0A"/>
+</div>
+</div>
+<div class="md:col-span-5 flex flex-col justify-center">
+<div class="flex items-center gap-2 mb-4">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+<span class="font-label text-[11px] font-bold uppercase tracking-widest text-primary">精选推荐</span>
+</div>
+<h2 class="text-4xl md:text-5xl font-headline font-bold leading-[1.1] mb-6 tracking-tight text-on-surface italic">
+                    数字空间中的寂静架构。
+                </h2>
+<div class="flex items-center gap-3 font-label text-xs text-on-surface-variant">
+<span class="font-bold">美学周刊</span>
+<span class="opacity-30">•</span>
+<span>阅读需 14 分钟</span>
+</div>
+</div>
+</article>
+<!-- Bento Feed Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+<!-- Article Item 1 -->
+<article class="flex flex-col group">
+<div class="relative mb-6">
+<div class="absolute -left-2 top-0">
+<div class="w-2 h-2 rounded-full bg-primary ring-4 ring-surface"></div>
+</div>
+<div class="aspect-[4/3] rounded-lg overflow-hidden bg-surface-container-low mb-6">
+<img alt="复古科技" class="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500" data-alt="Close up of a classic mechanical keyboard on a wooden desk with soft morning sunlight and dust motes" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC2PqyoP5ryurLFs5re-Rr4P3JKg84SPNxSdV8vIOGvxJoAXkdiLUrVZPNLMFu2fE11AO8HvKRrYRb5AHnVi2J5E3ZHVAOG-5PaBgFscIup2nch1iyW6Lyy4NL7IFnZHozLypwLwoUiqhQMh79lgUDGVLEFT8XaJXJzqvPB-qAiblnzB50KSkoOgmwlEIoVFFJFgBPqJHjyu8XbtU1VeZhcyFSbHEOig6_AYOrwob0FVZqesN-q4R-QXIN6aTZdN8428_r4rYsmgTQ"/>
+</div>
+<div class="flex items-center gap-2 mb-3">
+<span class="font-label text-[10px] font-black uppercase tracking-tighter text-on-secondary-fixed-variant px-2 py-0.5 bg-secondary-fixed rounded-sm">科技</span>
+<span class="font-label text-[10px] text-on-surface-variant">2 小时前</span>
+</div>
+<h3 class="text-2xl font-headline font-semibold leading-tight text-on-surface mb-3 group-hover:text-primary transition-colors">
+                        重塑早期互联网的机械感。
+                    </h3>
+<p class="font-label text-sm text-on-surface-variant leading-relaxed line-clamp-2">
+                        在日益数字化的界面世界中，触觉硬件是如何重新回归的。
+                    </p>
+</div>
+</article>
+<!-- Article Item 2 (No Image Variant) -->
+<article class="flex flex-col justify-center p-8 rounded-lg bg-surface-container-lowest border border-outline-variant/10 group">
+<div class="flex items-center gap-2 mb-4">
+<div class="w-2 h-2 rounded-full bg-primary ring-4 ring-surface-container-lowest"></div>
+<span class="font-label text-[10px] text-on-surface-variant">8 小时前</span>
+</div>
+<h3 class="text-2xl font-headline font-semibold leading-tight text-on-surface mb-4 italic group-hover:text-primary transition-colors">
+                    “设计不仅是视觉和感觉，更是它如何运作。”
+                </h3>
+<div class="flex items-center justify-between mt-4">
+<span class="font-label text-[11px] font-bold text-tertiary uppercase tracking-widest">连线设计</span>
+<button class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-sm">bookmark</span>
+</button>
+</div>
+</article>
+<!-- Article Item 3 -->
+<article class="flex flex-col group">
+<div class="relative mb-6">
+<div class="aspect-[4/3] rounded-lg overflow-hidden bg-surface-container-low mb-6">
+<img alt="风景" class="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500" data-alt="Ethereal landscape of a foggy lake in Norway at twilight with blue and silver water reflections" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAX_wt__nsixSb_OM5OGusUnXOeeigEZ-Hj7yJwtOwGDqxzDWcOyVM0PlpgbPidYCv_2ZJ-y2VrDk2nJmjzi-gE_ZX5TkJ1MN3_QRlnOi18TZDnklbXbgxj_9707lccmHJqHqvYsYSQNztxYiF3zOUKZY6_9wfewGAWG8g8_bObCZ-y22nBOUuoNNyX7pXY7ca1qf4oA8_olQ6pSjS_gITIx8yXVxIh8vZpOhSlgmnTRD2HCS9T150WnwV--vMTFy77eRKcvnJBg5Q"/>
+</div>
+<div class="flex items-center gap-2 mb-3">
+<span class="font-label text-[10px] font-black uppercase tracking-tighter text-on-secondary-fixed-variant px-2 py-0.5 bg-secondary-fixed rounded-sm">新闻</span>
+<span class="font-label text-[10px] text-on-surface-variant">12 小时前</span>
+</div>
+<h3 class="text-2xl font-headline font-semibold leading-tight text-on-surface mb-3 group-hover:text-primary transition-colors">
+                        数字保存的环境成本。
+                    </h3>
+<p class="font-label text-sm text-on-surface-variant leading-relaxed line-clamp-2">
+                        数据中心正在扩张，但它们在记录物理世界的同时，付出了怎样的代价？
+                    </p>
+</div>
+</article>
+<!-- Article Item 4 -->
+<article class="flex flex-col group lg:col-span-2">
+<div class="grid md:grid-cols-2 gap-8 items-center bg-surface-container-low/50 p-6 rounded-lg">
+<div class="aspect-video rounded-lg overflow-hidden bg-surface-container-low">
+<img alt="代码" class="object-cover w-full h-full group-hover:scale-105 transition-transform duration-700" data-alt="Minimalist desk setup with a high-resolution monitor showing clean typography in a text editor, soft bokeh background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCCIWmBFa6ICgeNzfav2-8Lj16_8oW_BvA3LpJKncMrA8Mobkeg4fVb3jY9tilLc2Jv8dCS-70VhRIra21hTuQ2kyjxLdIUH4TC32HbRyfs7EN1psbtaYEzK3AEz-yHjRAuP5rsPnZMhtj0zadm9MsQkMQ14PdauG5xIz4zypq6yxr8f0QSI4eQsnFTl3pXKymuNAtp6cJr1HkEvYdxTNvuDxTb7IEQ1NAo4KXZCZJdOcgTVKeMni0flHkz-1bblUJyqqBEA5-NvA0"/>
+</div>
+<div>
+<div class="flex items-center gap-2 mb-3">
+<div class="w-1.5 h-1.5 rounded-full bg-primary/40"></div>
+<span class="font-label text-[10px] text-on-surface-variant">昨天</span>
+</div>
+<h3 class="text-2xl font-headline font-semibold leading-tight text-on-surface mb-4 group-hover:text-primary transition-colors">
+                            为什么排版是现代界面的灵魂。
+                        </h3>
+<span class="font-label text-[11px] font-bold text-on-primary-fixed-variant uppercase tracking-widest">字库工房</span>
+</div>
+</div>
+</article>
+<!-- Article Item 5 -->
+<article class="flex flex-col group">
+<div class="relative mb-6">
+<div class="absolute -left-2 top-0">
+<div class="w-2 h-2 rounded-full bg-primary ring-4 ring-surface"></div>
+</div>
+<div class="aspect-[4/3] rounded-lg overflow-hidden bg-surface-container-low mb-6">
+<img alt="艺术设计" class="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500" data-alt="Sculptural modern chair in a white gallery room with dramatic geometric shadows from a skylight" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD7GrFLhhyy0VIS27AZA1z33HYmFrkYIWm2xMZdYnu8vhMt2kaV2OaPZJXbaCfok6aLbWCcp_MfFt0lQu7OEhdO2KBLTD96iEhjJw8KRCUMSIaB6QklfZyum736QaF5aUeOajUX16Rvo8s-qZk0CWBmAbHcp9N8lfH1vzaChXupDvE2iAgRz94XOrv-XYMcUIs1d4_SFVYWW66SrfLsIS1eyqy3Mr8m_XxJrbJHZ_YRQZurS7QWR0fXZstcynLke_HVCdHDvkNz2Ko"/>
+</div>
+<div class="flex items-center gap-2 mb-3">
+<span class="font-label text-[10px] font-black uppercase tracking-tighter text-on-secondary-fixed-variant px-2 py-0.5 bg-secondary-fixed rounded-sm">设计</span>
+<span class="font-label text-[10px] text-on-surface-variant">2 天前</span>
+</div>
+<h3 class="text-2xl font-headline font-semibold leading-tight text-on-surface mb-3 group-hover:text-primary transition-colors">
+                        极简主义已死，意图主义万岁。
+                    </h3>
+<p class="font-label text-sm text-on-surface-variant leading-relaxed line-clamp-2">
+                        超越虚无，在精心策划的体验中走向有意义的密度。
+                    </p>
+</div>
+</article>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full h-20 bg-[#f9f9f7]/80 backdrop-blur-xl border-t border-slate-200/20 z-50 flex justify-around items-center px-4 pb-safe shadow-[0_-12px_40px_rgba(26,28,27,0.06)] rounded-t-3xl">
+<!-- Feed Active -->
+<a class="flex flex-col items-center justify-center text-[#0061A4] bg-blue-50/50 rounded-xl px-4 py-1 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">rss_feed</span>
+<span class="font-['Inter'] text-[11px] font-medium tracking-wide uppercase mt-1">订阅</span>
+</a>
+<!-- Discover -->
+<a class="flex flex-col items-center justify-center text-slate-400 hover:text-slate-900 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined">explore</span>
+<span class="font-['Inter'] text-[11px] font-medium tracking-wide uppercase mt-1">探索</span>
+</a>
+<!-- Bookmarks -->
+<a class="flex flex-col items-center justify-center text-slate-400 hover:text-slate-900 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined">bookmark</span>
+<span class="font-['Inter'] text-[11px] font-medium tracking-wide uppercase mt-1">收藏</span>
+</a>
+<!-- Profile -->
+<a class="flex flex-col items-center justify-center text-slate-400 hover:text-slate-900 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-['Inter'] text-[11px] font-medium tracking-wide uppercase mt-1">个人</span>
+</a>
+</nav>
+</body></html>

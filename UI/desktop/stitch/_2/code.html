@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Newsreader:ital,wght@0,400;0,600;0,700;1,400;1,600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container": "#eeeeec",
+                        "surface-container-high": "#e8e8e6",
+                        "secondary": "#4a607c",
+                        "outline-variant": "#c1c7d2",
+                        "surface-variant": "#e2e3e1",
+                        "on-surface-variant": "#414750",
+                        "on-tertiary-fixed": "#301400",
+                        "on-tertiary": "#ffffff",
+                        "tertiary-fixed": "#ffdcc6",
+                        "tertiary-container": "#944a00",
+                        "surface-container-highest": "#e2e3e1",
+                        "surface-bright": "#f9f9f7",
+                        "on-secondary": "#ffffff",
+                        "on-primary-container": "#c0dbff",
+                        "on-background": "#1a1c1b",
+                        "error-container": "#ffdad6",
+                        "on-primary-fixed": "#001d36",
+                        "on-tertiary-container": "#ffceaf",
+                        "on-error": "#ffffff",
+                        "on-secondary-container": "#4c627e",
+                        "on-secondary-fixed-variant": "#324863",
+                        "surface-container-low": "#f4f4f2",
+                        "surface": "#f9f9f7",
+                        "on-primary-fixed-variant": "#00497d",
+                        "primary-container": "#0061a4",
+                        "inverse-surface": "#2f3130",
+                        "tertiary-fixed-dim": "#ffb784",
+                        "secondary-fixed": "#d1e4ff",
+                        "on-error-container": "#93000a",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-fixed-dim": "#9fcaff",
+                        "error": "#ba1a1a",
+                        "secondary-container": "#c8dfff",
+                        "inverse-primary": "#9fcaff",
+                        "surface-tint": "#0061a4",
+                        "secondary-fixed-dim": "#b1c8e8",
+                        "on-secondary-fixed": "#021d35",
+                        "outline": "#717782",
+                        "inverse-on-surface": "#f1f1ef",
+                        "on-primary": "#ffffff",
+                        "on-tertiary-fixed-variant": "#713700",
+                        "background": "#f9f9f7",
+                        "tertiary": "#713700",
+                        "primary-fixed": "#d1e4ff",
+                        "primary": "#00497d",
+                        "surface-dim": "#dadad8",
+                        "on-surface": "#1a1c1b"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Newsreader"],
+                        "body": ["Newsreader"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Newsreader', serif; }
+        .label-font { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-surface text-on-background min-h-screen flex overflow-hidden">
+<!-- SideNavBar -->
+<aside class="flex flex-col h-full py-8 px-6 space-y-8 h-screen w-64 border-r-0 bg-[#f4f4f2] dark:bg-slate-900 shrink-0">
+<div class="space-y-1">
+<h1 class="text-2xl font-bold tracking-tighter text-[#0061A4] dark:text-blue-400 font-['Newsreader']">REAL READER</h1>
+<p class="font-['Newsreader'] italic text-sm tracking-tight text-slate-500">The Editorial Sanctuary</p>
+</div>
+<nav class="flex-1 space-y-2">
+<div class="flex items-center gap-3 py-2 px-3 text-slate-500 dark:text-slate-400 hover:text-[#0061A4] hover:bg-[#e8e8e6] dark:hover:bg-slate-800 transition-colors duration-200 cursor-pointer active:opacity-80 rounded-lg label-font text-sm">
+<span class="material-symbols-outlined">dashboard</span>
+                仪表盘
+            </div>
+<div class="flex items-center gap-3 py-2 px-3 text-slate-500 dark:text-slate-400 hover:text-[#0061A4] hover:bg-[#e8e8e6] dark:hover:bg-slate-800 transition-colors duration-200 cursor-pointer active:opacity-80 rounded-lg label-font text-sm">
+<span class="material-symbols-outlined">explore</span>
+                探索
+            </div>
+<div class="flex items-center gap-3 py-2 px-3 text-slate-500 dark:text-slate-400 hover:text-[#0061A4] hover:bg-[#e8e8e6] dark:hover:bg-slate-800 transition-colors duration-200 cursor-pointer active:opacity-80 rounded-lg label-font text-sm">
+<span class="material-symbols-outlined">bookmarks</span>
+                收藏
+            </div>
+<div class="flex items-center gap-3 py-2 px-3 text-[#0061A4] dark:text-blue-400 font-bold border-r-2 border-[#0061A4] hover:bg-[#e8e8e6] dark:hover:bg-slate-800 transition-colors duration-200 cursor-pointer active:opacity-80 label-font text-sm">
+<span class="material-symbols-outlined">settings</span>
+                设置
+            </div>
+</nav>
+<div class="pt-4 border-t border-outline-variant/10">
+<div class="flex items-center gap-3 py-2 px-3 text-slate-500 dark:text-slate-400 hover:text-[#0061A4] hover:bg-[#e8e8e6] dark:hover:bg-slate-800 transition-colors duration-200 cursor-pointer active:opacity-80 rounded-lg label-font text-sm">
+<span class="material-symbols-outlined">add</span>
+                分类
+            </div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 flex flex-col h-screen overflow-hidden bg-surface relative">
+<!-- TopNavBar -->
+<header class="flex items-center justify-between px-12 w-full h-16 sticky top-0 z-50 bg-[#f9f9f7]/80 dark:bg-slate-950/80 backdrop-blur-md border-none">
+<h2 class="label-font font-medium text-sm text-on-surface-variant">系统设置 / 全局偏好</h2>
+<div class="flex items-center space-x-6">
+<span class="material-symbols-outlined text-[#0061A4] dark:text-blue-400 cursor-pointer transition-all duration-300 ease-in-out hover:text-[#0061A4]/80">search</span>
+<span class="material-symbols-outlined text-[#0061A4] dark:text-blue-400 cursor-pointer transition-all duration-300 ease-in-out hover:text-[#0061A4]/80">notifications</span>
+<div class="w-8 h-8 rounded-full overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="professional minimalist portrait of a modern editor with neutral lighting and clean aesthetic" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBk8L3cA2nM49d3evBd_x87W1jcovDtzd3pbytx8zczHVimD4rqoNqLD7WtyUHywkeTmJTWtSNgx9KuvsV9FqHqKztaoZ5llb7PZYSPmCMjALn6R89VGqCa6dA10vvk0ibc86uCLLRo_cE3QptE-dgQN3udTp4C1vECKw6jgzaTSEDbUfuA3uQaL664ZlAnyAAshdNwsOpB6QyOtfuXb7kbKXKJZSr8iiZ40OmOwKHI-S53SqZYJNuWpfDlF3hT29m3IJtjzvgBPDQ"/>
+</div>
+</div>
+</header>
+<!-- Content Canvas -->
+<section class="flex-1 overflow-y-auto px-12 py-12 max-w-5xl mx-auto w-full space-y-16">
+<!-- Page Header -->
+<div class="space-y-4">
+<h3 class="text-5xl font-bold tracking-tighter font-headline text-on-surface">设置</h3>
+<p class="text-on-surface-variant font-body italic text-lg leading-relaxed max-w-2xl">
+                    定制您的阅读庇护所。配置智能摘要引擎，管理您的订阅来源，同步跨设备的阅读进度。
+                </p>
+</div>
+<!-- Bento Layout Sections -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-8">
+<!-- 大模型配置 (AI Config) -->
+<div class="md:col-span-8 bg-surface-container-lowest rounded-xl p-8 transition-all hover:bg-surface-container-low duration-300">
+<div class="flex items-center gap-3 mb-8">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">psychology</span>
+<h4 class="text-xl font-bold font-headline">大模型配置</h4>
+</div>
+<div class="space-y-8">
+<div class="space-y-3">
+<label class="label-font text-xs font-semibold uppercase tracking-wider text-on-surface-variant">选择摘要引擎</label>
+<div class="flex flex-wrap gap-3">
+<button class="px-5 py-2.5 rounded-sm label-font text-sm font-medium transition-all bg-primary text-on-primary ring-2 ring-primary ring-offset-2">MiniMax-abab6.5</button>
+<button class="px-5 py-2.5 rounded-sm label-font text-sm font-medium transition-all bg-surface-container-highest text-on-surface-variant hover:bg-surface-container-high">GPT-4o</button>
+<button class="px-5 py-2.5 rounded-sm label-font text-sm font-medium transition-all bg-surface-container-highest text-on-surface-variant hover:bg-surface-container-high">Claude 3.5 Sonnet</button>
+<button class="px-5 py-2.5 rounded-sm label-font text-sm font-medium transition-all bg-surface-container-highest text-on-surface-variant hover:bg-surface-container-high">DeepSeek-V3</button>
+</div>
+</div>
+<div class="space-y-3">
+<label class="label-font text-xs font-semibold uppercase tracking-wider text-on-surface-variant">API Key 凭据</label>
+<div class="flex gap-3">
+<input class="flex-1 bg-surface border-none label-font text-sm px-4 py-3 focus:ring-1 focus:ring-primary/20 rounded-sm" placeholder="输入您的 API 密钥..." type="password"/>
+<button class="px-6 py-3 bg-primary text-on-primary label-font text-xs font-bold uppercase tracking-widest rounded-full transition-all hover:opacity-90 active:scale-95 shadow-lg shadow-primary/20">测试连接</button>
+</div>
+<p class="text-[10px] label-font text-on-surface-variant/60 italic">您的密钥将进行本地加密存储，仅用于调用摘要接口。</p>
+</div>
+</div>
+</div>
+<!-- 同步设置 (Sync) -->
+<div class="md:col-span-4 bg-surface-container-low rounded-xl p-8 space-y-6">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">sync</span>
+<h4 class="text-xl font-bold font-headline">同步设置</h4>
+</div>
+<div class="space-y-6 pt-4">
+<div class="flex items-center justify-between">
+<div class="space-y-0.5">
+<p class="label-font text-sm font-semibold">自动云端同步</p>
+<p class="label-font text-[11px] text-on-surface-variant">多端阅读进度实时同步</p>
+</div>
+<div class="w-12 h-6 bg-primary rounded-full relative cursor-pointer p-1">
+<div class="w-4 h-4 bg-white rounded-full ml-auto"></div>
+</div>
+</div>
+<div class="pt-6 border-t border-outline-variant/20">
+<div class="bg-surface-container-lowest p-4 rounded-lg flex items-center gap-3">
+<img class="w-10 h-10 rounded-full border-2 border-surface-container-high" data-alt="simple profile avatar icon minimalist editorial style" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCoCgWH7xR9e4NLQbkkw7FJHBoZ_-2GL_jCB9A_D-QOT-U4RjB5gyUMRMPDnFZcJ6OEQd-Mr_oD6BMLOv1tOOk-A2jkgzERRvh88fhVAQkNTF_71YcgTJqY-6fJK028SDnSW2hByy2zy47ArH56UV3lu909pmtvrFusEkFpV6bALoIRrbFCuk_rT-0AkvARkaVcZqn2Q2vOxHdcsBkqWtzfnaj9ni4aF4dsyUH3y3YMBaRSXKVrSG3bXEbBxbV87HqoUPs_oxOcfhA"/>
+<div class="flex-1">
+<p class="label-font text-xs font-bold">已登录账户</p>
+<p class="label-font text-[10px] text-on-surface-variant">editor@realreader.io</p>
+</div>
+<button class="text-tertiary label-font text-[10px] font-bold underline underline-offset-4">注销</button>
+</div>
+</div>
+</div>
+</div>
+<!-- 数据管理 (Data Management / OPML) -->
+<div class="md:col-span-12 bg-surface-container-lowest rounded-xl p-8 border border-outline-variant/10">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-tertiary" style="font-variation-settings: 'FILL' 1;">import_export</span>
+<div>
+<h4 class="text-xl font-bold font-headline">OPML 数据管理</h4>
+<p class="label-font text-xs text-on-surface-variant mt-1">迁移您的订阅源，保持阅读主权的独立性。</p>
+</div>
+</div>
+<div class="flex gap-4">
+<button class="px-8 py-3 border border-outline text-on-surface-variant label-font text-xs font-bold uppercase tracking-widest rounded-full hover:bg-surface-container-high transition-colors">
+                                导入 OPML
+                            </button>
+<button class="px-8 py-3 bg-gradient-to-br from-primary to-primary-container text-on-primary label-font text-xs font-bold uppercase tracking-widest rounded-full hover:opacity-95 transition-opacity shadow-lg shadow-primary/20">
+                                导出备份
+                            </button>
+</div>
+</div>
+</div>
+<!-- Footer Aesthetic Image (Editorial Element) -->
+<div class="md:col-span-12 mt-12">
+<div class="h-[300px] w-full rounded-2xl overflow-hidden relative group">
+<img class="w-full h-full object-cover grayscale opacity-80 group-hover:scale-105 transition-transform duration-[2000ms]" data-alt="abstract minimalist monochrome photography of a serene reading room with architectural shadows and soft morning light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB5cPb2KHh0upw_AqbDwqy3FN7Uol4DqvMqgEarGxLpetdcNRqhusq2mhsPFvyWADU1Bh_KQueIgvJY69e8RftlemgEoO-WGFARHkuyjUBbCwFvhDM_uwDjbjLzoCEU1HvFIFFDK09hH2KrL9GcJr6r8Lx4EwAM5NELrFRHm2JtJAcnz6THdgdaQAB4j3foKK8KJbioP-DoOiwK56k3H-yl7qBhek4BdO-_4fTT5NJprxpsZ8oPPa0GUPpgNalnezkOiRe8riT1DIc"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface via-transparent to-transparent"></div>
+<div class="absolute bottom-8 left-8 space-y-1">
+<p class="label-font text-[10px] font-bold uppercase tracking-[0.3em] text-on-surface/40">The Editorial Sanctuary</p>
+<p class="font-headline italic text-lg text-on-surface/60">“阅读是一场关于自我的宁静探险。”</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Custom Reading Progress Bar -->
+<div class="fixed top-0 left-64 right-0 h-[2px] bg-surface-container-high">
+<div class="h-full bg-primary w-1/3"></div>
+</div>
+</main>
+</body></html>

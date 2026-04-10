@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>REAL READER - 文章视图</title>
+<!-- Google Fonts: Newsreader for Editorial, Inter for Utility -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&amp;family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-error-container": "#93000a",
+                    "outline": "#717782",
+                    "tertiary-fixed": "#ffdcc6",
+                    "tertiary-fixed-dim": "#ffb784",
+                    "on-secondary-fixed-variant": "#324863",
+                    "on-tertiary-fixed": "#301400",
+                    "surface-container-low": "#f4f4f2",
+                    "secondary-fixed": "#d1e4ff",
+                    "on-primary-fixed": "#001d36",
+                    "secondary-container": "#c8dfff",
+                    "on-secondary": "#ffffff",
+                    "on-tertiary": "#ffffff",
+                    "tertiary": "#713700",
+                    "surface-container-highest": "#e2e3e1",
+                    "outline-variant": "#c1c7d2",
+                    "on-primary-fixed-variant": "#00497d",
+                    "on-primary-container": "#c0dbff",
+                    "secondary": "#4a607c",
+                    "inverse-surface": "#2f3130",
+                    "primary-fixed-dim": "#9fcaff",
+                    "primary": "#00497d",
+                    "surface-container-high": "#e8e8e6",
+                    "on-error": "#ffffff",
+                    "on-surface-variant": "#414750",
+                    "on-background": "#1a1c1b",
+                    "surface-tint": "#0061a4",
+                    "inverse-on-surface": "#f1f1ef",
+                    "on-tertiary-container": "#ffceaf",
+                    "on-secondary-fixed": "#021d35",
+                    "tertiary-container": "#944a00",
+                    "surface-dim": "#dadad8",
+                    "on-primary": "#ffffff",
+                    "surface-bright": "#f9f9f7",
+                    "on-surface": "#1a1c1b",
+                    "error-container": "#ffdad6",
+                    "on-secondary-container": "#4c627e",
+                    "surface-variant": "#e2e3e1",
+                    "primary-container": "#0061a4",
+                    "surface-container": "#eeeeec",
+                    "secondary-fixed-dim": "#b1c8e8",
+                    "error": "#ba1a1a",
+                    "surface-container-lowest": "#ffffff",
+                    "primary-fixed": "#d1e4ff",
+                    "on-tertiary-fixed-variant": "#713700",
+                    "surface": "#f9f9f7",
+                    "inverse-primary": "#9fcaff",
+                    "background": "#f9f9f7"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Newsreader", "serif"],
+                    "body": ["Newsreader", "serif"],
+                    "label": ["Inter", "sans-serif"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .reading-progress {
+            height: 2px;
+            background: #00497d;
+            width: 35%; /* Simulated progress */
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 60;
+        }
+        body {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-surface text-on-surface selection:bg-primary-container selection:text-white">
+<!-- Reading Progress Indicator -->
+<div class="reading-progress"></div>
+<!-- TopAppBar (Transactional/Focused State: Hidden Nav Shell) -->
+<header class="fixed top-0 w-full z-50 bg-[#f9f9f7]/80 dark:bg-slate-900/80 backdrop-blur-xl">
+<div class="flex items-center justify-between px-6 h-16 w-full max-w-screen-xl mx-auto">
+<div class="flex items-center gap-4">
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-slate-200/50 dark:hover:bg-slate-800/50 transition-colors active:scale-95 duration-200 ease-in-out">
+<span class="material-symbols-outlined text-slate-900 dark:text-slate-50">arrow_back</span>
+</button>
+<span class="text-2xl font-bold tracking-tighter text-slate-900 dark:text-slate-50 font-['Newsreader']">REAL READER</span>
+</div>
+<div class="flex items-center gap-2">
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-slate-200/50 dark:hover:bg-slate-800/50 transition-colors">
+<span class="material-symbols-outlined text-slate-500">bookmark</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-slate-200/50 dark:hover:bg-slate-800/50 transition-colors">
+<span class="material-symbols-outlined text-slate-500">share</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="pt-32 pb-32 px-6 sm:px-12 md:px-[15%] lg:px-[20%] xl:px-[25%] max-w-screen-2xl mx-auto">
+<!-- Article Header -->
+<header class="mb-12">
+<div class="flex items-center gap-3 mb-6">
+<span class="px-3 py-1 rounded-sm bg-surface-container-highest text-on-surface-variant font-label text-[11px] uppercase tracking-widest font-bold">技术</span>
+<span class="font-label text-sm text-outline">阅读需 12 分钟</span>
+</div>
+<h1 class="font-headline text-5xl md:text-6xl font-bold text-on-surface tracking-tight leading-[1.1] mb-8">
+                寂静的架构：为什么我们需要数字避难所
+            </h1>
+<div class="flex items-center gap-4 py-6 border-y border-outline-variant/15">
+<div class="w-12 h-12 rounded-full overflow-hidden bg-surface-container-high">
+<img class="w-full h-full object-cover" data-alt="close-up portrait of a professional writer in a bright studio with soft natural lighting and warm tones" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC-TZEQ31mfnfx0ASDAvkq3H441LSO3N7BT8ENOkzfFobTzOSO5KiaQVgFlXMZhadNjWS7rOJthMe1bm7RUczGhnASSc81Yb-fAftx3QR0sCxenOKuIrlNhD2Y0ILa331ar48bfaW2elxlj97d-e5bgtFk49GUPPMGRbygM4e0iMylRtJrWuaIR8x1_JyUNrilruXSi5BrZiohrH1I_7MxRAaw1O7W4vEFZawqobWMt_3dCBMS_i-tEjZqjArgeRS66Mb-IxmNjv3k"/>
+</div>
+<div>
+<p class="font-label font-bold text-on-surface">朱利安·索恩</p>
+<p class="font-label text-sm text-outline">发表于《现代期刊》 • 10月24日</p>
+</div>
+</div>
+</header>
+<!-- Article Body -->
+<article class="font-body text-xl md:text-2xl text-on-surface leading-relaxed space-y-8">
+<p class="first-letter:text-7xl first-letter:font-bold first-letter:mr-3 first-letter:float-left first-letter:font-headline first-letter:text-primary">
+                在现代界面的喧嚣中，寂静已成为终极的奢侈。我们不断受到通知、无限滚动和“当下”无情压力的轰炸。然而，随着我们进入这个十年的深处，一种新的设计哲学正在兴起——这种哲学优先考虑专注而非参与度指标。
+            </p>
+<figure class="my-12 -mx-6 md:-mx-12">
+<div class="aspect-[16/9] w-full bg-surface-container-low rounded-xl overflow-hidden shadow-sm">
+<img class="w-full h-full object-cover" data-alt="minimalist interior with large windows looking onto a foggy forest, a single wooden chair and soft natural light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAWcwkmvysaNiNj7ntsme6FJGdtKBPvV5Ih_9236vN7oFK5p-oU8zZOIqESaW0yIHKvmYvuIc4PO_36eoDRkeAwl4RWzfYpvdWi3kQkwO_N06do7uFfhET_33P7u4-DNsq7aU2Lj8vR56m-JHIaxyPyvWJgV6BxNksTHGEt-jtqKoQ_8VA7tASk1aPcjIbuiTlNGMOFkULJxp0kv9sLxVyA4mDZLGzcDpAHZ4bOPDhVty5Iw3f6S8FW3R2dEmzrN0zmWhErt26RyGc"/>
+</div>
+<figcaption class="mt-4 px-6 md:px-0 font-label text-sm text-outline italic text-center">用意图设计：创造让心灵呼吸的空间。</figcaption>
+</figure>
+<p>
+                数字避难所并非关于功能的缺失，而是关于意图的存在。它就像是在繁华大都市中心的一座安静图书馆。当我们为读者设计时，必须将他们的注意力视为一种神圣的资源，而非可供挖掘的商品。
+            </p>
+<h2 class="font-headline text-3xl font-bold text-on-surface pt-8">留白的重量</h2>
+<p>
+                思考一下纸质页面。边距并非“浪费”的空间；它们是让内容得以存在的框架。在数字世界中，我们常常感到需要用推荐或广告填满每一个像素。通过收回这些边距，我们为用户提供了沉浸在单一思考中的心理安全感。
+            </p>
+<blockquote class="my-12 pl-8 border-l-4 border-primary italic text-2xl md:text-3xl text-primary-container font-headline py-2">
+                “任何设计师工具箱中最强大的工具，就是无所作为的勇气。”
+            </blockquote>
+<p>
+                这种勇气体现为“无缝”规则。通过移除分割屏幕的生硬的 1px 边框，我们让想法得以流动。我们使用色调偏移——从一种米色到另一种米色的微妙过渡——来引导视线而不禁锢它。
+            </p>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8 my-12">
+<div class="bg-surface-container-low p-8 rounded-xl">
+<h3 class="font-headline text-xl font-bold mb-4">实用阶段</h3>
+<p class="font-label text-base text-on-surface-variant">功能性强、速度快，但往往冰冷。旨在寻找信息而非吸收知识。</p>
+</div>
+<div class="bg-surface-container-lowest p-8 rounded-xl shadow-[0_12px_40px_rgba(26,28,27,0.06)] border border-outline-variant/10">
+<h3 class="font-headline text-xl font-bold mb-4">编辑阶段</h3>
+<p class="font-label text-base text-on-surface-variant">量身定制、温暖且有目的性。旨在进行长篇综合和情感共鸣。</p>
+</div>
+</div>
+<p>
+                作为读者，我们正在从“信息流”转向“收藏”。我们正在寻找那些尊重我们的时间并提升我们好奇心的平台。网络的未来属于那些敢于保持安静的人。
+            </p>
+</article>
+<!-- Article Footer Metadata -->
+<footer class="mt-20 pt-12 border-t border-outline-variant/15 flex flex-wrap gap-2">
+<span class="px-4 py-2 bg-surface-container-low rounded-full font-label text-xs font-bold text-outline uppercase tracking-wider">设计哲学</span>
+<span class="px-4 py-2 bg-surface-container-low rounded-full font-label text-xs font-bold text-outline uppercase tracking-wider">极简主义</span>
+<span class="px-4 py-2 bg-surface-container-low rounded-full font-label text-xs font-bold text-outline uppercase tracking-wider">阅读体验</span>
+</footer>
+</main>
+<!-- Floating Action Buttons -->
+<div class="fixed bottom-8 left-0 w-full flex justify-center items-center gap-4 px-6 z-50">
+<!-- AI Summary Button -->
+<button class="flex items-center gap-3 px-6 py-4 bg-gradient-to-br from-primary to-primary-container text-on-primary rounded-full shadow-[0_12px_40px_rgba(0,73,125,0.25)] hover:scale-105 active:scale-95 transition-all duration-300">
+<span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">colors_spark</span>
+<span class="font-label font-bold text-sm tracking-widest uppercase">AI 摘要</span>
+</button>
+<!-- Translate Button -->
+<button class="flex items-center gap-3 px-6 py-4 bg-surface-container-lowest text-on-surface rounded-full shadow-[0_12px_40px_rgba(26,28,27,0.06)] border border-outline-variant/20 hover:bg-surface-container-high active:scale-95 transition-all duration-300">
+<span class="material-symbols-outlined text-xl">language</span>
+<span class="font-label font-bold text-sm tracking-widest uppercase">一键翻译</span>
+</button>
+<button class="flex items-center gap-3 px-6 py-4 bg-surface-container-lowest text-on-surface rounded-full shadow-[0_12px_40px_rgba(26,28,27,0.06)] border border-outline-variant/20 hover:bg-surface-container-high active:scale-95 transition-all duration-300">
+<span class="material-symbols-outlined text-xl">volume_up</span>
+<span class="font-label font-bold text-sm tracking-widest uppercase">新闻转语音</span>
+</button></div>
+</body></html>

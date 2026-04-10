@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>REAL READER - 我的订阅</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-error-container": "#93000a",
+                    "outline": "#717782",
+                    "tertiary-fixed": "#ffdcc6",
+                    "tertiary-fixed-dim": "#ffb784",
+                    "on-secondary-fixed-variant": "#324863",
+                    "on-tertiary-fixed": "#301400",
+                    "surface-container-low": "#f4f4f2",
+                    "secondary-fixed": "#d1e4ff",
+                    "on-primary-fixed": "#001d36",
+                    "secondary-container": "#c8dfff",
+                    "on-secondary": "#ffffff",
+                    "on-tertiary": "#ffffff",
+                    "tertiary": "#713700",
+                    "surface-container-highest": "#e2e3e1",
+                    "outline-variant": "#c1c7d2",
+                    "on-primary-fixed-variant": "#00497d",
+                    "on-primary-container": "#c0dbff",
+                    "secondary": "#4a607c",
+                    "inverse-surface": "#2f3130",
+                    "primary-fixed-dim": "#9fcaff",
+                    "primary": "#00497d",
+                    "surface-container-high": "#e8e8e6",
+                    "on-error": "#ffffff",
+                    "on-surface-variant": "#414750",
+                    "on-background": "#1a1c1b",
+                    "surface-tint": "#0061a4",
+                    "inverse-on-surface": "#f1f1ef",
+                    "on-tertiary-container": "#ffceaf",
+                    "on-secondary-fixed": "#021d35",
+                    "tertiary-container": "#944a00",
+                    "surface-dim": "#dadad8",
+                    "on-primary": "#ffffff",
+                    "surface-bright": "#f9f9f7",
+                    "on-surface": "#1a1c1b",
+                    "error-container": "#ffdad6",
+                    "on-secondary-container": "#4c627e",
+                    "surface-variant": "#e2e3e1",
+                    "primary-container": "#0061a4",
+                    "surface-container": "#eeeeec",
+                    "secondary-fixed-dim": "#b1c8e8",
+                    "error": "#ba1a1a",
+                    "surface-container-lowest": "#ffffff",
+                    "primary-fixed": "#d1e4ff",
+                    "on-tertiary-fixed-variant": "#713700",
+                    "surface": "#f9f9f7",
+                    "inverse-primary": "#9fcaff",
+                    "background": "#f9f9f7"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Newsreader", "serif"],
+                    "body": ["Newsreader", "serif"],
+                    "label": ["Inter", "sans-serif"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .reading-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 2px;
+            width: 45%;
+            background: #00497d;
+            z-index: 100;
+        }
+        body {
+            background-color: #f9f9f7;
+            font-family: 'Newsreader', serif;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="text-on-background selection:bg-primary-container selection:text-white">
+<div class="reading-progress"></div>
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-[#f9f9f7]/80 backdrop-blur-xl">
+<div class="flex items-center justify-between px-6 h-16 w-full max-w-screen-xl mx-auto">
+<button class="material-symbols-outlined text-[#0061A4] hover:bg-slate-200/50 p-2 rounded-full transition-colors">menu</button>
+<h1 class="text-2xl font-bold tracking-tighter text-slate-900 font-['Newsreader'] italic">REAL READER</h1>
+<button class="material-symbols-outlined text-[#0061A4] hover:bg-slate-200/50 p-2 rounded-full transition-colors">search</button>
+</div>
+</header>
+<main class="pt-24 pb-32 px-6 max-w-2xl mx-auto">
+<!-- Header & Sync Status -->
+<header class="mb-12">
+<h2 class="text-4xl font-headline font-bold text-on-surface tracking-tight mb-2">我的订阅</h2>
+<div class="flex items-center gap-2 text-on-surface-variant font-label text-sm">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">cloud_done</span>
+<span>上次同步于 2分钟前</span>
+</div>
+</header>
+<!-- Import/Export Actions -->
+<section class="grid grid-cols-2 gap-4 mb-12">
+<button class="flex items-center justify-center gap-2 py-4 px-6 bg-surface-container-low rounded-xl border border-outline-variant/15 hover:bg-surface-container-high transition-colors font-label font-medium text-on-surface">
+<span class="material-symbols-outlined">file_upload</span>
+                导入 OPML
+            </button>
+<button class="flex items-center justify-center gap-2 py-4 px-6 bg-surface-container-low rounded-xl border border-outline-variant/15 hover:bg-surface-container-high transition-colors font-label font-medium text-on-surface">
+<span class="material-symbols-outlined">file_download</span>
+                导出 OPML
+            </button>
+</section>
+<!-- Subscription List -->
+<div class="space-y-10">
+<!-- Folder Group -->
+<section>
+<div class="flex items-center justify-between mb-6 group">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">folder</span>
+<h3 class="font-headline text-xl font-bold">科技与设计</h3>
+</div>
+<span class="font-label text-xs uppercase tracking-widest text-on-surface-variant bg-surface-container-highest px-2 py-1 rounded">12 个订阅源</span>
+</div>
+<div class="space-y-6 ml-9">
+<!-- Source Item -->
+<div class="flex items-center justify-between group cursor-pointer">
+<div class="flex items-center gap-4">
+<div class="w-8 h-8 rounded-lg bg-surface-container-high flex items-center justify-center overflow-hidden">
+<img alt="Source Icon" class="w-6 h-6 object-cover" data-alt="minimalist tech blog logo icon with clean geometric lines on a neutral background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA3w4nK9g-tQM3RZ2Byx4AzVMBlL26JIvpkoVW7wKHEKfhcAMG1FgU8B_Gndx8IjyB2LNAcxPQ2aOYkyR4mc1Exf_cDLDzzWHViWyy43PCYsoiTWzlzziB1L7IglxzbCtFR1v3EdFrTCkTPhIdMIHhR3DNqOLyaybKNWrK8eVE_s3oKI_FZEz07y7AsRbVDPP3MJ0A-3uqX_PQ-EiR4gQYp_AlE7pqAM2_kpCN-O4CHjAbKQ-j_vEKYsV6QwZfwRr4AmMySMQDxdxg"/>
+</div>
+<div>
+<p class="font-headline text-lg text-on-surface leading-tight">The Verge</p>
+<p class="font-label text-xs text-on-surface-variant">theverge.com/rss/index.xml</p>
+</div>
+</div>
+<button class="material-symbols-outlined opacity-0 group-hover:opacity-100 transition-opacity text-on-surface-variant">more_vert</button>
+</div>
+<div class="flex items-center justify-between group cursor-pointer">
+<div class="flex items-center gap-4">
+<div class="w-8 h-8 rounded-lg bg-surface-container-high flex items-center justify-center overflow-hidden">
+<img alt="Source Icon" class="w-6 h-6 object-cover" data-alt="abstract minimalist logo for a design studio using soft neutral tones and organic shapes" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDj0JIpdORvDvFsigp2FGRE_UGG98imuY3UlHSyYlHCppfUxol7NzNSb6mm8hwdwMESAgnUoKCt_qsk_jAyrLhebFAonvnlyUltLIzLWAk2BLLE7sQ0QiqT9xZ3s0aoIX80wVRbjmRmfWOZKoK8pc2wLhLkfw5WMQw2iNsJTnSQDdV8J88lvyh4DBfJf55HCEJyUzSzIYne-l7ouvQDlX-nWQJNUfXiEnvP-3YpGiZp7MWUwFhAtpXRfWMCxS2necgGFbbHA00gSwU"/>
+</div>
+<div>
+<p class="font-headline text-lg text-on-surface leading-tight">It's Nice That</p>
+<p class="font-label text-xs text-on-surface-variant">itsnicethat.com/rss</p>
+</div>
+</div>
+<button class="material-symbols-outlined opacity-0 group-hover:opacity-100 transition-opacity text-on-surface-variant">more_vert</button>
+</div>
+</div>
+</section>
+<!-- Folder Group -->
+<section>
+<div class="flex items-center justify-between mb-6 group">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">folder</span>
+<h3 class="font-headline text-xl font-bold">新闻与世界</h3>
+</div>
+<span class="font-label text-xs uppercase tracking-widest text-on-surface-variant bg-surface-container-highest px-2 py-1 rounded">5 个订阅源</span>
+</div>
+<div class="space-y-6 ml-9">
+<div class="flex items-center justify-between group cursor-pointer">
+<div class="flex items-center gap-4">
+<div class="w-8 h-8 rounded-lg bg-surface-container-high flex items-center justify-center overflow-hidden">
+<img alt="Source Icon" class="w-6 h-6 object-cover" data-alt="minimalist newspaper icon representing global news with traditional serif typography feel" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA3-p4KwtxJ7xWP2waihCVmMDQDdNS9RMj2bm09Y3pxIuyGF4snWmeOsLmCttA9WqwSGLOyabp78Oavfe6VWIhJLz2wHma6NiNM4F7lDl_uuMn0ul2jxcl76hM6jDOThNqrsTAHcMuKv6oX7QYztJRuLPchI0uGTNjWwhr-vO0r6LwALhhTTyn7UcEtd93F0rEGHhGh7svOudShj_SNzGMdXljyaFf9om4r0AJxoI02HSTJJl3XjVtGViNnjyR6n1T1PSiY3RrreiM"/>
+</div>
+<div>
+<p class="font-headline text-lg text-on-surface leading-tight">The New York Times</p>
+<p class="font-label text-xs text-on-surface-variant">nytimes.com/rss</p>
+</div>
+</div>
+<button class="material-symbols-outlined opacity-0 group-hover:opacity-100 transition-opacity text-on-surface-variant">more_vert</button>
+</div>
+</div>
+</section>
+<!-- Folder Group (Uncategorized) -->
+<section>
+<div class="flex items-center justify-between mb-6 group">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">drafts</span>
+<h3 class="font-headline text-xl font-bold">未分类</h3>
+</div>
+<span class="font-label text-xs uppercase tracking-widest text-on-surface-variant bg-surface-container-highest px-2 py-1 rounded">2 个订阅源</span>
+</div>
+<div class="space-y-6 ml-9">
+<div class="flex items-center justify-between group cursor-pointer">
+<div class="flex items-center gap-4">
+<div class="w-8 h-8 rounded-lg bg-surface-container-high flex items-center justify-center overflow-hidden">
+<img alt="Source Icon" class="w-6 h-6 object-cover" data-alt="delicate handwritten style monogram icon for a personal literary blog" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCBxrepcbm3eM0pk0zRYCwjomlPWshMpbvR48T04OoRnuanxh1Szrpn9Ep1rtlYJ0dGUF1etCSEbUugx3QGFOXYDkpwOAfUax2CnLFLoVtNZRthHGhVm1IIsPxHcpWxvrWqo-TGng2NTVfRFCf99_iocHq_LPO5l4a7xuuyhUOsMgDbIcpmzsIatUh0mdCf99wK4f6higxS_SG1u2i9M9GQIzZpezAOaEkGiRmphxYSnxTKPty1fG_35tmOrNur22clRHjAOUpoR1Q"/>
+</div>
+<div>
+<p class="font-headline text-lg text-on-surface leading-tight">Austin Kleon</p>
+<p class="font-label text-xs text-on-surface-variant">austinkleon.com/feed</p>
+</div>
+</div>
+<button class="material-symbols-outlined opacity-0 group-hover:opacity-100 transition-opacity text-on-surface-variant">more_vert</button>
+</div>
+</div>
+</section>
+<!-- Add Source Item -->
+<button class="w-full flex items-center gap-4 py-4 px-4 border-2 border-dashed border-outline-variant/30 rounded-2xl hover:border-primary/50 transition-colors text-on-surface-variant hover:text-primary group">
+<div class="w-8 h-8 rounded-lg bg-surface-container-highest flex items-center justify-center group-hover:bg-primary-container group-hover:text-white transition-colors">
+<span class="material-symbols-outlined">add</span>
+</div>
+<span class="font-label font-semibold">添加新的 RSS 订阅源</span>
+</button>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full h-20 bg-[#f9f9f7]/80 backdrop-blur-xl flex justify-around items-center px-4 pb-safe border-t border-slate-200/20 z-50 shadow-[0_-12px_40px_rgba(26,28,27,0.06)] rounded-t-3xl">
+<div class="flex flex-col items-center justify-center text-slate-400">
+<span class="material-symbols-outlined">rss_feed</span>
+<span class="font-['Inter'] text-[11px] font-medium tracking-wide uppercase mt-1">订阅</span>
+</div>
+<div class="flex flex-col items-center justify-center text-slate-400">
+<span class="material-symbols-outlined">explore</span>
+<span class="font-['Inter'] text-[11px] font-medium tracking-wide uppercase mt-1">探索</span>
+</div>
+<div class="flex flex-col items-center justify-center text-slate-400">
+<span class="material-symbols-outlined">bookmark</span>
+<span class="font-['Inter'] text-[11px] font-medium tracking-wide uppercase mt-1">收藏</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#0061A4] bg-blue-50/50 rounded-xl px-4 py-1">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">person</span>
+<span class="font-['Inter'] text-[11px] font-medium tracking-wide uppercase mt-1">个人</span>
+</div>
+</nav>
+<!-- Floating Action Button -->
+<button class="fixed bottom-24 right-6 md:bottom-12 md:right-12 w-14 h-14 bg-gradient-to-br from-primary to-primary-container text-white rounded-full shadow-lg flex items-center justify-center active:scale-90 transition-transform z-40">
+<span class="material-symbols-outlined text-2xl">add_link</span>
+</button>
+</body></html>

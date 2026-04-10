@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>REAL READER - 文章详情</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Newsreader:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary": "#ffffff",
+                        "surface-container-low": "#f4f4f2",
+                        "surface-bright": "#f9f9f7",
+                        "secondary-fixed-dim": "#b1c8e8",
+                        "inverse-on-surface": "#f1f1ef",
+                        "on-primary-fixed": "#001d36",
+                        "tertiary-fixed-dim": "#ffb784",
+                        "on-tertiary-fixed-variant": "#713700",
+                        "surface": "#f9f9f7",
+                        "on-background": "#1a1c1b",
+                        "outline-variant": "#c1c7d2",
+                        "error-container": "#ffdad6",
+                        "on-primary-container": "#c0dbff",
+                        "outline": "#717782",
+                        "surface-container": "#eeeeec",
+                        "primary-fixed": "#d1e4ff",
+                        "on-error-container": "#93000a",
+                        "on-primary-fixed-variant": "#00497d",
+                        "surface-container-high": "#e8e8e6",
+                        "surface-dim": "#dadad8",
+                        "on-tertiary": "#ffffff",
+                        "on-surface-variant": "#414750",
+                        "on-secondary-fixed-variant": "#324863",
+                        "inverse-primary": "#9fcaff",
+                        "secondary-fixed": "#d1e4ff",
+                        "surface-variant": "#e2e3e1",
+                        "surface-container-highest": "#e2e3e1",
+                        "primary": "#00497d",
+                        "on-error": "#ffffff",
+                        "on-tertiary-fixed": "#301400",
+                        "on-tertiary-container": "#ffceaf",
+                        "inverse-surface": "#2f3130",
+                        "secondary-container": "#c8dfff",
+                        "tertiary": "#713700",
+                        "on-secondary-container": "#4c627e",
+                        "on-surface": "#1a1c1b",
+                        "on-secondary-fixed": "#021d35",
+                        "on-primary": "#ffffff",
+                        "primary-fixed-dim": "#9fcaff",
+                        "tertiary-fixed": "#ffdcc6",
+                        "tertiary-container": "#944a00",
+                        "primary-container": "#0061a4",
+                        "surface-tint": "#0061a4",
+                        "background": "#f9f9f7",
+                        "secondary": "#4a607c",
+                        "error": "#ba1a1a",
+                        "surface-container-lowest": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Newsreader"],
+                        "body": ["Newsreader"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .article-content p {
+            margin-bottom: 2rem;
+            text-align: justify;
+        }
+        .article-content blockquote {
+            border-left: 3px solid #0061A4;
+            padding-left: 1.5rem;
+            font-style: italic;
+            margin: 2.5rem 0;
+            color: #414750;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-label selection:bg-primary-container selection:text-on-primary-fixed-variant overflow-hidden">
+<!-- SideNavBar Shell -->
+<aside class="fixed left-0 top-0 h-full flex flex-col p-6 bg-[#f4f4f2] dark:bg-stone-900 h-screen w-64 border-r-0 z-50">
+<div class="mb-10">
+<h1 class="font-['Newsreader'] text-2xl font-bold italic text-[#0061A4] dark:text-blue-400 leading-tight">REAL READER</h1>
+<p class="text-[10px] tracking-[0.2em] uppercase text-stone-400 mt-1">The Editorial Sanctuary</p>
+</div>
+<nav class="flex-1 flex flex-col gap-1">
+<a class="flex items-center gap-3 px-4 py-3 text-stone-500 dark:text-stone-400 hover:bg-[#e8e8e6] dark:hover:bg-stone-800 transition-colors duration-200 ease-in-out font-['Inter'] font-medium text-sm tracking-wide rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span>仪表盘</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-stone-500 dark:text-stone-400 hover:bg-[#e8e8e6] dark:hover:bg-stone-800 transition-colors duration-200 ease-in-out font-['Inter'] font-medium text-sm tracking-wide rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="explore">explore</span>
+<span>探索</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#0061A4] dark:text-blue-300 font-semibold bg-white/50 dark:bg-stone-800/50 rounded-lg transition-colors duration-200 ease-in-out font-['Inter'] font-medium text-sm tracking-wide" href="#">
+<span class="material-symbols-outlined" data-icon="bookmark" style="font-variation-settings: 'FILL' 1;">bookmark</span>
+<span>收藏</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-stone-500 dark:text-stone-400 hover:bg-[#e8e8e6] dark:hover:bg-stone-800 transition-colors duration-200 ease-in-out font-['Inter'] font-medium text-sm tracking-wide rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span>设置</span>
+</a>
+<div class="mt-8 mb-4 px-4">
+<div class="flex justify-between items-center text-[11px] font-bold text-stone-400 tracking-widest uppercase">
+<span>分类</span>
+<button class="hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="add">add</span>
+</button>
+</div>
+</div>
+<a class="flex items-center gap-3 px-4 py-2 text-stone-500 hover:bg-[#e8e8e6] rounded-lg transition-colors font-medium text-sm" href="#">
+<span class="w-2 h-2 rounded-full bg-blue-400"></span>
+<span>科技前沿</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-stone-500 hover:bg-[#e8e8e6] rounded-lg transition-colors font-medium text-sm" href="#">
+<span class="w-2 h-2 rounded-full bg-amber-400"></span>
+<span>设计审美</span>
+</a>
+</nav>
+<div class="mt-auto flex flex-col gap-1 pt-6 border-t border-stone-200">
+<a class="flex items-center gap-3 px-4 py-3 text-stone-500 dark:text-stone-400 hover:bg-[#e8e8e6] transition-colors rounded-lg font-medium text-sm" href="#">
+<span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
+<span>账户</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-stone-500 dark:text-stone-400 hover:bg-[#e8e8e6] transition-colors rounded-lg font-medium text-sm" href="#">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+<span>帮助</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-64 min-h-screen flex flex-col">
+<!-- TopNavBar Shell -->
+<header class="sticky top-0 z-40 flex justify-between items-center px-12 h-20 w-full bg-[#f9f9f7]/80 backdrop-blur-xl transition-all">
+<div class="flex items-center gap-6">
+<button class="flex items-center gap-2 text-stone-500 hover:text-primary transition-all group">
+<span class="material-symbols-outlined text-lg group-active:scale-90" data-icon="arrow_back">arrow_back</span>
+<span class="font-['Newsreader'] text-lg">返回列表</span>
+</button>
+</div>
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-4">
+<button class="text-stone-500 hover:text-[#00497d] transition-all p-2 rounded-full hover:bg-surface-container-high">
+<span class="material-symbols-outlined" data-icon="bookmark">bookmark</span>
+</button>
+<button class="text-stone-500 hover:text-[#00497d] transition-all p-2 rounded-full hover:bg-surface-container-high">
+<span class="material-symbols-outlined" data-icon="share">share</span>
+</button>
+<button class="text-stone-500 hover:text-[#00497d] transition-all p-2 rounded-full hover:bg-surface-container-high">
+<span class="material-symbols-outlined" data-icon="format_size">format_size</span>
+</button>
+</div>
+<div class="h-6 w-px bg-stone-200"></div>
+<div class="flex items-center gap-3">
+<button class="text-stone-500 hover:text-primary"><span class="material-symbols-outlined" data-icon="auto_awesome">auto_awesome</span></button>
+<button class="text-stone-500 hover:text-primary"><span class="material-symbols-outlined" data-icon="translate">translate</span></button>
+<button class="text-stone-500 hover:text-primary"><span class="material-symbols-outlined" data-icon="volume_up">volume_up</span></button>
+</div>
+</div>
+</header>
+<!-- Reading Progress Bar -->
+<div class="fixed top-0 left-64 right-0 h-[2px] bg-primary z-50 origin-left scale-x-[0.35]"></div>
+<!-- Scrollable Content Canvas -->
+<div class="flex-1 overflow-y-auto px-12 pb-24 flex justify-center bg-surface">
+<div class="max-w-[1200px] w-full grid grid-cols-12 gap-16 pt-12">
+<!-- Left Content: Article -->
+<article class="col-span-8">
+<!-- Metadata -->
+<div class="flex items-center gap-4 mb-8 font-label text-xs tracking-widest text-stone-400 uppercase">
+<span>科技前沿</span>
+<span class="w-1 h-1 rounded-full bg-stone-300"></span>
+<span>2024年10月24日</span>
+<span class="w-1 h-1 rounded-full bg-stone-300"></span>
+<span>阅读时间：12分钟</span>
+</div>
+<!-- Title -->
+<h1 class="font-headline text-[3.5rem] leading-[1.1] font-bold text-on-background tracking-tight mb-12">
+                        人工智能对现代创作者的影响：一场关于主权的争夺战
+                    </h1>
+<!-- Hero Image -->
+<div class="mb-16 rounded-xl overflow-hidden bg-surface-container-low aspect-[16/9]">
+<img alt="AI and Creativity" class="w-full h-full object-cover grayscale-[0.2] hover:grayscale-0 transition-all duration-700" data-alt="Abstract cinematic composition of ethereal digital light particles forming a human hand touching a glowing neural network mesh in a dark studio" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCwUESnv5GhdDxBkxJAxN2v73vqstZEKOqkY8l2TSyp3OOoi57yg8YD7tMNpcUqsSXwdsWHBybIdFOPbt3leHWGf_ZpytPKzn5neRYjKgzk5c-HOOODOC_XUfWMPXmGaY1izs5hvSyugFlQKkIJrkgB0sCPlJIsxOfADLyteYbH9L2IcN3676YMQ7XfbQzXefpeYxvLrnCrCIEy9dNOJHYmW9MvWB1eVahtsryQ5_KwYS9CiZZHKbYn9pVg4CIwDX_r_4_3X-keNQI"/>
+</div>
+<!-- Article Body -->
+<div class="article-content font-body text-[1.15rem] leading-[1.8] text-on-surface-variant max-w-[720px]">
+<p>
+                            在过去的一年里，生成式人工智能的崛起不仅仅是技术的迭代，更是一场关于“人类独创性”定义的重新评估。当算法可以瞬间生成具有大师风范的插画、编排复杂的交响乐，甚至撰写极具洞察力的时评时，传统的创作者正站在一个历史的十字路口。
+                        </p>
+<p>
+                            这不再仅仅是效率的提升。对于许多摄影师、插画师和作家来说，AI 的介入更像是一种对“创作主权”的侵蚀。大规模语言模型（LLM）是在无数人类先辈的智慧结晶上训练出来的，这种“数字反哺”的过程，虽然在法律层面尚存争议，但在道德伦理层面已经引发了广泛的焦虑。
+                        </p>
+<blockquote>
+                            “我们正在进入一个‘后原创’时代，在这个时代，真正的价值不在于你创造了什么，而在于你如何引导算法去实现你的视觉。”
+                        </blockquote>
+<p>
+                            然而，与其将人工智能视为吞噬创作的怪兽，不如将其看作是“数字画笔”的终极形态。历史上的每一次技术革命——从摄影机的发明到数码绘画的普及——都曾被当时的精英阶层视为艺术的终结。但事实证明，技术总是会迫使艺术向更深处演进。
+                        </p>
+<p>
+                            当重复性的劳动被外包给算法，人类创作者将被迫回归到最纯粹的职责：审美判断、概念建构以及对情感共鸣的敏锐捕捉。未来的主权争夺战，胜者将是那些能够驾驭AI，而不被AI所异化的人。
+                        </p>
+</div>
+</article>
+<!-- Right Sidebar: AI Toolkit & Metadata -->
+<aside class="col-span-4 sticky top-32 h-fit space-y-10">
+<!-- AI Smart Toolkit -->
+<div class="p-8 rounded-2xl bg-surface-container-low border border-outline-variant/10">
+<div class="flex items-center gap-2 mb-6">
+<span class="material-symbols-outlined text-primary" data-icon="bolt">bolt</span>
+<h3 class="font-label font-bold text-sm tracking-widest uppercase">AI 智能辅助</h3>
+</div>
+<div class="flex flex-col gap-3">
+<button class="w-full group flex items-center justify-between p-4 rounded-xl bg-surface-container-lowest hover:bg-primary hover:text-on-primary transition-all duration-300 shadow-sm">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary group-hover:text-on-primary" data-icon="summarize">summarize</span>
+<span class="font-label text-sm font-medium">AI 摘要</span>
+</div>
+<span class="material-symbols-outlined text-xs opacity-0 group-hover:opacity-100 transition-opacity" data-icon="arrow_forward">arrow_forward</span>
+</button>
+<button class="w-full group flex items-center justify-between p-4 rounded-xl bg-surface-container-lowest hover:bg-primary hover:text-on-primary transition-all duration-300 shadow-sm">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary group-hover:text-on-primary" data-icon="translate">translate</span>
+<span class="font-label text-sm font-medium">AI 翻译</span>
+</div>
+<span class="material-symbols-outlined text-xs opacity-0 group-hover:opacity-100 transition-opacity" data-icon="arrow_forward">arrow_forward</span>
+</button>
+<button class="w-full group flex items-center justify-between p-4 rounded-xl bg-surface-container-lowest hover:bg-primary hover:text-on-primary transition-all duration-300 shadow-sm">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary group-hover:text-on-primary" data-icon="hearing">hearing</span>
+<span class="font-label text-sm font-medium">语音朗读</span>
+</div>
+<span class="material-symbols-outlined text-xs opacity-0 group-hover:opacity-100 transition-opacity" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Source Info -->
+<div class="px-4">
+<div class="flex items-center gap-4 mb-6">
+<div class="w-12 h-12 rounded-full overflow-hidden bg-stone-200">
+<img alt="The Editorial" data-alt="Close up of high quality premium paper texture with a small minimalist logo stamped in metallic blue" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCW_orS5Ey5aBy93fxdO0gnRnaE4bVyidCXGdsoDEKfH8VlCzPhV9Zm0rZA0KdWS0o0M4LV42Ju-UdN-VL_APfeFHwdERTEVp70kayDl4cQMlTYdoZsM80Fd-J6fF-jtjzQGUoPdkUqZqFeqDn1_a4B0HH55rLdLpu4-MYqb5rlM04uLMZoU7rxXbhAPFYAjTLg_VHGhY_Vc3CdPB10-LqONmnQVxPzi_a0hTqnhAeVbY86-MdGjMyecnLITUk4D6rCygHBtlVVqNA"/>
+</div>
+<div>
+<h4 class="font-headline font-bold text-lg">The Verge</h4>
+<p class="font-label text-[10px] text-stone-400 uppercase tracking-widest">已订阅</p>
+</div>
+</div>
+<p class="text-sm text-stone-500 leading-relaxed font-body italic">
+                            探索科技如何改变世界，从硅谷巨头到边缘创新。
+                        </p>
+</div>
+<!-- Action Chips -->
+<div class="flex flex-wrap gap-2 px-4">
+<span class="px-3 py-1.5 bg-surface-container-highest text-on-surface-variant rounded-sm text-[11px] font-bold uppercase tracking-wider">人工智能</span>
+<span class="px-3 py-1.5 bg-surface-container-highest text-on-surface-variant rounded-sm text-[11px] font-bold uppercase tracking-wider">未来主义</span>
+<span class="px-3 py-1.5 bg-surface-container-highest text-on-surface-variant rounded-sm text-[11px] font-bold uppercase tracking-wider">创作者经济</span>
+</div>
+</aside>
+</div>
+</div>
+<!-- Floating Quick Action (FAB Suppression Logic: Not primary destination, so omitted) -->
+</main>
+</body></html>

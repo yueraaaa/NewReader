@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>REAL READER - 我的收藏</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-fixed": "#d1e4ff",
+                    "on-error-container": "#93000a",
+                    "surface-container-high": "#e8e8e6",
+                    "secondary-fixed-dim": "#b1c8e8",
+                    "secondary-container": "#c8dfff",
+                    "on-error": "#ffffff",
+                    "on-tertiary-fixed": "#301400",
+                    "surface-container": "#eeeeec",
+                    "primary-container": "#0061a4",
+                    "on-secondary": "#ffffff",
+                    "tertiary": "#713700",
+                    "surface-container-lowest": "#ffffff",
+                    "secondary-fixed": "#d1e4ff",
+                    "surface-dim": "#dadad8",
+                    "primary": "#00497d",
+                    "inverse-surface": "#2f3130",
+                    "on-tertiary-container": "#ffceaf",
+                    "inverse-primary": "#9fcaff",
+                    "on-background": "#1a1c1b",
+                    "surface-variant": "#e2e3e1",
+                    "on-secondary-container": "#4c627e",
+                    "on-primary": "#ffffff",
+                    "on-tertiary": "#ffffff",
+                    "on-surface": "#1a1c1b",
+                    "outline-variant": "#c1c7d2",
+                    "surface-container-highest": "#e2e3e1",
+                    "on-primary-fixed": "#001d36",
+                    "tertiary-fixed": "#ffdcc6",
+                    "background": "#f9f9f7",
+                    "on-primary-container": "#c0dbff",
+                    "error": "#ba1a1a",
+                    "surface-container-low": "#f4f4f2",
+                    "surface-bright": "#f9f9f7",
+                    "surface": "#f9f9f7",
+                    "on-tertiary-fixed-variant": "#713700",
+                    "outline": "#717782",
+                    "error-container": "#ffdad6",
+                    "on-secondary-fixed": "#021d35",
+                    "primary-fixed-dim": "#9fcaff",
+                    "on-surface-variant": "#414750",
+                    "secondary": "#4a607c",
+                    "on-secondary-fixed-variant": "#324863",
+                    "on-primary-fixed-variant": "#00497d",
+                    "tertiary-fixed-dim": "#ffb784",
+                    "surface-tint": "#0061a4",
+                    "inverse-on-surface": "#f1f1ef",
+                    "tertiary-container": "#944a00"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Newsreader", "serif"],
+                    "body": ["Newsreader", "serif"],
+                    "label": ["Inter", "sans-serif"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Inter', sans-serif; background-color: #f9f9f7; }
+        .serif-headline { font-family: 'Newsreader', serif; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface min-h-screen pb-24">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-[#f9f9f7]/80 backdrop-blur-xl flex justify-between items-center px-6 h-16">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-blue-700" data-icon="menu_book">menu_book</span>
+<h1 class="text-2xl font-serif italic tracking-tight text-stone-900">REAL READER</h1>
+</div>
+<div class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center overflow-hidden">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="minimalist illustrated avatar of a reader with glasses and a calm expression on a soft grey background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD4PGXKixl1P-wuqnpV0jXtODFIGQ7IYyOApoXl8l3IB0HnuMr_GyLTb5xaYMGr_xarqQXyDZ79pD5DAbTyGezOJsuW_JKjmdrrq2ykjEGhO1mBsMaj-mmXJ-iZDoXJh0_1wQKVN_NVYmZhk5-UZQzNe3l7xDYCKwPZlKTT6SoDRq8MBJvE_MTJwZe6bPxmp7NHAfJOAbsSof1cvtucUNWUyMn0l3gTlOKif3ssWzYxpYBm-mEpxvYsoI5S9_6UlhkeDGM628eJ8XA"/>
+</div>
+</header>
+<main class="pt-20 px-6 max-w-2xl mx-auto">
+<!-- Title & Filter Section -->
+<section class="mb-8">
+<h2 class="serif-headline text-4xl font-semibold tracking-tight mb-6">我的收藏</h2>
+<div class="flex gap-2 overflow-x-auto no-scrollbar pb-2">
+<button class="bg-primary text-on-primary px-5 py-2 rounded-full font-label text-sm font-medium tracking-wide">全部</button>
+<button class="bg-surface-container-high text-on-surface-variant px-5 py-2 rounded-full font-label text-sm font-medium tracking-wide hover:bg-stone-200/50 transition-colors">文章</button>
+<button class="bg-surface-container-high text-on-surface-variant px-5 py-2 rounded-full font-label text-sm font-medium tracking-wide hover:bg-stone-200/50 transition-colors">段落</button>
+<button class="bg-surface-container-high text-on-surface-variant px-5 py-2 rounded-full font-label text-sm font-medium tracking-wide hover:bg-stone-200/50 transition-colors">灵感</button>
+</div>
+</section>
+<!-- Collection Grid/Feed -->
+<div class="space-y-10">
+<!-- Card 1: Article -->
+<article class="group relative">
+<div class="rounded-xl overflow-hidden mb-4 aspect-[16/9] bg-surface-container-low transition-transform duration-500 group-hover:scale-[1.01]">
+<img class="w-full h-full object-cover" data-alt="atmospheric close-up of an old open book with textured paper and soft morning light casting gentle shadows" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA5TjWEXi0kw8o9J_QSGvzkF8oauPS2jMU2GXtkSF0QcTGI8EQ-ovb-zUZptQme9TY4Ax2PTLG_VKzssAtCe7N5alvCY0LLj9glTBQKP3yPqmTsx5jI8D3JjShFHWkeAeJA2IsXTtbWZgz0cR9Nmco60BjysnIk-k-1jJvBEq7kCsD3D3W037wClMkLg_3vgK8wyQzEapIRkBMNb5j5bIIUE7-w5YXTfyUFsCLXIStId9CDeWQVF-45M97DSPmMC5VjWww96ch3jYs"/>
+</div>
+<div class="flex flex-col gap-2">
+<div class="flex items-center gap-2 text-[11px] font-label font-bold uppercase tracking-widest text-primary">
+<span>The Atlantic</span>
+<span class="w-1 h-1 rounded-full bg-outline-variant/30"></span>
+<span class="text-on-surface-variant/60">12 MIN READ</span>
+</div>
+<h3 class="serif-headline text-2xl leading-tight font-medium group-hover:text-primary transition-colors">文字的重量：为何纸质阅读依然无可替代</h3>
+<p class="serif-headline text-on-surface-variant leading-relaxed text-base line-clamp-2">在数字时代的洪流中，触碰纸张的质感与墨香不仅是一种怀旧，更是一种深度认知的必要回归。探讨实体书籍在神经科学中的独特地位...</p>
+</div>
+<button class="absolute bottom-0 right-0 p-3 bg-surface/90 backdrop-blur rounded-full shadow-sm text-tertiary hover:scale-110 transition-transform">
+<span class="material-symbols-outlined" data-icon="bookmark" style="font-variation-settings: 'FILL' 1;">bookmark</span>
+</button>
+</article>
+<!-- Card 2: Excerpt/Paragraph -->
+<article class="bg-surface-container-lowest p-8 rounded-xl border border-outline-variant/15 relative">
+<div class="flex items-center gap-3 mb-6">
+<div class="w-6 h-6 rounded bg-tertiary-fixed flex items-center justify-center">
+<span class="material-symbols-outlined text-[14px] text-on-tertiary-fixed" data-icon="format_quote">format_quote</span>
+</div>
+<span class="font-label text-[11px] font-bold uppercase tracking-widest text-on-surface-variant">精彩段落 · 《瓦尔登湖》</span>
+</div>
+<blockquote class="serif-headline text-xl italic leading-relaxed text-on-surface mb-6">
+                    “我步入丛林，因为我希望生活得有意义，我希望活得深刻，吸取生命中所有的精华，把非生命的一切都击溃。”
+                </blockquote>
+<div class="flex justify-between items-center">
+<span class="font-label text-xs text-on-surface-variant/50">收藏于 2023年10月24日</span>
+<button class="text-tertiary hover:opacity-70 transition-opacity">
+<span class="material-symbols-outlined" data-icon="bookmark" style="font-variation-settings: 'FILL' 1;">bookmark</span>
+</button>
+</div>
+</article>
+<!-- Card 3: Article -->
+<article class="group relative">
+<div class="rounded-xl overflow-hidden mb-4 aspect-[4/5] bg-surface-container-low transition-transform duration-500 group-hover:scale-[1.01]">
+<img class="w-full h-full object-cover" data-alt="minimalist architectural shot of a bright modern library with sweeping curves and neutral concrete textures" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC2sjEvNLUFXyqfPmMGvxGeg09QCNsHuaFx23UjGx_guZVZQ7HMg7W-dhcLULLiFXe8jFE4GjzhNRysOj0y1bPrWcCOlTdFs5YaPQr6puzPTw3w1oMdMdcrrA0J9y6OOq6tdyzyjM6t7ANZjPIBW8TjJD5jn8RzRcbvbPyJ2JTLc_8rvtG76EpXEN4z1SDVHtWTO01ufpL3XnbqeICQTncjHxEa-BfztkBgsV1q_MGy-r-N-l8H4ds4aarQGvthfrYEL3b8cLZZqvw"/>
+</div>
+<div class="flex flex-col gap-2">
+<div class="flex items-center gap-2 text-[11px] font-label font-bold uppercase tracking-widest text-primary">
+<span>ArchDaily</span>
+<span class="w-1 h-1 rounded-full bg-outline-variant/30"></span>
+<span class="text-on-surface-variant/60">8 MIN READ</span>
+</div>
+<h3 class="serif-headline text-2xl leading-tight font-medium group-hover:text-primary transition-colors">建筑中的沉默与光影</h3>
+<p class="serif-headline text-on-surface-variant leading-relaxed text-base line-clamp-2">如何通过空间布局营造专注感？安藤忠雄与路易斯·康的作品中隐藏着引导心灵静谧的秘密逻辑。</p>
+</div>
+<button class="absolute bottom-0 right-0 p-3 bg-surface/90 backdrop-blur rounded-full shadow-sm text-tertiary hover:scale-110 transition-transform">
+<span class="material-symbols-outlined" data-icon="bookmark" style="font-variation-settings: 'FILL' 1;">bookmark</span>
+</button>
+</article>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pt-3 pb-6 bg-[#f9f9f7]/80 backdrop-blur-xl z-50 rounded-t-3xl shadow-[0_-4px_20px_rgba(0,0,0,0.04)]">
+<a class="flex flex-col items-center justify-center text-stone-500 opacity-70 hover:opacity-100 transition-opacity" href="#">
+<span class="material-symbols-outlined" data-icon="explore">explore</span>
+<span class="font-['Inter'] text-[11px] font-medium tracking-wide uppercase mt-1">探索</span>
+</a>
+<a class="flex flex-col items-center justify-center text-stone-500 opacity-70 hover:opacity-100 transition-opacity" href="#">
+<span class="material-symbols-outlined" data-icon="auto_stories">auto_stories</span>
+<span class="font-['Inter'] text-[11px] font-medium tracking-wide uppercase mt-1">库</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-blue-600/10 text-blue-700 rounded-xl px-4 py-1" href="#">
+<span class="material-symbols-outlined" data-icon="bookmark" style="font-variation-settings: 'FILL' 1;">bookmark</span>
+<span class="font-['Inter'] text-[11px] font-medium tracking-wide uppercase mt-0.5">收藏</span>
+</a>
+<a class="flex flex-col items-center justify-center text-stone-500 opacity-70 hover:opacity-100 transition-opacity" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-['Inter'] text-[11px] font-medium tracking-wide uppercase mt-1">设置</span>
+</a>
+</nav>
+</body></html>

@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary-fixed-dim": "#ffb784",
+                    "on-primary-fixed-variant": "#00497d",
+                    "surface-dim": "#dadad8",
+                    "surface-tint": "#0061a4",
+                    "on-tertiary-container": "#ffceaf",
+                    "secondary": "#4a607c",
+                    "on-tertiary": "#ffffff",
+                    "error-container": "#ffdad6",
+                    "surface-container-high": "#e8e8e6",
+                    "tertiary": "#713700",
+                    "on-tertiary-fixed-variant": "#713700",
+                    "on-surface": "#1a1c1b",
+                    "on-primary": "#ffffff",
+                    "surface-container-lowest": "#ffffff",
+                    "on-secondary-fixed-variant": "#324863",
+                    "inverse-surface": "#2f3130",
+                    "surface-container-highest": "#e2e3e1",
+                    "primary-container": "#0061a4",
+                    "error": "#ba1a1a",
+                    "secondary-fixed-dim": "#b1c8e8",
+                    "surface": "#f9f9f7",
+                    "surface-container": "#eeeeec",
+                    "inverse-on-surface": "#f1f1ef",
+                    "on-secondary": "#ffffff",
+                    "on-background": "#1a1c1b",
+                    "inverse-primary": "#9fcaff",
+                    "tertiary-fixed": "#ffdcc6",
+                    "primary-fixed-dim": "#9fcaff",
+                    "primary-fixed": "#d1e4ff",
+                    "secondary-fixed": "#d1e4ff",
+                    "surface-bright": "#f9f9f7",
+                    "primary": "#00497d",
+                    "secondary-container": "#c8dfff",
+                    "tertiary-container": "#944a00",
+                    "on-secondary-fixed": "#021d35",
+                    "on-secondary-container": "#4c627e",
+                    "on-primary-container": "#c0dbff",
+                    "surface-container-low": "#f4f4f2",
+                    "on-surface-variant": "#414750",
+                    "outline": "#717782",
+                    "on-tertiary-fixed": "#301400",
+                    "on-error-container": "#93000a",
+                    "outline-variant": "#c1c7d2",
+                    "on-error": "#ffffff",
+                    "surface-variant": "#e2e3e1",
+                    "on-primary-fixed": "#001d36",
+                    "background": "#f9f9f7"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Newsreader", "serif"],
+                    "body": ["Newsreader", "serif"],
+                    "label": ["Inter", "sans-serif"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .reading-progress {
+            height: 2px;
+            background: linear-gradient(to right, #00497d, #0061a4);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 35%;
+            z-index: 100;
+        }
+        body {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body selection:bg-primary-container selection:text-on-primary-container">
+<div class="reading-progress"></div>
+<!-- TopAppBar -->
+<header class="bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl fixed top-0 w-full z-50 flex justify-between items-center px-6 h-16">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-zinc-500 dark:text-zinc-400">menu_book</span>
+<h1 class="font-serif text-zinc-900 dark:text-zinc-50 text-xl font-bold tracking-tighter">The Atelier</h1>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-zinc-500 dark:text-zinc-400">search</span>
+</div>
+</header>
+<main class="pt-24 pb-32 px-6 max-w-2xl mx-auto">
+<!-- AI Recommendations Header -->
+<section class="mb-12">
+<div class="flex items-center gap-2 mb-6">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+<h2 class="font-label text-xs uppercase tracking-[0.2em] font-bold text-primary">AI 为您推荐</h2>
+</div>
+<!-- Hero AI Recommendation Card -->
+<div class="group relative overflow-hidden rounded-xl bg-surface-container-lowest transition-all duration-500 hover:shadow-2xl">
+<div class="aspect-[4/5] overflow-hidden">
+<img alt="Editorial photography of a minimalist architect studio with soft morning light streaming through large industrial windows" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" data-alt="Bespoke editorial photography of a minimalist architect studio with soft morning light streaming through large industrial windows and scattered blueprints" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAGvUe_ui448R2Z3lJTQUPoWGr15-pi0A8uEMJGnqaQRAog_VJTWKxSWLz4dgDai_daBIDNs01WlKmsdEBU4qGabvjtcLHcIT3pc16Y1psHPHtTEnvsPicIJ8n58GHkT2GmYUn954jpbMoZ34JKbJPgDfbJRt-mCw4o7k2mVPT_riP-ggAJNkbAB_KIDXLOmf6NfKnlvOqJBHefvKum4QB86aTicUXt5OOPPqlUuUmizjmbGQra-kVjQMQ_8q9yXu3ZgKTZrmqjezQ"/>
+</div>
+<div class="absolute inset-0 bg-gradient-to-t from-zinc-900/90 via-zinc-900/20 to-transparent flex flex-col justify-end p-8 text-white">
+<span class="font-label text-[10px] uppercase tracking-widest mb-3 text-white/70">建筑与空间 • 5分钟阅读</span>
+<h3 class="text-3xl font-headline leading-tight mb-4 font-semibold tracking-tight">重塑宁静：为何极简主义仍是未来的设计核心？</h3>
+<p class="text-white/80 font-body text-lg leading-relaxed mb-6 line-clamp-2">深入探讨光影在居住空间中的心理暗示，以及新一代建筑师如何通过减少物质堆砌来提升生活质量。</p>
+<div class="flex items-center gap-4">
+<button class="bg-primary hover:bg-primary-container transition-colors text-white px-6 py-2 rounded-full font-label text-xs font-bold tracking-wider uppercase">立即阅读</button>
+<span class="material-symbols-outlined text-white/70">bookmark</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Staggered Editorial Grid for Secondary Recommendations -->
+<section class="grid grid-cols-1 gap-12">
+<div class="bg-surface-container-low p-1 border-0">
+<div class="flex flex-col gap-6">
+<div class="flex flex-col md:flex-row gap-6 items-start">
+<div class="flex-1 order-2 md:order-1">
+<span class="font-label text-[10px] font-bold text-tertiary uppercase tracking-widest">前沿科技</span>
+<h4 class="text-2xl font-headline font-semibold mt-2 mb-3 leading-snug">神经拟态芯片：模仿人类大脑的计算新纪元</h4>
+<p class="text-on-surface-variant font-body leading-relaxed mb-4">这种新型处理器不仅能降低能耗，还能在边缘设备上实现前所未有的学习能力。</p>
+<span class="font-label text-[11px] text-zinc-400">由 AI 助手基于您的“计算架构”偏好推荐</span>
+</div>
+<div class="w-full md:w-40 aspect-square rounded-lg overflow-hidden order-1 md:order-2">
+<img alt="Macro shot of a high-tech microprocessor with glowing fiber optic paths in shades of blue and amber" class="w-full h-full object-cover" data-alt="Cinematic macro close-up of a sophisticated neural chip with intricate golden pathways and ethereal blue bioluminescent pulses" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBNkhiPKh5ZF_QtxuEmCMjFHed6csJX-aUExpwdWTavM-c49qjKp-9s1GLUaGlpQmfTckvr7Ywc9kVSWk4ayUS9m7Gh01Jj5OgshO4A2QlGZl77R-buPWH4Kw0pB25LYfV5C4oYvABQhfM2YJVLGJV30j8YXEQbm3MQkmR9udc_y8ykPYesu9H4q-7TOlQvwv1Y60wz9TYuP5TFrDJYLzW3PUiI_DO_aI2u9lnr8Yqx4LwLrU5fvwrp1h-a1BBjkK44j4BkxpIX9Xo"/>
+</div>
+</div>
+</div>
+</div>
+<!-- Asymmetric Bento-style Layout -->
+<div class="grid grid-cols-2 gap-4">
+<div class="col-span-1 bg-surface-container-low rounded-xl p-6 flex flex-col justify-between aspect-[3/4]">
+<div>
+<span class="material-symbols-outlined text-primary mb-4">palette</span>
+<h4 class="font-headline text-xl font-bold leading-tight">数字艺术的物理化趋势</h4>
+</div>
+<span class="font-label text-[10px] text-zinc-500 uppercase tracking-tighter">艺术 • 342人正在读</span>
+</div>
+<div class="col-span-1 space-y-4">
+<div class="bg-surface-container-highest rounded-xl p-6 aspect-square flex flex-col justify-center text-center">
+<h4 class="font-headline text-lg italic">"书籍是唯一能让人同时身处两地的工具"</h4>
+<p class="font-label text-[10px] mt-4 opacity-60">今日箴言</p>
+</div>
+<div class="bg-primary text-white rounded-xl p-6 aspect-square flex flex-col justify-between">
+<span class="material-symbols-outlined">trending_up</span>
+<h4 class="font-label text-sm font-bold tracking-tight">本周最受关注的5个文化策展</h4>
+</div>
+</div>
+</div>
+</section>
+<!-- Categories Section -->
+<section class="mt-16 mb-8">
+<h3 class="font-label text-xs uppercase tracking-[0.2em] font-bold text-zinc-400 mb-6">浏览分类</h3>
+<div class="flex gap-3 overflow-x-auto pb-4 no-scrollbar">
+<button class="flex-shrink-0 bg-primary text-on-primary px-6 py-2 rounded-full font-label text-xs font-bold uppercase tracking-wide">精选</button>
+<button class="flex-shrink-0 bg-surface-container-highest text-on-surface-variant px-6 py-2 rounded-full font-label text-xs font-medium uppercase tracking-wide">文学</button>
+<button class="flex-shrink-0 bg-surface-container-highest text-on-surface-variant px-6 py-2 rounded-full font-label text-xs font-medium uppercase tracking-wide">哲学</button>
+<button class="flex-shrink-0 bg-surface-container-highest text-on-surface-variant px-6 py-2 rounded-full font-label text-xs font-medium uppercase tracking-wide">社科</button>
+<button class="flex-shrink-0 bg-surface-container-highest text-on-surface-variant px-6 py-2 rounded-full font-label text-xs font-medium uppercase tracking-wide">自然科学</button>
+</div>
+</section>
+<!-- Discover List -->
+<section class="space-y-12">
+<div class="group">
+<div class="flex justify-between items-end mb-4">
+<div class="space-y-1">
+<span class="font-label text-[10px] text-zinc-400">今日头条 • 纽约时报</span>
+<h5 class="text-xl font-headline font-bold group-hover:text-primary transition-colors">气候协议后的第一个十年：我们走到了哪里？</h5>
+</div>
+</div>
+<div class="h-48 overflow-hidden rounded-xl bg-zinc-100">
+<img alt="Dramatic view of ocean waves crashing against icebergs under a pale blue sky" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" data-alt="Dramatic aerial photography of melting glacial ice in a deep indigo ocean with misty atmosphere and cold natural lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB7_BSWHm2_RqG1Zdm_NQyntiN_MWQOJCg_HkiIa1aQ8u59zR4U01g45MMRGPPpoT711y4Zq_90cGuCujea53yS1LxqooEhlitbJFbAY-ncr0KR3b30dwPnpIcqNM3aO57fIxVzmnPVETZ3OhIkDyCUX33BSg-7OGoXdMqEOhA1wIpLza3qTN5NHvP318E11BBoJ2NDc6ReQ0A1UBomySPg6dboJ3c0gqw6TI6gQ8y86bFd-242fodcDXHejCnWSfFMjRcr8hbaYMA"/>
+</div>
+</div>
+<div class="border-t border-zinc-200/10 pt-8">
+<div class="flex gap-6 items-center">
+<div class="flex-1">
+<span class="font-label text-[10px] text-zinc-400 uppercase tracking-widest">深度评论</span>
+<h5 class="text-xl font-headline font-bold mt-1">社交媒体是否正在摧毁我们的长期专注力？</h5>
+<p class="text-sm text-zinc-500 font-body italic mt-2 line-clamp-1">—— 访谈著名心理学家阿德里安·韦斯特</p>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl flex justify-around items-center px-4 pt-2 pb-safe-offset-2 z-50 shadow-[0_-4px_24px_rgba(0,0,0,0.04)] border-t border-zinc-200/20">
+<a class="flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 transition-transform scale-95 active:scale-90" href="#">
+<span class="material-symbols-outlined" data-icon="rss_feed">rss_feed</span>
+<span class="font-sans text-[11px] font-medium tracking-wide uppercase mt-1">Feed</span>
+</a>
+<a class="flex flex-col items-center justify-center text-blue-700 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-900/20 rounded-xl px-3 py-1 transition-transform scale-95 active:scale-90" href="#">
+<span class="material-symbols-outlined" data-icon="explore" style="font-variation-settings: 'FILL' 1;">explore</span>
+<span class="font-sans text-[11px] font-medium tracking-wide uppercase mt-1">Discover</span>
+</a>
+<a class="flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 transition-transform scale-95 active:scale-90" href="#">
+<span class="material-symbols-outlined" data-icon="bookmark">bookmark</span>
+<span class="font-sans text-[11px] font-medium tracking-wide uppercase mt-1">Saved</span>
+</a>
+<a class="flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 transition-transform scale-95 active:scale-90" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-sans text-[11px] font-medium tracking-wide uppercase mt-1">Settings</span>
+</a>
+</nav>
+<style>
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        /* Mobile specific bottom spacing for safe areas */
+        .pb-safe-offset-2 {
+            padding-bottom: calc(0.5rem + env(safe-area-inset-bottom));
+        }
+    </style>
+</body></html>

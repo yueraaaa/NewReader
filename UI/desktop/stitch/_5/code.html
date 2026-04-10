@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>数字工坊 | 个人阅读室</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;0,6..72,700;1,6..72,400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container": "#eeeeec",
+                        "secondary-fixed-dim": "#b1c8e8",
+                        "on-secondary-container": "#4c627e",
+                        "tertiary-container": "#944a00",
+                        "on-secondary": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "inverse-on-surface": "#f1f1ef",
+                        "secondary-container": "#c8dfff",
+                        "surface-container-low": "#f4f4f2",
+                        "surface-container-highest": "#e2e3e1",
+                        "on-error": "#ffffff",
+                        "surface-container-high": "#e8e8e6",
+                        "tertiary": "#713700",
+                        "on-tertiary": "#ffffff",
+                        "outline-variant": "#c1c7d2",
+                        "on-primary": "#ffffff",
+                        "on-primary-fixed-variant": "#00497d",
+                        "surface-bright": "#f9f9f7",
+                        "tertiary-fixed": "#ffdcc6",
+                        "surface-tint": "#0061a4",
+                        "on-secondary-fixed-variant": "#324863",
+                        "secondary-fixed": "#d1e4ff",
+                        "primary-fixed-dim": "#9fcaff",
+                        "surface-dim": "#dadad8",
+                        "on-primary-container": "#c0dbff",
+                        "secondary": "#4a607c",
+                        "outline": "#717782",
+                        "on-tertiary-container": "#ffceaf",
+                        "on-tertiary-fixed-variant": "#713700",
+                        "surface": "#f9f9f7",
+                        "error-container": "#ffdad6",
+                        "on-primary-fixed": "#001d36",
+                        "on-error-container": "#93000a",
+                        "surface-variant": "#e2e3e1",
+                        "on-background": "#1a1c1b",
+                        "tertiary-fixed-dim": "#ffb784",
+                        "on-tertiary-fixed": "#301400",
+                        "inverse-primary": "#9fcaff",
+                        "background": "#f9f9f7",
+                        "on-surface": "#1a1c1b",
+                        "on-surface-variant": "#414750",
+                        "primary": "#00497d",
+                        "error": "#ba1a1a",
+                        "primary-fixed": "#d1e4ff",
+                        "on-secondary-fixed": "#021d35",
+                        "primary-container": "#0061a4",
+                        "inverse-surface": "#2f3130"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Newsreader", "serif"],
+                        "body": ["Newsreader", "serif"],
+                        "label": ["Inter", "sans-serif"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Newsreader', serif; }
+        .font-label { font-family: 'Inter', sans-serif; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #e2e3e1; border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface overflow-hidden">
+<!-- Root Three-Pane Layout -->
+<div class="flex h-screen w-full">
+<!-- Left Pane: SideNavBar (Rail) -->
+<aside class="flex flex-col fixed left-0 top-0 h-full h-screen w-64 border-r border-stone-200/50 dark:border-slate-800/50 bg-stone-50/80 dark:bg-slate-900/80 backdrop-blur-md z-50"><div class="p-8">
+<h1 class="text-xl font-serif font-bold text-stone-900 dark:text-stone-50 tracking-tight">The Digital Atelier</h1>
+<p class="font-serif font-light text-stone-900 dark:text-stone-100 opacity-60 text-sm">RSS Reader</p>
+</div>
+<nav class="flex-1 px-4 space-y-2 mt-4">
+<!-- Navigation Items -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-blue-700 dark:text-blue-400 font-semibold border-r-2 border-blue-700 bg-stone-200/30" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-label text-sm tracking-wide">仪表盘</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-stone-500 dark:text-stone-400 hover:bg-stone-200/50 transition-colors duration-300 group" href="#">
+<span class="material-symbols-outlined" data-icon="explore">explore</span>
+<span class="font-label text-sm tracking-wide">探索</span>
+</a>
+<!-- ACTIVE: Saved (收藏) -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-stone-500 dark:text-stone-400 hover:bg-stone-200/50 transition-colors duration-300 group" href="#">
+<span class="material-symbols-outlined" data-icon="bookmark">bookmark</span>
+<span class="font-label text-sm tracking-wide">收藏</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-stone-500 dark:text-stone-400 hover:bg-stone-200/50 transition-colors duration-300 group" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-label text-sm tracking-wide">设置</span>
+</a>
+<!-- Sub-Categories for Saved Section -->
+<div class="mt-10 pt-8 border-t border-stone-100">
+<p class="px-4 text-[10px] font-label font-bold uppercase tracking-[0.2em] text-stone-400 mb-2"><div class="flex items-center justify-between w-full"><span class="font-label font-bold uppercase tracking-[0.2em] text-stone-400">分类</span><button class="p-1 text-stone-400 hover:text-primary transition-colors hover:bg-stone-200/50 rounded" title="Add Subscription"><span class="material-symbols-outlined text-sm">add</span></button></div></p>
+<div class="space-y-1">
+<a class="flex items-center justify-between px-4 py-2 text-sm font-label text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-all" href="#">
+<span>科技</span>
+<span class="text-[10px] bg-surface-container-highest px-2 py-0.5 rounded-full">12</span>
+</a>
+<a class="flex items-center justify-between px-4 py-2 text-sm font-label text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-all" href="#">
+<span>设计</span>
+<span class="text-[10px] bg-surface-container-highest px-2 py-0.5 rounded-full">8</span>
+</a>
+<a class="flex items-center justify-between px-4 py-2 text-sm font-label text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-all" href="#">
+<span>国际新闻</span>
+<span class="text-[10px] bg-surface-container-highest px-2 py-0.5 rounded-full">5</span>
+</a>
+<a class="flex items-center justify-between px-4 py-2 text-sm font-label text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-all" href="#">
+<span>哲学</span>
+<span class="text-[10px] bg-surface-container-highest px-2 py-0.5 rounded-full text-primary font-bold">3</span>
+</a>
+</div>
+</div>
+</nav>
+<div class="p-6">
+<div class="flex items-center gap-3 p-3 bg-surface-container-low rounded-xl">
+<img alt="User profile" class="w-8 h-8 rounded-full object-cover" data-alt="close-up portrait of a thoughtful man in a library setting with soft warm light on his face" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDZ2MqtqRHZtEhW0UBtW3qA1D6otGrJUmm1cnVQ2nYhIOfxIchEW_Zumv2dbsPXZYuIycD9HCfRNCy3KknPmroHuph1lYfb5VpD3BQOTxM29-ySPnryxWfUO8kUM9a2fgRmtQg9Xj4EPYMLnKUS6pnslW4sG45XLjeFcW66eWfQxipTjzSpnavLaGcqklzjqYnrnOacYsxS9_CU5QmaOFP_x6fFhzTeIcoY2y6rP4T4o3Uh9A6lPuTH67pSYRv0XuyWoPhgnTj2DzY"/>
+<div class="overflow-hidden">
+<p class="text-xs font-label font-bold truncate">Arthur Penhaligon</p>
+<p class="text-[10px] font-label text-stone-400 truncate">高级阅读员</p>
+</div>
+</div>
+</div></aside>
+<!-- Main Canvas Area (Middle + Right) -->
+<main class="ml-64 flex flex-1 overflow-hidden bg-surface">
+<!-- Middle Pane: Article List -->
+<section class="w-[400px] flex flex-col border-r border-stone-200/50 bg-surface-container-low">
+<!-- TopAppBar for Middle Pane -->
+<header class="flex justify-between items-center w-full px-6 h-16 bg-stone-50/80 dark:bg-stone-950/80 backdrop-blur-xl shrink-0">
+<h2 class="font-serif text-lg font-bold text-stone-900">今日精选</h2>
+<div class="flex items-center gap-2">
+<button class="p-2 text-stone-500 hover:text-stone-900 transition-opacity opacity-80 hover:opacity-100">
+<span class="material-symbols-outlined">filter_list</span>
+</button>
+<button class="p-2 text-stone-500 hover:text-stone-900 transition-opacity opacity-80 hover:opacity-100">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+</header>
+<!-- Search & Filters -->
+<div class="px-6 py-4 space-y-4">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 text-sm">search</span>
+<input class="w-full bg-surface-container-lowest border-none rounded-lg py-2 pl-10 pr-4 text-sm font-label focus:ring-1 focus:ring-primary/20" placeholder="在文章中搜索..." type="text"/>
+</div>
+<div class="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
+<span class="px-3 py-1 bg-primary text-on-primary text-[10px] font-label font-bold rounded-sm uppercase tracking-wider whitespace-nowrap">全部</span>
+<span class="px-3 py-1 bg-surface-container-highest text-on-surface-variant text-[10px] font-label rounded-sm uppercase tracking-wider whitespace-nowrap">未读</span>
+<span class="px-3 py-1 bg-surface-container-highest text-on-surface-variant text-[10px] font-label rounded-sm uppercase tracking-wider whitespace-nowrap">长文</span>
+</div>
+</div>
+<!-- Article Cards Scrollable -->
+<div class="flex-1 overflow-y-auto px-6 py-2 space-y-6">
+<!-- Card 1: Selected -->
+<div class="group relative bg-surface-container-lowest rounded-xl p-4 shadow-sm border-l-4 border-primary transition-all cursor-pointer">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label text-[10px] text-primary font-bold uppercase tracking-widest">Wired China</span>
+<span class="font-label text-[10px] text-stone-400">10分钟前</span>
+</div>
+<h3 class="font-serif text-base font-bold leading-tight mb-3 text-on-surface group-hover:text-primary transition-colors">人工智能对现代创作者的影响：一场关于主权的争夺战</h3>
+<div class="flex gap-4">
+<p class="flex-1 font-serif text-sm text-on-surface-variant line-clamp-2 leading-relaxed">随着大型语言模型的普及，内容创作者正面临着前所未有的挑战。版权、归属感与工具化的界限...</p>
+<img alt="文章配图" class="w-16 h-16 rounded-lg object-cover bg-stone-100" data-alt="minimalist 3d render of flowing abstract blue silk ribbons against a soft beige background with soft diffused lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDH9ZuKCiOPWTto8HlocWGIoxpDkARna4akbzMynSTiWHOvw7cPaL7OJQ9SIZq6gHqGiJH7jzsiiSs-EgAOr7QCtnIuyHs6TjqynJKS2jz0-WdFLDIW5NHKxsnVOCLiRX3dt8EMTiz7iQK7Fx_cn8lDW-MVWjic8aqZilxWhR_JmVITWwtN4r0jd7mtynHTWr3BlbbkCyufF1k5VesW-E1Qx0BW-Ph7rkaKcnMzOIJ910o_1145LaecrcFk50xqrIUzeTkmPEbWi50"/>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="group relative bg-transparent py-4 border-b border-stone-200/30 transition-all cursor-pointer">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label text-[10px] text-stone-500 font-bold uppercase tracking-widest">The Paper</span>
+<span class="font-label text-[10px] text-stone-400">2小时前</span>
+</div>
+<h3 class="font-serif text-base font-bold leading-tight mb-3 text-on-surface group-hover:text-primary transition-colors">城市建筑的呼吸：为什么我们需要更多绿色公共空间</h3>
+<div class="flex gap-4">
+<p class="flex-1 font-serif text-sm text-on-surface-variant line-clamp-2 leading-relaxed">在水泥森林中寻找慰藉，现代都市规划如何重新定义人与自然的生态连接。从新加坡到哥本哈根...</p>
+<img alt="文章配图" class="w-16 h-16 rounded-lg object-cover bg-stone-100" data-alt="architectural shot of a modern glass building with lush green trees reflecting in the windows under a clear blue sky" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDDj1vM0ijzmgzuD2PseiRLn3CegNHaZSECdn3YcyGnmc9_J3BoR2D8rO8UzQKSjE9m_7yjiQCbVj9p5_56SNFCOm4vEYMT8vDeVAUZW1dgrN9LhyenG3XTNikDiZ9LolyoiXWwLvWQTEoKYxrbbInVmG3HXLpnY-Vq4FlTwawuuoc4VyOzom0EfJ3OWISXf3TUO57Z2ETsQD7-qJBE5K_-y86Hvdq3Bwm3nm42bN-0YlKfbKn6sKHius7P8dCP8LUfTonb1WZ8z54"/>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="group relative bg-transparent py-4 border-b border-stone-200/30 transition-all cursor-pointer">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label text-[10px] text-stone-500 font-bold uppercase tracking-widest">Medium</span>
+<span class="font-label text-[10px] text-stone-400">5小时前</span>
+</div>
+<h3 class="font-serif text-base font-bold leading-tight mb-3 text-on-surface group-hover:text-primary transition-colors">2024年极简设计趋势深度解析</h3>
+<div class="flex gap-4">
+<p class="flex-1 font-serif text-sm text-on-surface-variant line-clamp-2 leading-relaxed">少即是多，但在数字化时代，这种哲学正在发生微妙的变化。探讨触感、色彩与排版的全新结合...</p>
+<img alt="文章配图" class="w-16 h-16 rounded-lg object-cover bg-stone-100" data-alt="composition of minimalist stationary items on a clean desk with soft shadows and high-end aesthetic" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCeV6hNDhEhw5QrJZ49ZnXsnx7Rf8Z2Mx0oEirf9--UlL0O1DBVH98xdT-Q0Ss4fJm1CLErQ3uwF4piURifbcRUssctba2zzmF_da89LVQOpwnUQ7SdCbKJmgKtm0ZyTWH5PvzRiy0ivCePO5xgtJzNMWXX04DQOjmLq6EW3Px0YQjftLQmVlXJ3Pm5V6mqd-_YuJ5b9aw4Mc7q7VcGoIsAVpUxQ9zVobmcQKIFvgO9Y-T3kJtceH_6Y6rNb3rQPrTpPgSWkSD_vDw"/>
+</div>
+</div>
+<!-- Card 4 -->
+<div class="group relative bg-transparent py-4 border-b border-stone-200/30 transition-all cursor-pointer">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label text-[10px] text-stone-500 font-bold uppercase tracking-widest">Wall Street Journal</span>
+<span class="font-label text-[10px] text-stone-400">1天前</span>
+</div>
+<h3 class="font-serif text-base font-bold leading-tight mb-3 text-on-surface group-hover:text-primary transition-colors">全球供应链的微妙平衡：地缘政治与经济复苏</h3>
+<div class="flex gap-4">
+<p class="flex-1 font-serif text-sm text-on-surface-variant line-clamp-2 leading-relaxed">分析师警告称，海运成本的再次波动可能会对下半年的通胀预期产生连锁反应...</p>
+<img alt="文章配图" class="w-16 h-16 rounded-lg object-cover bg-stone-100" data-alt="blurred motion of cargo ships in a harbor at sunset with deep orange and blue cinematic tones" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBjmqrB4t73U9Jd1Y-5KFIzU62OSo_BckvYDfSrvsVmI2BVJlBc0V8785gy6FAq-XlhTslzMM03r_4pHbMlK0Ov903157mz0EfXlTJKj6OMKGq27oaY0wFxStykD2x6LK3hOMlqB11xd29XHo0yIQoOBbAaUKb7xgPAZ82oo7_Wy-3Kevk1VmRb_0LpiDPtn98H_PIvdMgtfx4YvmN2f2qx96jTCjFDAX38-rq4wrJPCdOCwKqxGXMahXqRYYdvuQtRmTYYpyp2Hb4"/>
+</div>
+</div>
+</div>
+</section>
+<!-- Right Pane: Full Article Preview -->
+<section class="flex-1 flex flex-col bg-surface relative">
+<!-- Top Navigation & Reading Progress -->
+<div class="absolute top-0 left-0 w-full h-[2px] bg-surface-container z-50">
+<div class="h-full bg-primary" style="width: 35%;"></div>
+</div>
+<header class="flex justify-between items-center px-12 h-16 bg-surface/80 backdrop-blur-xl shrink-0 z-40">
+<div class="flex items-center gap-6">
+<button class="flex items-center gap-2 font-label text-xs text-stone-500 hover:text-stone-900">
+<span class="material-symbols-outlined text-sm">arrow_back</span>
+                            返回列表
+                        </button>
+<div class="h-4 w-px bg-stone-200"></div>
+<span class="font-label text-[10px] text-stone-400 uppercase tracking-widest">正在阅读: 人工智能对现代创作者的影响...</span>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 rounded-full hover:bg-stone-100 transition-colors">
+<span class="material-symbols-outlined text-stone-600">bookmark</span>
+</button>
+<button class="p-2 rounded-full hover:bg-stone-100 transition-colors">
+<span class="material-symbols-outlined text-stone-600">share</span>
+</button>
+<button class="p-2 rounded-full hover:bg-stone-100 transition-colors">
+<span class="material-symbols-outlined text-stone-600">text_format</span>
+</button>
+</div>
+</header>
+<!-- Article Content Canvas -->
+<div class="flex-1 overflow-y-auto">
+<article class="max-w-3xl mx-auto px-12 py-16">
+<!-- Hero Image -->
+<div class="mb-12">
+<img alt="文章主图" class="w-full aspect-[21/9] object-cover rounded-xl shadow-lg shadow-on-surface/5" data-alt="artistic abstract visualization of human neural network merging with digital binary code in sophisticated deep blue and gold lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAIqFLw1zWwEPK_ZNUx2ESGGLKx7PSKA9Fo7axINSEaOrHjk_3Pa1hZRrz6WNrQSocsqhv3MQQ7ObzgNQlHXbZKQU0a25wTbt8Zl3h5j24_UJG8RR2HyyKK4of7Ddeq4F_B-Jd1Hi7FDRYwv5_-uvQRzh_jRFE02j9R2ffGogBCpPvLA4E2iKBexz92BRWmuKGpPYHyJmwXUCkOppZ7XNT-MQJHzdV9fky443f4vUzmGky2FCmbzSjJhaJKy_0cpuj-WAe5OxPpz_M"/>
+<p class="mt-4 font-label text-[10px] text-stone-400 italic text-center">图：人工智能与人类创意的共生边界。/ 数字工坊插图</p>
+</div>
+<header class="mb-12">
+<div class="flex items-center gap-4 mb-6">
+<span class="px-2 py-0.5 border border-tertiary text-tertiary text-[10px] font-label font-bold rounded">深度解读</span>
+<time class="font-label text-xs text-stone-400">2024年5月24日 · 阅读需8分钟</time>
+</div>
+<h1 class="font-serif text-[2.75rem] font-bold leading-[1.1] text-stone-900 mb-6 tracking-tight">人工智能对现代创作者的影响：一场关于主权的争夺战</h1>
+<div class="flex items-center gap-3">
+<img alt="作者" class="w-8 h-8 rounded-full object-cover" data-alt="professional portrait of a tech journalist in a library with warm wooden shelves in the background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBkv_Ff3w5TcnTTNZKx87JdSK177k2NqZcGqqUMIh_nCi6pd9wNlm88nFMaK6Jm6STl2anmWLqt8QrytZdX1930-AatpgcI4tAuWjnG2qnDZOR_UWKWKaESYqmEgJZyBhohrFEqPMLImcC--mmaWWbGEYTWUvwNKE1zWnQSFKpbGw6CN5gma0btrljyuimeZHp1RkYzGUVXevIVq-SRwC9b2DSMewbvhc9tf-sdiIasd3gayXwX3hi1Nb4GScDyz5wmfq1JA4NVoRc"/>
+<span class="font-label text-sm font-medium text-stone-700">陈墨 · Wired China 首席专栏作家</span>
+</div>
+</header>
+<section class="font-serif text-lg leading-[1.8] text-stone-800 space-y-8">
+<p class="first-letter:text-6xl first-letter:font-bold first-letter:float-left first-letter:mr-3 first-letter:mt-2 first-letter:text-primary">在过去的一年里</p>
+<p>人工智能的崛起不再只是硅谷的实验室谈资，它已经悄然渗透到了每一个创作环节。从平面设计师的草图生成到小说家的情节润色，算法正以其惊人的速度和无限的样本库，重新定义着“原创性”的边界。</p>
+<blockquote class="pl-8 border-l-4 border-primary-container italic text-stone-600 text-xl py-4 my-10">
+                                “技术从来不是创意的终结者，它是创意的催化剂。真正的恐惧不在于工具的强大，而在于人类主权的退让。”
+                            </blockquote>
+<p>这种主权的退让体现在多个维度。首先是审美趋同。当所有人都在使用同一种预训练模型来优化他们的作品时，我们是否正在进入一个视觉和听觉上的“平均值时代”？那些曾经由人类独有的缺陷、偏见和意外所构成的“灵光”，正在被算法生成的完美所取代。</p>
+<h3 class="text-2xl font-bold text-stone-900 mt-12 mb-6">算法的“完美”枷锁</h3>
+<p>创作者们发现，为了迎合平台的推荐算法，他们不得不调整自己的创作风格。这种“为机器创作”的现象，是内容生产领域的一次本末倒置。我们需要思考的是，如何在这种共生关系中，保留下那一抹不可替代的人性温度。</p>
+</section>
+</article>
+</div>
+<!-- AI Toolkit: Floating Sidebar in Preview -->
+<div class="absolute right-8 top-24 flex flex-col gap-4 z-40">
+<div class="bg-surface-container-lowest/80 backdrop-blur-xl p-2 rounded-2xl shadow-xl border border-stone-200/50 flex flex-col gap-2">
+<div class="px-3 py-2 text-[10px] font-label font-bold text-stone-400 uppercase tracking-widest text-center">AI 工具箱</div>
+<button class="w-12 h-12 flex items-center justify-center rounded-xl bg-primary-container text-primary hover:scale-110 transition-transform group relative">
+<span class="material-symbols-outlined">auto_awesome</span>
+<span class="absolute right-14 bg-on-background text-white text-[10px] font-label px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">智能摘要</span>
+</button>
+<button class="w-12 h-12 flex items-center justify-center rounded-xl hover:bg-stone-100 text-stone-600 hover:scale-110 transition-transform group relative">
+<span class="material-symbols-outlined">translate</span>
+<span class="absolute right-14 bg-on-background text-white text-[10px] font-label px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">即时翻译</span>
+</button>
+<button class="w-12 h-12 flex items-center justify-center rounded-xl hover:bg-stone-100 text-stone-600 hover:scale-110 transition-transform group relative">
+<span class="material-symbols-outlined">psychology</span>
+<span class="absolute right-14 bg-on-background text-white text-[10px] font-label px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">核心观点</span>
+</button>
+<div class="h-px w-8 mx-auto bg-stone-200 my-1"></div>
+<button class="w-12 h-12 flex items-center justify-center rounded-xl hover:bg-stone-100 text-stone-600 hover:scale-110 transition-transform group relative">
+<span class="material-symbols-outlined">mic</span>
+<span class="absolute right-14 bg-on-background text-white text-[10px] font-label px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">语音朗读</span>
+</button>
+</div>
+</div>
+</section>
+</main>
+</div>
+</body></html>

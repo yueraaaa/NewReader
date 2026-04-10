@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>REAL READER - 您的文字圣殿</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,700;0,6..72,800;1,6..72,400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-error-container": "#93000a",
+                        "outline": "#717782",
+                        "tertiary-fixed": "#ffdcc6",
+                        "tertiary-fixed-dim": "#ffb784",
+                        "on-secondary-fixed-variant": "#324863",
+                        "on-tertiary-fixed": "#301400",
+                        "surface-container-low": "#f4f4f2",
+                        "secondary-fixed": "#d1e4ff",
+                        "on-primary-fixed": "#001d36",
+                        "secondary-container": "#c8dfff",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "tertiary": "#713700",
+                        "surface-container-highest": "#e2e3e1",
+                        "outline-variant": "#c1c7d2",
+                        "on-primary-fixed-variant": "#00497d",
+                        "on-primary-container": "#c0dbff",
+                        "secondary": "#4a607c",
+                        "inverse-surface": "#2f3130",
+                        "primary-fixed-dim": "#9fcaff",
+                        "primary": "#00497d",
+                        "surface-container-high": "#e8e8e6",
+                        "on-error": "#ffffff",
+                        "on-surface-variant": "#414750",
+                        "on-background": "#1a1c1b",
+                        "surface-tint": "#0061a4",
+                        "inverse-on-surface": "#f1f1ef",
+                        "on-tertiary-container": "#ffceaf",
+                        "on-secondary-fixed": "#021d35",
+                        "tertiary-container": "#944a00",
+                        "surface-dim": "#dadad8",
+                        "on-primary": "#ffffff",
+                        "surface-bright": "#f9f9f7",
+                        "on-surface": "#1a1c1b",
+                        "error-container": "#ffdad6",
+                        "on-secondary-container": "#4c627e",
+                        "surface-variant": "#e2e3e1",
+                        "primary-container": "#0061a4",
+                        "surface-container": "#eeeeec",
+                        "secondary-fixed-dim": "#b1c8e8",
+                        "error": "#ba1a1a",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-fixed": "#d1e4ff",
+                        "on-tertiary-fixed-variant": "#713700",
+                        "surface": "#f9f9f7",
+                        "inverse-primary": "#9fcaff",
+                        "background": "#f9f9f7"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Newsreader", "serif"],
+                        "body": ["Newsreader", "serif"],
+                        "label": ["Inter", "sans-serif"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .editorial-gradient {
+            background: linear-gradient(135deg, #00497d 0%, #0061a4 100%);
+        }
+        .asymmetric-anchor {
+            padding-left: 10%;
+        }
+        @media (max-width: 768px) {
+            .asymmetric-anchor {
+                padding-left: 1.5rem;
+            }
+        }
+    </style>
+<style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body selection:bg-secondary-container selection:text-on-secondary-container antialiased">
+<main class="min-h-screen flex flex-col md:flex-row overflow-hidden">
+<!-- Branding & Experience Section -->
+<section class="flex-1 flex flex-col justify-center asymmetric-anchor py-12 md:py-0 bg-surface">
+<header class="mb-12">
+<h1 class="text-7xl md:text-8xl font-black tracking-tighter text-on-background font-headline leading-none">
+                REAL READER
+            </h1>
+<p class="mt-6 text-on-surface-variant font-body text-xl max-w-md leading-relaxed">
+                您的数字生活避风港。没有算法，没有杂乱，只有对您而言真正重要的文字。
+            </p>
+</header>
+<div class="mt-8 space-y-12 max-w-sm">
+<div class="space-y-4">
+<div class="flex items-start gap-4">
+<span class="material-symbols-outlined text-primary mt-1" data-icon="cloud_sync">cloud_sync</span>
+<div>
+<h3 class="font-label font-bold text-sm tracking-wide">云端同步</h3>
+<p class="text-on-surface-variant text-sm mt-1 leading-snug">跨设备阅读。您的阅读位置、书签和订阅源将在工作坊中即时更新。</p>
+</div>
+</div>
+<div class="flex items-start gap-4">
+<span class="material-symbols-outlined text-primary mt-1" data-icon="auto_stories">auto_stories</span>
+<div>
+<h3 class="font-label font-bold text-sm tracking-wide">专注阅读</h3>
+<p class="text-on-surface-variant text-sm mt-1 leading-snug">每篇文章都经过精简处理，去除干扰，保留作者意图呈现的排版风格。</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Interaction Canvas -->
+<section class="flex-1 bg-surface-container-low flex items-center justify-center p-6 md:p-12">
+<div class="w-full max-w-md bg-surface-container-lowest rounded-xl p-10 md:p-12 shadow-[0_12px_40px_rgba(26,28,27,0.06)]">
+<div class="mb-10">
+<h2 class="text-2xl font-headline font-bold text-on-surface tracking-tight">欢迎回来</h2>
+<p class="text-on-surface-variant font-label text-sm mt-2">登录您的私密档案馆。</p>
+</div>
+<div class="space-y-4">
+<!-- SSO Buttons -->
+<button class="w-full h-14 flex items-center justify-center gap-3 bg-on-background text-surface-container-lowest rounded-full font-label font-medium tracking-wide transition-all active:scale-95 hover:opacity-90">
+<svg class="w-5 h-5 fill-current" viewbox="0 0 24 24"><path d="M17.05 20.28c-.96.95-2.18 1.78-3.5 1.72-1.37-.06-2.03-.89-3.55-.89-1.52 0-2.22.87-3.55.89-1.32.06-2.54-.77-3.5-1.72-1.93-1.93-3.07-5.11-3.07-8.15 0-4.99 3.12-7.63 6.13-7.63 1.54 0 2.68.79 3.6 1.48.92-.69 2.06-1.48 3.6-1.48 3.01 0 6.13 2.64 6.13 7.63 0 3.04-1.14 6.22-3.07 8.15l-.22-.22zM12 5.5c0-1.84 1.41-3.32 3.16-3.32.09 0 .18 0 .27.01-1.72 1.83-3.15 3.31-3.15 5.16 0 .09 0 .18.01.27-.09 0-.19.01-.29.01-1.84 0-3.33-1.41-3.33-3.16 0-.32.04-.63.12-.92 1.83 1.72 3.2 3.11 3.2 5.06 0 .11-.01.21-.02.32.1 0 .21-.01.32-.01 1.84 0 3.32 1.41 3.32 3.16 0 .32-.04.63-.12.92-1.83-1.72-3.21-3.11-3.21-5.06 0-.11.01-.21.02-.32-.1 0-.21.01-.32.01z"></path></svg>
+                    通过 Apple 登录
+                </button>
+<button class="w-full h-14 flex items-center justify-center gap-3 bg-surface-container-high border border-outline-variant/20 text-on-surface rounded-full font-label font-medium tracking-wide transition-all active:scale-95 hover:bg-surface-variant">
+<svg class="w-5 h-5 fill-current" viewbox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"></path></svg>
+                    通过 GitHub 登录
+                </button>
+<div class="relative py-4">
+<div class="absolute inset-0 flex items-center"><div class="w-full border-t border-outline-variant/15"></div></div>
+<div class="relative flex justify-center text-xs uppercase tracking-widest font-label font-bold text-outline">
+<span class="bg-surface-container-lowest px-4">或</span>
+</div>
+</div>
+<button class="editorial-gradient w-full h-14 flex items-center justify-center gap-3 text-on-primary rounded-full font-label font-bold tracking-widest uppercase transition-all active:scale-95 shadow-lg shadow-primary/20">
+                    继续使用邮箱登录
+                </button>
+</div>
+<footer class="mt-12 text-center">
+<p class="text-on-surface-variant font-label text-xs leading-relaxed max-w-[240px] mx-auto">
+                    继续即表示您同意我们的 <a class="underline decoration-outline-variant hover:text-primary transition-colors" href="#">隐私政策</a> 和 <a class="underline decoration-outline-variant hover:text-primary transition-colors" href="#">服务条款</a>。
+                </p>
+</footer>
+</div>
+</section>
+</main>
+<!-- Decorative Ghost Element for Editorial Feel -->
+<div class="fixed top-0 right-0 w-[40vw] h-full opacity-[0.03] pointer-events-none z-[-1] overflow-hidden">
+<div class="asymmetric-anchor pt-24">
+<h2 class="text-[20rem] font-black tracking-tighter leading-none select-none">READ</h2>
+<h2 class="text-[20rem] font-black tracking-tighter leading-none select-none -mt-32">REAL</h2>
+</div>
+</div>
+</body></html>
