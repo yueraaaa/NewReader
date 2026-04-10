@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'core/router/app_router.dart';
+import 'core/theme/app_theme.dart';
 
 void main() {
   runApp(const RealReaderApp());
@@ -9,12 +11,13 @@ class RealReaderApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'Real Reader',
-      theme: ThemeData(useMaterial3: true),
-      home: const Scaffold(
-        body: Center(child: Text('Real Reader - Scaffold')),
-      ),
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: ThemeMode.system,
+      routerConfig: router,
+      debugShowCheckedModeBanner: false,
     );
   }
 }
