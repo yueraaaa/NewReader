@@ -1,5 +1,6 @@
 import 'package:sqflite/sqflite.dart';
 import '../../models/feed_model.dart';
+import '../../models/article_model.dart';
 import '../../models/category_model.dart';
 import 'database_helper.dart';
 
@@ -118,6 +119,37 @@ class FeedLocalDatasource {
       {'is_deleted': 1, 'updated_at': DateTime.now().toIso8601String()},
       where: 'id = ?',
       whereArgs: [id],
+    );
+  }
+
+  // Article methods
+  Future<void> insertArticle(ArticleModel article) async {
+    final db = await _db;
+    await db.insert(
+      'articles',
+      article.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<List<ArticleModel>> getArticlesByFeedId(String feedId) async {
+    final db = await _db;
+    final maps = await db.query(
+      'articles',
+      where: 'feed_id = ? AND is_deleted = ?',
+      whereArgs: [feedId, 0],
+      orderBy: 'published_at DESC',
+    );
+    return maps.map((m) => ArticleModel.fromMap(m)).toList();
+  }
+
+  Future<void> softDeleteArticlesByFeedId(String feedId) async {
+    final db = await _db;
+    await db.update(
+      'articles',
+      {'is_deleted': 1, 'updated_at': DateTime.now().toIso8601String()},
+      where: 'feed_id = ?',
+      whereArgs: [feedId],
     );
   }
 }
