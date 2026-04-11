@@ -1,14 +1,25 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import '../../../core/config/app_config.dart';
+import '../../../data/datasources/ai/minimax_datasource.dart';
+import '../../../data/models/article_model.dart';
 import 'ai_event.dart';
 import 'ai_state.dart';
 
 class AiBloc extends Bloc<AiEvent, AiState> {
   final FlutterTts _flutterTts;
-  // MinimaxService will be wired in Task 2b - stub for now
-  // final MinimaxService _minimaxService;
+  final MinimaxDatasource _minimaxDatasource;
 
-  AiBloc({FlutterTts? flutterTts}) : _flutterTts = flutterTts ?? FlutterTts(), super(const AiState()) {
+  AiBloc({
+    FlutterTts? flutterTts,
+    MinimaxDatasource? minimaxDatasource,
+  })  : _flutterTts = flutterTts ?? FlutterTts(),
+        _minimaxDatasource = minimaxDatasource ??
+            MinimaxDatasource(
+              apiKey: AppConfig.minimaxApiKey,
+              groupId: AppConfig.minimaxGroupId,
+            ),
+        super(const AiState()) {
     _initTts();
     on<TranslateArticle>(_onTranslateArticle);
     on<SummarizeArticle>(_onSummarizeArticle);
@@ -24,16 +35,19 @@ class AiBloc extends Bloc<AiEvent, AiState> {
     await _flutterTts.setPitch(1.0);
   }
 
+  String _getArticleText(ArticleModel article) {
+    return article.content ?? article.description ?? article.title;
+  }
+
   Future<void> _onTranslateArticle(
     TranslateArticle event,
     Emitter<AiState> emit,
   ) async {
     emit(state.copyWith(isTranslating: true, error: null));
     try {
-      // TODO: Wire in MinimaxService from Task 2b
-      // final result = await _minimaxService.translate(event.article);
-      // emit(state.copyWith(isTranslating: false, translation: result));
-      emit(state.copyWith(isTranslating: false, translation: 'Translation not yet implemented'));
+      final text = _getArticleText(event.article);
+      final result = await _minimaxDatasource.translateToChinese(text);
+      emit(state.copyWith(isTranslating: false, translation: result));
     } catch (e) {
       emit(state.copyWith(isTranslating: false, error: e.toString()));
     }
@@ -45,10 +59,9 @@ class AiBloc extends Bloc<AiEvent, AiState> {
   ) async {
     emit(state.copyWith(isSummarizing: true, error: null));
     try {
-      // TODO: Wire in MinimaxService from Task 2b
-      // final result = await _minimaxService.summarize(event.article);
-      // emit(state.copyWith(isSummarizing: false, summary: result));
-      emit(state.copyWith(isSummarizing: false, summary: 'Summary not yet implemented'));
+      final text = _getArticleText(event.article);
+      final result = await _minimaxDatasource.summarize(text);
+      emit(state.copyWith(isSummarizing: false, summary: result));
     } catch (e) {
       emit(state.copyWith(isSummarizing: false, error: e.toString()));
     }
