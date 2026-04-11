@@ -18,16 +18,16 @@ migrate_working_dir/
 *.iws
 .idea/
 
-# The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
-#.vscode/
+# VS Code
+.vscode/
 
 # Flutter/Dart/Pub related
 **/doc/api/
 **/ios/Flutter/.last_build_id
 .dart_tool/
+.flutter-plugins
 .flutter-plugins-dependencies
+.packages
 .pub-cache/
 .pub/
 /build/
@@ -39,7 +39,79 @@ app.*.symbols
 # Obfuscation related
 app.*.map.json
 
-# Android Studio will place build artifacts here
+# Android Studio
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# iOS/XCode related
+**/ios/**/*.dSYM
+**/ios/**/*.js.java
+**/ios/**/*.pbxproj
+**/ios/**/*.perspectivev3
+**/ios/**/*xcuserstate
+**/ios/**/*pbxproj
+**/ios/**/project.xcworkspace
+**/ios/**/xcuserdata
+**/ios/Pods/
+**/ios/.symlinks
+**/ios/Flutter/App.framework
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/Flutter.podspec
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/ephemeral/
+**/ios/Flutter/app.flx
+**/ios/Flutter/app.zip
+**/ios/Flutter/flutter_assets/
+**/ios/Flutter/ServiceDefinitions.json
+**/macos/Flutter/GeneratedPluginRegistrant.swift
+**/macos/Flutter/ephemeral/
+**/macos/Pods/
+**/macos/.symlinks
+**/macos/Podfile.lock
+macos/Runner.xcworkspace/xcuserdata/
+macos/Runner.xcworkspace/
+
+# Windows related
+**/windows/**/*.obj
+**/windows/**/*.exe
+**/windows/**/*.ilk
+**/windows/**/*.pdb
+**/windows/**/*.lib
+**/windows/**/*.idb
+**/windows/**/*.state
+
+# Linux related
+**/linux/**/*.o
+**/linux/**/*.a
+**/linux/**/*.so
+**/linux/**/*.so.*
+**/linux/flutter/ephemeral/
+**/linux/.cmake/
+**/linux/build/
+**/linux/flutter/CMakeLists.txt
+
+# Local configuration (contains API keys - DO NOT commit)
+.local.properties
+.env
+.env.*
+!.env.example
+
+# OMC state files
+.omc/**
+!.omc/project-memory.json
+
+# Test coverage
+/coverage/
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.swp
+*~
+
+# Package managers lock files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
