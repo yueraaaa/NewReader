@@ -4,11 +4,11 @@ import 'package:universal_platform/universal_platform.dart';
 import '../../presentation/pages/desktop/desktop_shell.dart';
 import '../../presentation/pages/mobile/mobile_shell.dart';
 import '../../presentation/pages/desktop/dashboard_page.dart';
-import '../../presentation/pages/desktop/explore_page.dart';
-import '../../presentation/pages/desktop/bookmarks_page.dart';
 import '../../presentation/pages/desktop/settings_page.dart';
 import '../../presentation/pages/desktop/feed_list_page.dart';
 import '../../presentation/pages/desktop/article_detail_page.dart';
+import '../../presentation/pages/desktop/explore_page.dart' as desktop_explore;
+import '../../presentation/pages/desktop/bookmarks_page.dart' as desktop_bookmarks;
 
 final router = GoRouter(
   initialLocation: '/',
@@ -18,9 +18,11 @@ final router = GoRouter(
         final isDesktop = UniversalPlatform.isDesktop ||
             UniversalPlatform.isWindows ||
             UniversalPlatform.isMacOS;
-        return isDesktop
-            ? DesktopShell(child: child)
-            : MobileShell(child: child);
+        final currentPath = state.uri.path;
+        if (isDesktop) {
+          return DesktopShell(child: child);
+        }
+        return MobileShell(child: child, currentPath: currentPath);
       },
       routes: [
         GoRoute(
@@ -32,13 +34,13 @@ final router = GoRouter(
         GoRoute(
           path: '/explore',
           pageBuilder: (context, state) => const NoTransitionPage(
-            child: ExplorePage(),
+            child: desktop_explore.ExplorePage(),
           ),
         ),
         GoRoute(
           path: '/bookmarks',
           pageBuilder: (context, state) => const NoTransitionPage(
-            child: BookmarksPage(),
+            child: desktop_bookmarks.BookmarksPage(),
           ),
         ),
         GoRoute(

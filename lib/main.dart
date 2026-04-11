@@ -1,8 +1,44 @@
 import 'package:flutter/material.dart';
-import 'core/router/app_router.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 import 'core/theme/app_theme.dart';
+import 'core/router/app_router.dart';
+import 'presentation/blocs/auth/auth_bloc.dart';
+import 'presentation/blocs/auth/auth_event.dart';
+import 'presentation/blocs/settings/settings_bloc.dart';
+import 'presentation/blocs/settings/settings_event.dart';
+import 'presentation/blocs/settings/settings_state.dart';
+import 'presentation/blocs/feed/feed_bloc.dart';
+import 'presentation/blocs/feed/feed_event.dart';
+import 'presentation/blocs/article/article_bloc.dart';
+import 'presentation/blocs/ai/ai_bloc.dart';
+import 'data/datasources/local/settings_local_datasource.dart';
+import 'data/datasources/local/feed_local_datasource.dart';
+import 'data/datasources/local/article_local_datasource.dart';
+import 'data/datasources/remote/supabase_datasource.dart';
+import 'domain/repositories/auth_repository.dart';
+import 'data/repositories/auth_repository_impl.dart';
+import 'data/repositories/feed_repository_impl.dart';
+import 'core/config/app_config.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Supabase
+  await supabase.Supabase.initialize(
+    url: AppConfig.supabaseUrl,
+    anonKey: AppConfig.supabaseAnonKey,
+  );
+
+  // Set preferred orientations
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+    DeviceOrientation.landscapeLeft,
+    DeviceOrientation.landscapeRight,
+  ]);
+
   runApp(const RealReaderApp());
 }
 
@@ -11,13 +47,40 @@ class RealReaderApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      title: 'Real Reader',
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.system,
-      routerConfig: router,
-      debugShowCheckedModeBanner: false,
+    // Create datasources
+    final settingsDatasource = SettingsLocalDatasource();
+    final feedLocalDatasource = FeedLocalDatasource();
+    final articleDatasource = ArticleLocalDatasource();
+    final supabaseClient = supabase.Supabase.instance.client;
+    final supabaseDatasource = SupabaseDatasource(supabaseClient);
+
+    // Create repositories
+    final AuthRepository authRepository = AuthRepositoryImpl(supabaseDatasource);
+    final feedRepository = FeedRepositoryImpl(
+      localDatasource: feedLocalDatasource,
+      remoteDatasource: null,
+    );
+
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (_) => AuthBloc(authRepository)..add(AuthCheckRequested())),
+        BlocProvider(create: (_) => SettingsBloc(settingsDatasource: settingsDatasource)..add(LoadSettings())),
+        BlocProvider(create: (_) => FeedBloc(feedRepository: feedRepository)..add(LoadFeeds())),
+        BlocProvider(create: (_) => ArticleBloc(articleDatasource: articleDatasource)),
+        BlocProvider(create: (_) => AiBloc()),
+      ],
+      child: BlocBuilder<SettingsBloc, SettingsState>(
+        builder: (context, settingsState) {
+          return MaterialApp.router(
+            title: 'Real Reader',
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
+            themeMode: settingsState.themeMode,
+            routerConfig: router,
+          );
+        },
+      ),
     );
   }
 }
