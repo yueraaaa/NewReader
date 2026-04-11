@@ -65,7 +65,6 @@ class OpmlService {
     final categoryNameToId = <String, String>{};
 
     for (final outline in outlines) {
-      final type = outline.getAttribute('type');
       final xmlUrl = outline.getAttribute('xmlUrl');
 
       if (xmlUrl == null) {
