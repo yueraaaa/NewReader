@@ -20,7 +20,7 @@ final router = GoRouter(
             UniversalPlatform.isMacOS;
         final currentPath = state.uri.path;
         if (isDesktop) {
-          return DesktopShell(child: child);
+          return DesktopShell(child: child, currentPath: currentPath);
         }
         return MobileShell(child: child, currentPath: currentPath);
       },
