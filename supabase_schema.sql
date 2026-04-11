@@ -1,13 +1,82 @@
 -- REAL READER - Supabase Schema with Row Level Security (RLS)
--- Run this in Supabase SQL Editor to set up the database
+-- Run this entire file in Supabase SQL Editor
 
--- Enable RLS on all tables
+-- ============================================
+-- TABLE CREATION
+-- ============================================
+
+CREATE TABLE IF NOT EXISTS categories (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  color TEXT NOT NULL,
+  sort_order INTEGER DEFAULT 0,
+  user_id TEXT DEFAULT '',
+  is_deleted INTEGER DEFAULT 0,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS feeds (
+  id TEXT PRIMARY KEY,
+  title TEXT NOT NULL,
+  url TEXT NOT NULL,
+  description TEXT,
+  icon_url TEXT,
+  category_id TEXT REFERENCES categories(id),
+  user_id TEXT DEFAULT '',
+  is_deleted INTEGER DEFAULT 0,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS articles (
+  id TEXT PRIMARY KEY,
+  feed_id TEXT NOT NULL REFERENCES feeds(id),
+  title TEXT NOT NULL,
+  link TEXT NOT NULL,
+  description TEXT,
+  content TEXT,
+  author TEXT,
+  image_url TEXT,
+  published_at TEXT,
+  is_read INTEGER DEFAULT 0,
+  is_favorite INTEGER DEFAULT 0,
+  read_progress REAL DEFAULT 0,
+  user_id TEXT DEFAULT '',
+  is_deleted INTEGER DEFAULT 0,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS settings (
+  key TEXT PRIMARY KEY,
+  value TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS sync_metadata (
+  table_name TEXT PRIMARY KEY,
+  last_synced_at TEXT
+);
+
+-- Performance indexes
+CREATE INDEX IF NOT EXISTS idx_articles_feed_id ON articles(feed_id);
+CREATE INDEX IF NOT EXISTS idx_articles_published_at ON articles(published_at);
+CREATE INDEX IF NOT EXISTS idx_feeds_category_id ON feeds(category_id);
+CREATE INDEX IF NOT EXISTS idx_feeds_user_id ON feeds(user_id);
+CREATE INDEX IF NOT EXISTS idx_articles_user_id ON articles(user_id);
+CREATE INDEX IF NOT EXISTS idx_categories_user_id ON categories(user_id);
+
+-- ============================================
+-- ROW LEVEL SECURITY (RLS)
+-- ============================================
+
+-- Enable RLS
 ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
 ALTER TABLE feeds ENABLE ROW LEVEL SECURITY;
 ALTER TABLE articles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE settings ENABLE ROW LEVEL SECURITY;
 
--- Drop existing policies if any (to recreate cleanly)
+-- Drop existing policies if any (for clean re-run)
 DROP POLICY IF EXISTS "Users can view own categories" ON categories;
 DROP POLICY IF EXISTS "Users can insert own categories" ON categories;
 DROP POLICY IF EXISTS "Users can update own categories" ON categories;
