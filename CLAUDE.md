@@ -1,78 +1,78 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+本文件为 Claude Code (claude.ai/code) 在此代码仓库工作时提供指导。
 
-## Project Overview
+## 项目概述
 
-REAL READER is a cross-platform RSS reader built with Flutter. It features AI-powered translation/summarization (via Minimax), cloud sync (via Supabase), and an editorial-style UI inspired by high-end print journals ("The Editorial Sanctuary" design system).
+REAL READER 是一款跨平台 RSS 阅读器，基于 Flutter 构建。集成 AI 翻译/摘要（Minimax）、云端同步（Supabase），采用高端杂志风格的 UI 设计系统（"The Editorial Sanctuary"）。
 
-## Development Commands
+## 开发命令
 
 ```bash
-# Install dependencies
+# 安装依赖
 flutter pub get
 
-# Run on target platform
+# 运行
 flutter run -d macos
 flutter run -d windows
 flutter run -d iphone
 
-# Analyze / lint
+# 分析/检查
 flutter analyze
 
-# Run tests
+# 测试
 flutter test
 
-# Run a specific test file
+# 指定测试文件
 flutter test test/data/models/feed_model_test.dart
 
-# Build
+# 构建
 flutter build macos
 flutter build ios
 flutter build windows
 ```
 
-## Environment Variables (required at runtime)
+## 环境变量（运行时必填）
 
-Set these via `flutter run` arguments or shell environment:
+通过 `flutter run` 的 `--dart-define` 参数或 Shell 环境变量设置：
 
-| Variable | Description |
-|----------|-------------|
-| `SUPABASE_URL` | Supabase project URL |
-| `SUPABASE_ANON_KEY` | Supabase anonymous (public) key |
-| `MINIMAX_API_KEY` | Minimax API key for AI features |
-| `MINIMAX_GROUP_ID` | Minimax group ID |
+| 变量 | 说明 |
+|------|------|
+| `SUPABASE_URL` | Supabase 项目 URL |
+| `SUPABASE_ANON_KEY` | Supabase Anonymous（公开）Key |
+| `MINIMAX_API_KEY` | Minimax API Key |
+| `MINIMAX_GROUP_ID` | Minimax Group ID |
 
-Example: `flutter run --dart-define=SUPABASE_URL=https://xxx.supabase.co --dart-define=SUPABASE_ANON_KEY=eyJ...`
+示例：`flutter run --dart-define=SUPABASE_URL=https://xxx.supabase.co --dart-define=SUPABASE_ANON_KEY=eyJ...`
 
-## Architecture
+## 架构
 
-**Clean Architecture** with 3 layers:
-- `lib/presentation/` — UI (pages, widgets, BLoCs)
-- `lib/domain/` — Business logic (entities, repository interfaces)
-- `lib/data/` — Data access (models, datasources, repository implementations)
+**三层 Clean Architecture：**
+- `lib/presentation/` — UI 层（pages、widgets、BLoCs）
+- `lib/domain/` — 业务逻辑层（entities、repository 接口）
+- `lib/data/` — 数据层（models、datasources、repository 实现）
 
-**State Management:** flutter_bloc (BLoC pattern)
+**状态管理：** flutter_bloc（BLoC 模式）
 
-**Routing:** go_router with ShellRoute that auto-selects `DesktopShell` or `MobileShell` based on platform detection via `universal_platform`.
+**路由：** go_router + ShellRoute，根据 `universal_platform` 自动选择 `DesktopShell` 或 `MobileShell`
 
-**Local Storage:** sqflite (SQLite) — tables: `feeds`, `articles`, `categories`, `settings`, `sync_metadata`
+**本地存储：** sqflite（SQLite）— 表：`feeds`、`articles`、`categories`、`settings`、`sync_metadata`
 
-**Cloud Sync:** Supabase — same schema as SQLite, synced via `SyncService` with last-write-wins conflict resolution
+**云端同步：** Supabase — 与 SQLite 同 schema，通过 `SyncService` 同步（last-write-wins 冲突解决）
 
-**Key BLoCs:**
-- `AuthBloc` — Apple/GitHub/Email login, auth state
-- `FeedBloc` — RSS feeds and categories CRUD
-- `ArticleBloc` — Articles with read/favorite/progress tracking
-- `SettingsBloc` — Theme mode, font size, reading speed
-- `AiBloc` — Minimax translation, summarization, TTS
+**核心 BLoCs：**
+- `AuthBloc` — Apple/GitHub/Email 登录，认证状态
+- `FeedBloc` — RSS 订阅源和分类的 CRUD
+- `ArticleBloc` — 文章的已读/收藏/阅读进度跟踪
+- `SettingsBloc` — 主题模式、字体大小、阅读速度
+- `AiBloc` — Minimax 翻译、摘要、TTS 朗读
 
-**Design System:** Defined in `UI/desktop/stitch/slate_serif/DESIGN.md` and `UI/mobile/stitch/slate_serif/DESIGN.md`. Uses Newsreader (serif) for editorial content, Inter for UI labels. Color palette via `AppColors` class — NO pure black in dark mode (uses `surface-dim` approach).
+**设计系统：** 详见 `UI/desktop/stitch/slate_serif/DESIGN.md` 和 `UI/mobile/stitch/slate_serif/DESIGN.md`。正文使用 Newsreader（衬线体），UI 标签使用 Inter。颜色定义在 `AppColors` 类中 — 深色模式不使用纯黑色（采用 `surface-dim` 方案）。
 
-## Important Patterns
+## 重要模式
 
-- **Models** use `Equatable` and `fromMap`/`toMap` for SQLite serialization
-- **Local datasources** handle SQLite CRUD; remote datasources handle HTTP/API calls
-- **Repository implementations** sit between BLoCs and datasources
-- **OPML import/export** handled by `OpmlService` in `lib/data/services/`
-- **AI features** (translate/summarize) are independent — each calls Minimax separately, results stored in BLoC state, do not overwrite original article content
+- **Models** 使用 `Equatable`，通过 `fromMap`/`toMap` 与 SQLite 互转
+- **Local datasources** 处理 SQLite CRUD；remote datasources 处理 HTTP/API
+- **Repository 实现** 位于 BLoCs 和 datasources 之间
+- **OPML 导入/导出** 由 `lib/data/services/opml_service.dart` 中的 `OpmlService` 处理
+- **AI 功能**（翻译/摘要）相互独立 — 各自分别调用 Minimax，结果存于 BLoC state，不覆盖原文
