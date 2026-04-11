@@ -32,9 +32,9 @@ flutter build ios
 flutter build windows
 ```
 
-## 环境变量（运行时必填）
+## 环境变量（可选，运行时 fallback）
 
-通过 `flutter run` 的 `--dart-define` 参数或 Shell 环境变量设置：
+主要通过应用内「设置」页面配置（Settings > API 配置）。环境变量仅作为开发/fallback 使用：
 
 | 变量 | 说明 |
 |------|------|
