@@ -13,6 +13,7 @@ import 'presentation/blocs/feed/feed_bloc.dart';
 import 'presentation/blocs/feed/feed_event.dart';
 import 'presentation/blocs/article/article_bloc.dart';
 import 'presentation/blocs/ai/ai_bloc.dart';
+import 'data/datasources/local/database_helper.dart';
 import 'data/datasources/local/settings_local_datasource.dart';
 import 'data/datasources/local/feed_local_datasource.dart';
 import 'data/datasources/local/article_local_datasource.dart';
@@ -25,11 +26,29 @@ import 'core/config/app_config.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize Supabase
-  await supabase.Supabase.initialize(
-    url: AppConfig.supabaseUrl,
-    anonKey: AppConfig.supabaseAnonKey,
-  );
+  // Initialize database
+  await DatabaseHelper.database;
+
+  // Read API keys from database (falls back to environment variables)
+  final settingsDatasource = SettingsLocalDatasource();
+  final dbSupabaseUrl = await settingsDatasource.getSetting('supabase_url');
+  final dbSupabaseAnonKey = await settingsDatasource.getSetting('supabase_anon_key');
+
+  // Use database values if available, otherwise fall back to environment variables
+  final supabaseUrl = dbSupabaseUrl?.isNotEmpty == true
+      ? dbSupabaseUrl!
+      : AppConfig.supabaseUrl;
+  final supabaseAnonKey = dbSupabaseAnonKey?.isNotEmpty == true
+      ? dbSupabaseAnonKey!
+      : AppConfig.supabaseAnonKey;
+
+  // Initialize Supabase if credentials are available
+  if (supabaseUrl.isNotEmpty && supabaseAnonKey.isNotEmpty) {
+    await supabase.Supabase.initialize(
+      url: supabaseUrl,
+      anonKey: supabaseAnonKey,
+    );
+  }
 
   // Set preferred orientations
   await SystemChrome.setPreferredOrientations([
@@ -39,16 +58,17 @@ void main() async {
     DeviceOrientation.landscapeRight,
   ]);
 
-  runApp(const RealReaderApp());
+  runApp(RealReaderApp(settingsDatasource: settingsDatasource));
 }
 
 class RealReaderApp extends StatelessWidget {
-  const RealReaderApp({super.key});
+  final SettingsLocalDatasource settingsDatasource;
+
+  const RealReaderApp({super.key, required this.settingsDatasource});
 
   @override
   Widget build(BuildContext context) {
     // Create datasources
-    final settingsDatasource = SettingsLocalDatasource();
     final feedLocalDatasource = FeedLocalDatasource();
     final articleDatasource = ArticleLocalDatasource();
     final supabaseClient = supabase.Supabase.instance.client;

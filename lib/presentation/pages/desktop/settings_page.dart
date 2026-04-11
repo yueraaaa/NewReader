@@ -142,6 +142,79 @@ class SettingsPage extends StatelessWidget {
 
             const SizedBox(height: AppSpacing.xl),
 
+            // API Configuration section
+            _SectionHeader(title: 'API 配置', color: secondaryColor),
+            const SizedBox(height: AppSpacing.md),
+            BlocBuilder<SettingsBloc, SettingsState>(
+              builder: (context, state) {
+                return Container(
+                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? AppColors.darkSurfaceContainerLowest
+                        : AppColors.surfaceContainerLowest,
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Supabase',
+                        style: TextStyle(
+                          color: textColor,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                      _ApiKeyInput(
+                        label: 'URL',
+                        value: state.supabaseUrl,
+                        onChanged: (value) {
+                          context.read<SettingsBloc>().add(UpdateSupabaseUrl(value));
+                        },
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                      _ApiKeyInput(
+                        label: 'ANON KEY',
+                        value: state.supabaseAnonKey,
+                        onChanged: (value) {
+                          context.read<SettingsBloc>().add(UpdateSupabaseAnonKey(value));
+                        },
+                      ),
+                      const SizedBox(height: AppSpacing.lg),
+                      Text(
+                        'Minimax AI',
+                        style: TextStyle(
+                          color: textColor,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                      _ApiKeyInput(
+                        label: 'API Key',
+                        value: state.minimaxApiKey,
+                        onChanged: (value) {
+                          context.read<SettingsBloc>().add(UpdateMinimaxApiKey(value));
+                        },
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                      _ApiKeyInput(
+                        label: 'Group ID',
+                        value: state.minimaxGroupId,
+                        onChanged: (value) {
+                          context.read<SettingsBloc>().add(UpdateMinimaxGroupId(value));
+                        },
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+
+            const SizedBox(height: AppSpacing.xl),
+
             // Data section
             _SectionHeader(title: '数据', color: secondaryColor),
             const SizedBox(height: AppSpacing.md),
@@ -362,6 +435,101 @@ class _SettingRow extends StatelessWidget {
         ),
         if (trailing != null) trailing!,
       ],
+    );
+  }
+}
+
+class _ApiKeyInput extends StatefulWidget {
+  final String label;
+  final String value;
+  final ValueChanged<String> onChanged;
+  final bool isPassword;
+
+  const _ApiKeyInput({
+    required this.label,
+    required this.value,
+    required this.onChanged,
+    this.isPassword = false,
+  });
+
+  @override
+  State<_ApiKeyInput> createState() => _ApiKeyInputState();
+}
+
+class _ApiKeyInputState extends State<_ApiKeyInput> {
+  late TextEditingController _controller;
+  bool _obscureText = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.value);
+  }
+
+  @override
+  void didUpdateWidget(_ApiKeyInput oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.value != _controller.text && widget.value != oldWidget.value) {
+      _controller.text = widget.value;
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surfaceColor = isDark ? AppColors.darkSurfaceContainerHigh : AppColors.surfaceContainerHigh;
+    final textColor = isDark ? AppColors.darkOnSurface : AppColors.onSurface;
+    final hintColor = isDark ? AppColors.darkOnSurfaceVariant : AppColors.onSurfaceVariant;
+
+    return SizedBox(
+      height: 40,
+      child: TextField(
+        controller: _controller,
+        obscureText: widget.isPassword && _obscureText,
+        onChanged: widget.onChanged,
+        style: TextStyle(fontSize: 13, color: textColor),
+        decoration: InputDecoration(
+          labelText: widget.label,
+          labelStyle: TextStyle(fontSize: 12, color: hintColor),
+          hintText: '请输入${widget.label}',
+          hintStyle: TextStyle(fontSize: 12, color: hintColor.withValues(alpha: 0.6)),
+          filled: true,
+          fillColor: surfaceColor,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide.none,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide.none,
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide(color: AppColors.primary, width: 1),
+          ),
+          suffixIcon: widget.isPassword
+              ? IconButton(
+                  icon: Icon(
+                    _obscureText ? Icons.visibility_off : Icons.visibility,
+                    size: 18,
+                    color: hintColor,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _obscureText = !_obscureText;
+                    });
+                  },
+                )
+              : null,
+        ),
+      ),
     );
   }
 }

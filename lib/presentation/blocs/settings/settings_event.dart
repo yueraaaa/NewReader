@@ -28,3 +28,31 @@ class UpdateReadingSpeed extends SettingsEvent {
   @override
   List<Object?> get props => [wordsPerMinute];
 }
+
+class UpdateSupabaseUrl extends SettingsEvent {
+  final String supabaseUrl;
+  UpdateSupabaseUrl(this.supabaseUrl);
+  @override
+  List<Object?> get props => [supabaseUrl];
+}
+
+class UpdateSupabaseAnonKey extends SettingsEvent {
+  final String supabaseAnonKey;
+  UpdateSupabaseAnonKey(this.supabaseAnonKey);
+  @override
+  List<Object?> get props => [supabaseAnonKey];
+}
+
+class UpdateMinimaxApiKey extends SettingsEvent {
+  final String minimaxApiKey;
+  UpdateMinimaxApiKey(this.minimaxApiKey);
+  @override
+  List<Object?> get props => [minimaxApiKey];
+}
+
+class UpdateMinimaxGroupId extends SettingsEvent {
+  final String minimaxGroupId;
+  UpdateMinimaxGroupId(this.minimaxGroupId);
+  @override
+  List<Object?> get props => [minimaxGroupId];
+}
