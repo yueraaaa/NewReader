@@ -5,6 +5,8 @@ class SupabaseDatasource {
 
   SupabaseDatasource(this._client);
 
+  String? get _userId => _client.auth.currentUser?.id;
+
   // Auth methods
   Future<User?> getCurrentUser() async => _client.auth.currentUser;
 
@@ -58,11 +60,15 @@ class SupabaseDatasource {
 
   Future<void> signOut() async => await _client.auth.signOut();
 
-  // Remote CRUD - these use the Supabase REST API or PostgREST
+  // Remote CRUD - filtered by authenticated user's userId
   Future<List<Map<String, dynamic>>> getFeeds(String? since) async {
-    final query = _client.from('feeds').select();
+    final userId = _userId;
+    if (userId == null) return [];
+
+    var query = _client.from('feeds').select()
+        .eq('user_id', userId);
     if (since != null) {
-      query.gte('updated_at', since);
+      query = query.gte('updated_at', since);
     }
     return await query;
   }
@@ -72,9 +78,13 @@ class SupabaseDatasource {
   }
 
   Future<List<Map<String, dynamic>>> getArticles(String? since) async {
-    final query = _client.from('articles').select();
+    final userId = _userId;
+    if (userId == null) return [];
+
+    var query = _client.from('articles').select()
+        .eq('user_id', userId);
     if (since != null) {
-      query.gte('updated_at', since);
+      query = query.gte('updated_at', since);
     }
     return await query;
   }
@@ -84,9 +94,13 @@ class SupabaseDatasource {
   }
 
   Future<List<Map<String, dynamic>>> getCategories(String? since) async {
-    final query = _client.from('categories').select();
+    final userId = _userId;
+    if (userId == null) return [];
+
+    var query = _client.from('categories').select()
+        .eq('user_id', userId);
     if (since != null) {
-      query.gte('updated_at', since);
+      query = query.gte('updated_at', since);
     }
     return await query;
   }

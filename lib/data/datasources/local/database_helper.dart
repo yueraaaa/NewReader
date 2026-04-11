@@ -3,7 +3,7 @@ import 'package:path/path.dart';
 
 class DatabaseHelper {
   static const _databaseName = 'real_reader.db';
-  static const _databaseVersion = 1;
+  static const _databaseVersion = 2;
 
   static Database? _database;
 
@@ -20,6 +20,7 @@ class DatabaseHelper {
       path,
       version: _databaseVersion,
       onCreate: _onCreate,
+      onUpgrade: _onUpgrade,
     );
   }
 
@@ -30,6 +31,7 @@ class DatabaseHelper {
         name TEXT NOT NULL,
         color TEXT NOT NULL,
         sort_order INTEGER DEFAULT 0,
+        user_id TEXT DEFAULT '',
         is_deleted INTEGER DEFAULT 0,
         created_at TEXT NOT NULL,
         updated_at TEXT NOT NULL
@@ -40,10 +42,11 @@ class DatabaseHelper {
       CREATE TABLE feeds (
         id TEXT PRIMARY KEY,
         title TEXT NOT NULL,
-        url TEXT NOT NULL UNIQUE,
+        url TEXT NOT NULL,
         description TEXT,
         icon_url TEXT,
         category_id TEXT REFERENCES categories(id),
+        user_id TEXT DEFAULT '',
         is_deleted INTEGER DEFAULT 0,
         created_at TEXT NOT NULL,
         updated_at TEXT NOT NULL
@@ -64,6 +67,7 @@ class DatabaseHelper {
         is_read INTEGER DEFAULT 0,
         is_favorite INTEGER DEFAULT 0,
         read_progress REAL DEFAULT 0,
+        user_id TEXT DEFAULT '',
         is_deleted INTEGER DEFAULT 0,
         created_at TEXT NOT NULL,
         updated_at TEXT NOT NULL
@@ -91,6 +95,25 @@ class DatabaseHelper {
         'CREATE INDEX idx_articles_published_at ON articles(published_at)');
     await db.execute(
         'CREATE INDEX idx_feeds_category_id ON feeds(category_id)');
+    // Index for user isolation queries
+    await db.execute(
+        'CREATE INDEX idx_feeds_user_id ON feeds(user_id)');
+    await db.execute(
+        'CREATE INDEX idx_articles_user_id ON articles(user_id)');
+    await db.execute(
+        'CREATE INDEX idx_categories_user_id ON categories(user_id)');
+  }
+
+  static Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      // Migration from v1 to v2: add user_id column
+      await db.execute('ALTER TABLE feeds ADD COLUMN user_id TEXT DEFAULT ""');
+      await db.execute('ALTER TABLE articles ADD COLUMN user_id TEXT DEFAULT ""');
+      await db.execute('ALTER TABLE categories ADD COLUMN user_id TEXT DEFAULT ""');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_feeds_user_id ON feeds(user_id)');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_articles_user_id ON articles(user_id)');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_categories_user_id ON categories(user_id)');
+    }
   }
 
   static Future<void> close() async {

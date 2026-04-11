@@ -13,6 +13,7 @@ class ArticleModel extends Equatable {
   final bool isRead;
   final bool isFavorite;
   final double readProgress;
+  final String userId;
   final bool isDeleted;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -30,6 +31,7 @@ class ArticleModel extends Equatable {
     this.isRead = false,
     this.isFavorite = false,
     this.readProgress = 0.0,
+    this.userId = '',
     this.isDeleted = false,
     required this.createdAt,
     required this.updatedAt,
@@ -58,6 +60,7 @@ class ArticleModel extends Equatable {
       isRead: (map['is_read'] as int?) == 1,
       isFavorite: (map['is_favorite'] as int?) == 1,
       readProgress: (map['read_progress'] as num?)?.toDouble() ?? 0.0,
+      userId: map['user_id'] as String? ?? '',
       isDeleted: (map['is_deleted'] as int?) == 1,
       createdAt: DateTime.parse(map['created_at'] as String),
       updatedAt: DateTime.parse(map['updated_at'] as String),
@@ -78,6 +81,7 @@ class ArticleModel extends Equatable {
       'is_read': isRead ? 1 : 0,
       'is_favorite': isFavorite ? 1 : 0,
       'read_progress': readProgress,
+      'user_id': userId,
       'is_deleted': isDeleted ? 1 : 0,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
@@ -97,6 +101,7 @@ class ArticleModel extends Equatable {
     bool? isRead,
     bool? isFavorite,
     double? readProgress,
+    String? userId,
     bool? isDeleted,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -114,6 +119,7 @@ class ArticleModel extends Equatable {
       isRead: isRead ?? this.isRead,
       isFavorite: isFavorite ?? this.isFavorite,
       readProgress: readProgress ?? this.readProgress,
+      userId: userId ?? this.userId,
       isDeleted: isDeleted ?? this.isDeleted,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -134,6 +140,7 @@ class ArticleModel extends Equatable {
         isRead,
         isFavorite,
         readProgress,
+        userId,
         isDeleted,
         createdAt,
         updatedAt,

@@ -7,6 +7,7 @@ class FeedModel extends Equatable {
   final String? description;
   final String? iconUrl;
   final String? categoryId;
+  final String userId;
   final bool isDeleted;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -18,6 +19,7 @@ class FeedModel extends Equatable {
     this.description,
     this.iconUrl,
     this.categoryId,
+    this.userId = '',
     this.isDeleted = false,
     required this.createdAt,
     required this.updatedAt,
@@ -31,6 +33,7 @@ class FeedModel extends Equatable {
       description: map['description'] as String?,
       iconUrl: map['icon_url'] as String?,
       categoryId: map['category_id'] as String?,
+      userId: map['user_id'] as String? ?? '',
       isDeleted: (map['is_deleted'] as int?) == 1,
       createdAt: DateTime.parse(map['created_at'] as String),
       updatedAt: DateTime.parse(map['updated_at'] as String),
@@ -45,6 +48,7 @@ class FeedModel extends Equatable {
       'description': description,
       'icon_url': iconUrl,
       'category_id': categoryId,
+      'user_id': userId,
       'is_deleted': isDeleted ? 1 : 0,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
@@ -58,6 +62,7 @@ class FeedModel extends Equatable {
     String? description,
     String? iconUrl,
     String? categoryId,
+    String? userId,
     bool? isDeleted,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -69,6 +74,7 @@ class FeedModel extends Equatable {
       description: description ?? this.description,
       iconUrl: iconUrl ?? this.iconUrl,
       categoryId: categoryId ?? this.categoryId,
+      userId: userId ?? this.userId,
       isDeleted: isDeleted ?? this.isDeleted,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -83,6 +89,7 @@ class FeedModel extends Equatable {
         description,
         iconUrl,
         categoryId,
+        userId,
         isDeleted,
         createdAt,
         updatedAt,
