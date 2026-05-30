@@ -93,7 +93,7 @@ public struct ArticleReaderView: View {
                 }
             }
             .padding(20)
-            .frame(maxWidth: 720)
+            .frame(maxWidth: .infinity)
         }
         .toolbar {
             ToolbarItemGroup {
