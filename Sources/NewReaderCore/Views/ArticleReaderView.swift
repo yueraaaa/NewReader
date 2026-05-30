@@ -20,72 +20,20 @@ public struct ArticleReaderView: View {
 
     public var body: some View {
         VStack(spacing: 0) {
-            // Header — scrollable
-            ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
-                    Text(article.title)
-                        .font(.title2.bold())
-                        .textSelection(.enabled)
+            // Header: ViewThatFits prevents ScrollView from expanding in VStack
+            ViewThatFits(in: .vertical) {
+                headerContent
+                    .padding(20)
 
-                    HStack(spacing: 12) {
-                        if let author = article.author {
-                            Label(author, systemImage: "person")
-                        }
-                        if let date = article.publishedDate {
-                            Label(date.formatted(date: .abbreviated, time: .shortened), systemImage: "calendar")
-                        }
-                        Label(article.feed?.title ?? "", systemImage: "dot.radiowaves.left.and.right")
-                        if viewModel.isArticleCached(article) {
-                            Image(systemName: "arrow.down.circle.fill")
-                                .foregroundStyle(.green)
-                                .help("已缓存")
-                        }
-                    }
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-
-                    Divider()
-
-                    if let summary = aiSummary ?? article.aiSummary {
-                        VStack(alignment: .leading, spacing: 6) {
-                            Label("AI 摘要", systemImage: "sparkles")
-                                .font(.caption.bold())
-                                .foregroundStyle(.purple)
-                            Text(summary)
-                                .font(.callout)
-                                .foregroundStyle(.secondary)
-                                .textSelection(.enabled)
-                        }
-                        .padding(12)
-                        .background(Color.purple.opacity(0.06), in: RoundedRectangle(cornerRadius: 8))
-                    }
-
-                    if let translation = translatedText {
-                        VStack(alignment: .leading, spacing: 6) {
-                            Label("\(selectedLanguage.displayName) 翻译", systemImage: "globe")
-                                .font(.caption.bold())
-                                .foregroundStyle(.blue)
-                            Text(translation)
-                                .font(.body)
-                                .textSelection(.enabled)
-                        }
-                        .padding(12)
-                        .background(Color.blue.opacity(0.06), in: RoundedRectangle(cornerRadius: 8))
-                    }
-
-                    if showVoicePanel {
-                        VoiceControlPanel(ttsService: viewModel.ttsService)
-                    }
-
-                    if translatedText != nil {
-                        Text("原文")
-                            .font(.caption.bold())
-                            .foregroundStyle(.secondary)
-                    }
+                ScrollView {
+                    headerContent
+                        .padding(20)
                 }
-                .padding(20)
-                .frame(maxWidth: .infinity)
+                .frame(maxHeight: 380)
             }
+            .frame(maxWidth: .infinity)
+
+            Divider()
 
             // Article body fills remaining height, WKWebView scrolls internally
             ArticleContentView(html: article.contentHTML)
@@ -177,6 +125,74 @@ public struct ArticleReaderView: View {
                 }
             }
         }
+    }
+
+    // MARK: - Header Content
+
+    @ViewBuilder
+    private var headerContent: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text(article.title)
+                .font(.title2.bold())
+                .textSelection(.enabled)
+
+            HStack(spacing: 12) {
+                if let author = article.author {
+                    Label(author, systemImage: "person")
+                }
+                if let date = article.publishedDate {
+                    Label(date.formatted(date: .abbreviated, time: .shortened), systemImage: "calendar")
+                }
+                Label(article.feed?.title ?? "", systemImage: "dot.radiowaves.left.and.right")
+                if viewModel.isArticleCached(article) {
+                    Image(systemName: "arrow.down.circle.fill")
+                        .foregroundStyle(.green)
+                        .help("已缓存")
+                }
+            }
+            .font(.caption)
+            .foregroundStyle(.secondary)
+
+            Divider()
+
+            if let summary = aiSummary ?? article.aiSummary {
+                VStack(alignment: .leading, spacing: 6) {
+                    Label("AI 摘要", systemImage: "sparkles")
+                        .font(.caption.bold())
+                        .foregroundStyle(.purple)
+                    Text(summary)
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
+                        .textSelection(.enabled)
+                }
+                .padding(12)
+                .background(Color.purple.opacity(0.06), in: RoundedRectangle(cornerRadius: 8))
+            }
+
+            if let translation = translatedText {
+                VStack(alignment: .leading, spacing: 6) {
+                    Label("\(selectedLanguage.displayName) 翻译", systemImage: "globe")
+                        .font(.caption.bold())
+                        .foregroundStyle(.blue)
+                    Text(translation)
+                        .font(.body)
+                        .textSelection(.enabled)
+                }
+                .padding(12)
+                .background(Color.blue.opacity(0.06), in: RoundedRectangle(cornerRadius: 8))
+            }
+
+            if showVoicePanel {
+                VoiceControlPanel(ttsService: viewModel.ttsService)
+            }
+
+            if translatedText != nil {
+                Text("原文")
+                    .font(.caption.bold())
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .frame(maxWidth: .infinity)
     }
 }
 
