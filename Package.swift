@@ -27,8 +27,7 @@ let package = Package(
             path: "Sources/NewReaderMac",
             exclude: [],
             resources: [
-                .process("AppIcon.icns"),
-                .process("Info.plist")
+                .process("AppIcon.icns")
             ]
         ),
         .executableTarget(
