@@ -11,9 +11,12 @@ public final class NotificationService: NSObject, @unchecked Sendable {
         super.init()
     }
 
-    /// Request notification permissions
+    /// Request notification permissions.
+    /// Returns false when running outside a proper app bundle (e.g., debug builds from CLI).
     public func requestPermission() async -> Bool {
         #if os(macOS)
+        // UNUserNotificationCenter.current() crashes without a main bundle
+        guard Bundle.main.bundleURL.pathExtension == "app" else { return false }
         let center = UNUserNotificationCenter.current()
         center.delegate = self
         do {
