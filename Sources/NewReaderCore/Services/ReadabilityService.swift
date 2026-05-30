@@ -29,7 +29,7 @@ public final class ReadabilityService: @unchecked Sendable {
     /// Extract meaningful text content from raw HTML using heuristics
     public func extractContent(from html: String, baseURL: URL?) throws -> String {
         // Remove scripts and styles
-        var cleaned = html
+        let cleaned = html
             .replacingOccurrences(of: "<script[^>]*>[\\s\\S]*?</script>",
                                   with: "", options: .regularExpression)
             .replacingOccurrences(of: "<style[^>]*>[\\s\\S]*?</style>",
