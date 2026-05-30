@@ -19,19 +19,21 @@ struct ContentView: View {
                     WelcomeView()
                 }
             }
+            .disabled(viewModel.showSubscribe)
+            .overlay {
+                if viewModel.showSubscribe {
+                    Color.black.opacity(0.3)
+                        .ignoresSafeArea()
+                        .onTapGesture { viewModel.showSubscribe = false }
+                }
+            }
 
-            // In-window subscribe overlay — no separate NSWindow, focus just works
+            // Subscribe overlay on top so it can receive focus
             if viewModel.showSubscribe {
-                Color.black.opacity(0.2)
-                    .ignoresSafeArea()
-                    .onTapGesture { viewModel.showSubscribe = false }
-
                 SubscribeOverlayView()
                     .environmentObject(viewModel)
-                    .transition(.scale(scale: 0.95).combined(with: .opacity))
             }
         }
-        .animation(.easeInOut(duration: 0.15), value: viewModel.showSubscribe)
         .onReceive(NotificationCenter.default.publisher(for: .showSubscribeSheet)) { _ in
             viewModel.showSubscribe = true
         }
@@ -52,9 +54,17 @@ struct WelcomeView: View {
             Text("选择一篇文章开始阅读")
                 .font(.title3)
                 .foregroundStyle(.secondary)
-            Text("⌘N 添加订阅 · ⌘, 打开设置")
+            Text("⌘N 添加订阅")
                 .font(.callout)
                 .foregroundStyle(.tertiary)
+
+            Button {
+                NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
+            } label: {
+                Label("打开设置", systemImage: "gearshape")
+            }
+            .buttonStyle(.bordered)
+            .padding(.top, 4)
         }
     }
 }

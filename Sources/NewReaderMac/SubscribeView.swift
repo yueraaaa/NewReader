@@ -29,6 +29,7 @@ struct SubscribeOverlayView: View {
 
             HStack(spacing: 12) {
                 Button("取消") {
+                    urlString = ""
                     viewModel.showSubscribe = false
                 }
                 .keyboardShortcut(.escape)
@@ -52,11 +53,14 @@ struct SubscribeOverlayView: View {
                 .fill(.regularMaterial)
                 .shadow(color: .black.opacity(0.15), radius: 20, y: 5)
         )
-        .onAppear {
-            // Brief delay so the TextField is in the view hierarchy before focus
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-                isFocused = true
-            }
+        .task {
+            // Wait for view to settle into hierarchy before requesting focus
+            try? await Task.sleep(for: .milliseconds(350))
+            isFocused = true
+        }
+        .onDisappear {
+            urlString = ""
+            isFocused = false
         }
     }
 
@@ -68,6 +72,7 @@ struct SubscribeOverlayView: View {
             await viewModel.subscribe(url: urlString)
             isSubscribing = false
             if viewModel.errorMessage == nil {
+                urlString = ""
                 viewModel.showSubscribe = false
             }
         }

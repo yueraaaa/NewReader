@@ -99,6 +99,16 @@ struct SidebarView: View {
                     Image(systemName: "ellipsis.circle")
                 }
             }
+
+            ToolbarItem {
+                Button {
+                    // Open Settings window via AppKit
+                    NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
+                } label: {
+                    Image(systemName: "gearshape")
+                }
+                .help("设置")
+            }
         }
         .fileImporter(
             isPresented: $showImportOPML,
