@@ -9,8 +9,8 @@
   html { scroll-behavior: smooth; }
   body {
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
-    background: #0d0d0d;
-    color: #e0e0e0;
+    background: #faf9f6;
+    color: #2c2c2c;
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
   }
@@ -24,6 +24,7 @@
     align-items: center;
     justify-content: center;
     overflow: hidden;
+    background: linear-gradient(180deg, #f0ede6 0%, #faf9f6 100%);
   }
   .hero canvas {
     position: absolute;
@@ -31,13 +32,7 @@
     width: 100%;
     height: 100%;
     z-index: 0;
-  }
-  .hero::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(180deg, rgba(13,13,13,0.3) 0%, rgba(13,13,13,0.88) 100%);
-    z-index: 1;
+    opacity: 0.55;
   }
   .hero-content {
     position: relative;
@@ -50,13 +45,13 @@
     font-size: clamp(3rem, 8vw, 5.5rem);
     font-weight: 700;
     letter-spacing: -0.035em;
-    color: #fff;
+    color: #1a1a1a;
     line-height: 1.08;
     margin-bottom: 20px;
   }
   .hero .subtitle {
     font-size: 1.2rem;
-    color: #aaa;
+    color: #666;
     max-width: 480px;
     margin: 0 auto 36px;
     line-height: 1.55;
@@ -75,22 +70,22 @@
     border-radius: 8px;
     font-size: 0.95rem;
     font-weight: 600;
-    transition: background 0.2s, transform 0.15s;
+    transition: background 0.2s, transform 0.15s, border-color 0.2s;
     cursor: pointer;
     border: none;
   }
   .btn:active { transform: scale(0.97); }
   .btn-primary {
-    background: #fff;
-    color: #111;
+    background: #1a1a1a;
+    color: #fff;
   }
-  .btn-primary:hover { background: #e5e5e5; }
+  .btn-primary:hover { background: #333; }
   .btn-ghost {
     background: transparent;
-    color: #ccc;
-    border: 1px solid rgba(255,255,255,0.2);
+    color: #555;
+    border: 1px solid #d4d4d4;
   }
-  .btn-ghost:hover { border-color: rgba(255,255,255,0.45); color: #fff; }
+  .btn-ghost:hover { border-color: #999; color: #1a1a1a; }
 
   /* Scroll hint */
   .scroll-hint {
@@ -101,7 +96,7 @@
     z-index: 2;
     animation: bob 2.2s ease-in-out infinite;
   }
-  .scroll-hint svg { width: 22px; height: 22px; opacity: 0.35; }
+  .scroll-hint svg { width: 22px; height: 22px; opacity: 0.25; stroke: #999; }
   @keyframes bob {
     0%, 100% { transform: translateX(-50%) translateY(0); }
     50% { transform: translateX(-50%) translateY(8px); }
@@ -114,40 +109,40 @@
     margin: 0 auto;
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 48px 40px;
+    gap: 40px 36px;
   }
   .feature-icon {
     width: 40px;
     height: 40px;
-    margin-bottom: 20px;
+    margin-bottom: 18px;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 8px;
-    background: rgba(255,255,255,0.06);
+    background: #f0ede6;
   }
-  .feature-icon svg { width: 20px; height: 20px; stroke: #8b8b8b; }
+  .feature-icon svg { width: 20px; height: 20px; stroke: #777; }
   .feature h3 {
     font-size: 1.05rem;
     font-weight: 600;
-    color: #eee;
+    color: #1a1a1a;
     margin-bottom: 8px;
   }
   .feature p {
     font-size: 0.9rem;
-    color: #888;
-    line-height: 1.6;
+    color: #777;
+    line-height: 1.65;
   }
 
   /* Platform */
   .platforms {
-    padding: 0 24px 100px;
+    padding: 0 24px 80px;
     text-align: center;
   }
   .platforms h2 {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     font-weight: 600;
-    color: #eee;
+    color: #1a1a1a;
     margin-bottom: 8px;
   }
   .platforms .tags {
@@ -161,35 +156,37 @@
     padding: 6px 16px;
     border-radius: 20px;
     font-size: 0.85rem;
-    color: #999;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.08);
+    color: #666;
+    background: #f0ede6;
+    border: 1px solid #e0dcd4;
   }
 
   /* Tech */
   .tech {
     padding: 80px 24px;
-    background: rgba(255,255,255,0.02);
+    background: #f5f2ed;
     text-align: center;
   }
   .tech h2 {
-    font-size: 1.15rem;
+    font-size: 1.1rem;
     font-weight: 500;
-    color: #666;
+    color: #999;
     margin-bottom: 24px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
   }
   .tech .stack {
     display: flex;
-    gap: 24px;
+    gap: 20px;
     justify-content: center;
     flex-wrap: wrap;
     font-size: 0.9rem;
-    color: #777;
+    color: #666;
   }
   .tech .stack span {
     padding: 6px 14px;
     border-radius: 6px;
-    background: rgba(255,255,255,0.04);
+    background: #e8e4dc;
   }
 
   /* Footer */
@@ -197,14 +194,14 @@
     padding: 40px 24px;
     text-align: center;
     font-size: 0.8rem;
-    color: #555;
-    border-top: 1px solid rgba(255,255,255,0.06);
+    color: #aaa;
+    border-top: 1px solid #e8e4dc;
   }
-  footer a { color: #888; }
-  footer a:hover { color: #ccc; }
+  footer a { color: #999; }
+  footer a:hover { color: #333; }
 
   @media (max-width: 640px) {
-    .features { gap: 36px 24px; padding: 60px 20px; }
+    .features { gap: 32px 20px; padding: 60px 20px; }
     .hero-content { padding: 0 16px; }
   }
 </style>
@@ -302,7 +299,7 @@
   <p>
     <a href="https://github.com/yueraaaa/NewReader" target="_blank" rel="noopener">GitHub</a>
     &nbsp;·&nbsp;
-    <a href="https://github.com/yueraaaa/NewReader/releases/tag/v1.0.0" target="_blank" rel="noopener">v1.0.0</a>
+    <a href="https://github.com/yueraaaa/NewReader/releases/tag/v1.0.1" target="_blank" rel="noopener">v1.0.1</a>
     &nbsp;·&nbsp;
     Swift Package Manager
   </p>
@@ -322,57 +319,58 @@ const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(60, 1, 0.1, 100);
 camera.position.z = 12;
 
-// Subtle geometry — floating, reading-like particles
-const count = 800;
+// Soft, warm-toned floating particles
+const count = 600;
 const positions = new Float32Array(count * 3);
-const sizes = new Float32Array(count);
 const colors = new Float32Array(count * 3);
 
 for (let i = 0; i < count; i++) {
   const i3 = i * 3;
-  // Flat disk-like distribution
   const theta = Math.random() * Math.PI * 2;
   const radius = 3 + Math.random() * 8;
   positions[i3] = Math.cos(theta) * radius;
   positions[i3 + 1] = (Math.random() - 0.5) * 10;
   positions[i3 + 2] = Math.sin(theta) * radius * 0.4 - 2;
 
-  sizes[i] = Math.random() * 0.04 + 0.015;
-
-  // Warm gray to cool white
-  const shade = 0.35 + Math.random() * 0.55;
-  colors[i3] = shade;
-  colors[i3 + 1] = shade;
-  colors[i3 + 2] = shade;
+  // Warm amber-brown tones
+  const r = 0.55 + Math.random() * 0.25;
+  const g = 0.4 + Math.random() * 0.2;
+  const b = 0.25 + Math.random() * 0.15;
+  colors[i3] = r;
+  colors[i3 + 1] = g;
+  colors[i3 + 2] = b;
 }
 
 const geo = new THREE.BufferGeometry();
 geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-geo.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
 geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
 const mat = new THREE.PointsMaterial({
-  size: 0.06,
+  size: 0.07,
   vertexColors: true,
-  blending: THREE.AdditiveBlending,
+  blending: THREE.NormalBlending,
   depthWrite: false,
   transparent: true,
-  opacity: 0.75
+  opacity: 0.5
 });
 
 const points = new THREE.Points(geo, mat);
 scene.add(points);
 
-// A few larger text-like rectangular cards drifting
+// Subtle floating card-like planes
 const cardGroup = new THREE.Group();
-for (let i = 0; i < 6; i++) {
-  const w = 0.8 + Math.random() * 1.6;
-  const h = 0.15 + Math.random() * 0.3;
+for (let i = 0; i < 5; i++) {
+  const w = 0.7 + Math.random() * 1.4;
+  const h = 0.12 + Math.random() * 0.25;
   const g = new THREE.PlaneGeometry(w, h);
   const m = new THREE.MeshBasicMaterial({
-    color: new THREE.Color(0.35 + Math.random() * 0.3, 0.35 + Math.random() * 0.3, 0.35 + Math.random() * 0.3),
+    color: new THREE.Color(
+      0.6 + Math.random() * 0.2,
+      0.45 + Math.random() * 0.2,
+      0.3 + Math.random() * 0.2
+    ),
     transparent: true,
-    opacity: 0.15 + Math.random() * 0.2,
+    opacity: 0.08 + Math.random() * 0.1,
     side: THREE.DoubleSide
   });
   const mesh = new THREE.Mesh(g, m);
@@ -383,8 +381,8 @@ for (let i = 0; i < 6; i++) {
   );
   mesh.rotation.z = (Math.random() - 0.5) * 0.3;
   mesh.userData = {
-    speed: 0.003 + Math.random() * 0.008,
-    amplitude: 0.3 + Math.random() * 1.5
+    speed: 0.002 + Math.random() * 0.006,
+    amplitude: 0.2 + Math.random() * 1
   };
   cardGroup.add(mesh);
 }
@@ -405,13 +403,13 @@ function animate() {
   requestAnimationFrame(animate);
   const t = clock.getElapsedTime();
 
-  points.rotation.y += 0.0004;
-  points.rotation.x = Math.sin(t * 0.15) * 0.08;
+  points.rotation.y += 0.0003;
+  points.rotation.x = Math.sin(t * 0.12) * 0.06;
 
   cardGroup.children.forEach(mesh => {
     mesh.position.y += mesh.userData.speed;
     if (mesh.position.y > 5) mesh.position.y = -5;
-    mesh.position.x += Math.sin(t * 0.7 + mesh.position.y) * 0.003;
+    mesh.position.x += Math.sin(t * 0.5 + mesh.position.y) * 0.002;
   });
 
   renderer.render(scene, camera);
