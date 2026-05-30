@@ -263,7 +263,6 @@ public struct ArticleContentView: NSViewRepresentable {
     public class Coordinator: NSObject, WKNavigationDelegate {
         let webView: WKWebView
         private var heightBinding: Binding<CGFloat>
-        private var observation: NSKeyValueObservation?
 
         init(dynamicHeight: Binding<CGFloat>) {
             self.heightBinding = dynamicHeight
@@ -274,21 +273,25 @@ public struct ArticleContentView: NSViewRepresentable {
             self.webView = WKWebView(frame: .zero, configuration: config)
             super.init()
             webView.navigationDelegate = self
-            observation = webView.scrollView.observe(\.documentView?.frame) { [weak self] _, _ in
-                self?.updateHeight()
-            }
+        }
+
+        private var scrollView: NSScrollView? {
+            webView.enclosingScrollView
         }
 
         private func updateHeight() {
-            guard let docView = webView.scrollView.documentView else { return }
+            guard let docView = scrollView?.documentView else { return }
             let h = docView.frame.height
-            if h > 50 {
+            if h > 50, abs(h - heightBinding.wrappedValue) > 2 {
                 DispatchQueue.main.async { self.heightBinding.wrappedValue = h }
             }
         }
 
         public func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-            updateHeight()
+            // Delay slightly for layout to complete
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { [weak self] in
+                self?.updateHeight()
+            }
         }
     }
 }
