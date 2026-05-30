@@ -296,7 +296,7 @@ public func wrapHTML(_ html: String) -> String {
       :root { color-scheme: light dark; }
       body { font-family: -apple-system, BlinkMacSystemFont, sans-serif;
              font-size: 16px; line-height: 1.7; color: #333;
-             padding: 0; margin: 0; max-width: 100%; }
+             padding: 20px 24px; margin: 0 auto; max-width: 740px; word-wrap: break-word; overflow-wrap: break-word; }
       @media (prefers-color-scheme: dark) {
         body { color: #ddd; background: transparent; } a { color: #6ea8fe; }
       }
