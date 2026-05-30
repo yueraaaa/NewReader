@@ -24,7 +24,12 @@ let package = Package(
         .executableTarget(
             name: "NewReaderMac",
             dependencies: ["NewReaderCore"],
-            path: "Sources/NewReaderMac"
+            path: "Sources/NewReaderMac",
+            exclude: [],
+            resources: [
+                .process("AppIcon.icns"),
+                .process("Info.plist")
+            ]
         ),
         .executableTarget(
             name: "NewReaderiOS",

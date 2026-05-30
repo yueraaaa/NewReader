@@ -7,7 +7,7 @@ public enum TranslationLanguage: String, CaseIterable {
     case ja = "ja"
     case ko = "ko"
 
-    var displayName: String {
+    public var displayName: String {
         switch self {
         case .zh: return "中文"
         case .en: return "English"
@@ -40,28 +40,28 @@ public enum AIProvider: String, CaseIterable, Codable {
     case openAI = "openai"
     case anthropic = "anthropic"
 
-    var displayName: String {
+    public var displayName: String {
         switch self {
         case .openAI: return "OpenAI 兼容"
         case .anthropic: return "Anthropic"
         }
     }
 
-    var defaultEndpoint: String {
+    public var defaultEndpoint: String {
         switch self {
         case .openAI: return "https://api.openai.com/v1"
         case .anthropic: return "https://api.anthropic.com/v1"
         }
     }
 
-    var defaultModel: String {
+    public var defaultModel: String {
         switch self {
         case .openAI: return "gpt-4o-mini"
         case .anthropic: return "claude-3-5-haiku-20241022"
         }
     }
 
-    var apiKeyPlaceholder: String {
+    public var apiKeyPlaceholder: String {
         switch self {
         case .openAI: return "sk-…"
         case .anthropic: return "sk-ant-…"
@@ -274,7 +274,7 @@ public final class AIService: ObservableObject {
     private func chatAnthropic(prompt: String, systemPrompt: String) async throws -> String {
         let url = try buildRequestURL()
 
-        var messages: [[String: Any]] = [
+        let messages: [[String: Any]] = [
             ["role": "user", "content": prompt]
         ]
 
