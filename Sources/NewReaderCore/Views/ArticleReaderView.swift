@@ -263,6 +263,7 @@ public struct ArticleContentView: NSViewRepresentable {
     public class Coordinator: NSObject, WKNavigationDelegate {
         let webView: WKWebView
         private var heightBinding: Binding<CGFloat>
+        private var measured = false
 
         init(dynamicHeight: Binding<CGFloat>) {
             self.heightBinding = dynamicHeight
@@ -275,22 +276,15 @@ public struct ArticleContentView: NSViewRepresentable {
             webView.navigationDelegate = self
         }
 
-        private var scrollView: NSScrollView? {
-            webView.enclosingScrollView
-        }
-
-        private func updateHeight() {
-            guard let docView = scrollView?.documentView else { return }
-            let h = docView.frame.height
-            if h > 50, abs(h - heightBinding.wrappedValue) > 2 {
-                DispatchQueue.main.async { self.heightBinding.wrappedValue = h }
-            }
-        }
-
         public func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-            // Delay slightly for layout to complete
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { [weak self] in
-                self?.updateHeight()
+            guard !measured else { return }
+            measured = true
+            // One-shot JS measurement — no ongoing observation loop
+            webView.evaluateJavaScript("document.body.scrollHeight") { [weak self] result, _ in
+                guard let self, let h = result as? CGFloat, h > 50 else { return }
+                DispatchQueue.main.async {
+                    self.heightBinding.wrappedValue = h + 16
+                }
             }
         }
     }
@@ -326,7 +320,7 @@ public struct ArticleContentView: UIViewRepresentable {
     public class Coordinator: NSObject, WKNavigationDelegate {
         let webView: WKWebView
         private var heightBinding: Binding<CGFloat>
-        private var observation: NSKeyValueObservation?
+        private var measured = false
 
         init(dynamicHeight: Binding<CGFloat>) {
             self.heightBinding = dynamicHeight
@@ -337,20 +331,17 @@ public struct ArticleContentView: UIViewRepresentable {
             self.webView = WKWebView(frame: .zero, configuration: config)
             super.init()
             webView.navigationDelegate = self
-            observation = webView.scrollView.observe(\.contentSize) { [weak self] _, _ in
-                self?.updateHeight()
-            }
-        }
-
-        private func updateHeight() {
-            let h = webView.scrollView.contentSize.height
-            if h > 50 {
-                DispatchQueue.main.async { self.heightBinding.wrappedValue = h }
-            }
         }
 
         public func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-            updateHeight()
+            guard !measured else { return }
+            measured = true
+            webView.evaluateJavaScript("document.body.scrollHeight") { [weak self] result, _ in
+                guard let self, let h = result as? CGFloat, h > 50 else { return }
+                DispatchQueue.main.async {
+                    self.heightBinding.wrappedValue = h + 16
+                }
+            }
         }
     }
 }
