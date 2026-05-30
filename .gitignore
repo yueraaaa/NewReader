@@ -1,0 +1,21 @@
+.build/
+DerivedData/
+*.xcodeproj/xcuserdata/
+*.xcworkspace/xcuserdata/
+Packages/
+.swiftpm/
+
+# Sensitive / transient files
+*.xcconfig
+!*.sample.xcconfig
+xcuserdata/
+
+# macOS
+.DS_Store
+*.swp
+*.swo
+
+# Archives and builds
+*.ipa
+*.dSYM.zip
+*.dSYM
