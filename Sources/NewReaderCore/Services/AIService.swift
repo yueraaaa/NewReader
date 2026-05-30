@@ -2,10 +2,10 @@ import Foundation
 
 /// Language codes supported for translation
 public enum TranslationLanguage: String, CaseIterable {
-    case zh = "zh"    // Chinese
-    case en = "en"    // English
-    case ja = "ja"    // Japanese
-    case ko = "ko"    // Korean
+    case zh = "zh"
+    case en = "en"
+    case ja = "ja"
+    case ko = "ko"
 
     var displayName: String {
         switch self {
@@ -35,18 +35,55 @@ public enum AIServiceError: LocalizedError {
     }
 }
 
+/// Supported AI providers
+public enum AIProvider: String, CaseIterable, Codable {
+    case openAI = "openai"
+    case anthropic = "anthropic"
+
+    var displayName: String {
+        switch self {
+        case .openAI: return "OpenAI 兼容"
+        case .anthropic: return "Anthropic"
+        }
+    }
+
+    var defaultEndpoint: String {
+        switch self {
+        case .openAI: return "https://api.openai.com/v1"
+        case .anthropic: return "https://api.anthropic.com/v1"
+        }
+    }
+
+    var defaultModel: String {
+        switch self {
+        case .openAI: return "gpt-4o-mini"
+        case .anthropic: return "claude-3-5-haiku-20241022"
+        }
+    }
+
+    var apiKeyPlaceholder: String {
+        switch self {
+        case .openAI: return "sk-…"
+        case .anthropic: return "sk-ant-…"
+        }
+    }
+}
+
 /// Configuration for the AI service
 public struct AIConfig {
+    public var provider: AIProvider
     public var endpoint: String
     public var apiKey: String
     public var model: String
 
-    public init(endpoint: String = "https://api.openai.com/v1",
+    public init(provider: AIProvider = .openAI,
+                endpoint: String? = nil,
                 apiKey: String = "",
-                model: String = "gpt-4o-mini") {
-        self.endpoint = endpoint
+                model: String? = nil) {
+        self.provider = provider
+        self.endpoint = endpoint ?? provider.defaultEndpoint
         self.apiKey = apiKey
-        self.model = model
+        self.model = model ?? provider.defaultModel
     }
 }
 
@@ -58,6 +95,7 @@ public final class AIService: ObservableObject {
     private let keychainKey = "ai_api_key"
     private let endpointUDKey = "ai_endpoint"
     private let modelUDKey = "ai_model"
+    private let providerUDKey = "ai_provider"
 
     public init() {
         let urlConfig = URLSessionConfiguration.default
@@ -116,10 +154,10 @@ public final class AIService: ObservableObject {
         }
         UserDefaults.standard.set(config.endpoint, forKey: endpointUDKey)
         UserDefaults.standard.set(config.model, forKey: modelUDKey)
+        UserDefaults.standard.set(config.provider.rawValue, forKey: providerUDKey)
     }
 
     /// Load API key from Keychain; non-sensitive fields from UserDefaults.
-    /// Falls back to legacy plaintext file for one-time migration.
     private func loadConfig() {
         if let key = KeychainHelper.load(key: keychainKey), !key.isEmpty {
             self.config.apiKey = key
@@ -130,6 +168,7 @@ public final class AIService: ObservableObject {
             }
             self.config.endpoint = legacy.endpoint
             self.config.model = legacy.model
+            self.config.provider = legacy.provider
         }
 
         if let endpoint = UserDefaults.standard.string(forKey: endpointUDKey),
@@ -140,9 +179,12 @@ public final class AIService: ObservableObject {
            !model.isEmpty {
             self.config.model = model
         }
+        if let raw = UserDefaults.standard.string(forKey: providerUDKey),
+           let provider = AIProvider(rawValue: raw) {
+            self.config.provider = provider
+        }
     }
 
-    /// One-time migration: read and delete the old plaintext config file.
     private func loadLegacyConfig() -> AIConfig? {
         guard let url = legacyConfigFileURL,
               let data = try? Data(contentsOf: url),
@@ -160,11 +202,19 @@ public final class AIService: ObservableObject {
 
     // MARK: - Private
 
-    /// Validate and construct the chat completions URL.
-    private func chatURL() throws -> URL {
+    private func buildRequestURL() throws -> URL {
         let raw = config.endpoint.trimmingCharacters(in: .whitespaces)
             .trimmingCharacters(in: CharacterSet(charactersIn: "/"))
-        guard let url = URL(string: "\(raw)/chat/completions"),
+
+        let path: String
+        switch config.provider {
+        case .openAI:
+            path = "\(raw)/chat/completions"
+        case .anthropic:
+            path = "\(raw)/messages"
+        }
+
+        guard let url = URL(string: path),
               let scheme = url.scheme?.lowercased(),
               scheme == "https" else {
             throw AIServiceError.insecureEndpoint
@@ -173,7 +223,18 @@ public final class AIService: ObservableObject {
     }
 
     private func chat(prompt: String, systemPrompt: String) async throws -> String {
-        let url = try chatURL()
+        switch config.provider {
+        case .openAI:
+            return try await chatOpenAI(prompt: prompt, systemPrompt: systemPrompt)
+        case .anthropic:
+            return try await chatAnthropic(prompt: prompt, systemPrompt: systemPrompt)
+        }
+    }
+
+    // MARK: - OpenAI-compatible API
+
+    private func chatOpenAI(prompt: String, systemPrompt: String) async throws -> String {
+        let url = try buildRequestURL()
 
         let body: [String: Any] = [
             "model": config.model,
@@ -208,6 +269,48 @@ public final class AIService: ObservableObject {
         return content.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
+    // MARK: - Anthropic Messages API
+
+    private func chatAnthropic(prompt: String, systemPrompt: String) async throws -> String {
+        let url = try buildRequestURL()
+
+        var messages: [[String: Any]] = [
+            ["role": "user", "content": prompt]
+        ]
+
+        let body: [String: Any] = [
+            "model": config.model,
+            "max_tokens": 1024,
+            "messages": messages,
+            "system": systemPrompt
+        ]
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue(config.apiKey, forHTTPHeaderField: "x-api-key")
+        request.setValue("2023-06-01", forHTTPHeaderField: "anthropic-version")
+        request.httpBody = try JSONSerialization.data(withJSONObject: body)
+
+        let (data, response) = try await session.data(for: request)
+
+        guard let httpResponse = response as? HTTPURLResponse,
+              httpResponse.statusCode == 200 else {
+            throw AIServiceError.invalidResponse
+        }
+
+        guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let contentList = json["content"] as? [[String: Any]],
+              let firstBlock = contentList.first,
+              let text = firstBlock["text"] as? String else {
+            throw AIServiceError.invalidResponse
+        }
+
+        return text.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    // MARK: - Helpers
+
     private func stripHTML(_ html: String) -> String {
         guard let data = html.data(using: .utf8) else { return html }
         if let plain = try? NSAttributedString(
@@ -226,4 +329,5 @@ private struct LegacyAIConfig: Codable {
     var endpoint: String
     var apiKey: String
     var model: String
+    var provider: AIProvider = .openAI
 }

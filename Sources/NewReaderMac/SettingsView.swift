@@ -3,6 +3,7 @@ import NewReaderCore
 
 struct SettingsView: View {
     @EnvironmentObject var viewModel: ReaderViewModel
+    @State private var provider: AIProvider = .openAI
     @State private var endpoint: String = ""
     @State private var apiKey: String = ""
     @State private var model: String = ""
@@ -10,29 +11,45 @@ struct SettingsView: View {
 
     var body: some View {
         TabView {
-            // AI Config
             VStack(alignment: .leading, spacing: 0) {
                 Form {
                     Section {
+                        Picker("提供商", selection: $provider) {
+                            ForEach(AIProvider.allCases, id: \.self) { p in
+                                Text(p.displayName).tag(p)
+                            }
+                        }
+                        .pickerStyle(.segmented)
+                        .onChange(of: provider) { _, newProvider in
+                            endpoint = newProvider.defaultEndpoint
+                            model = newProvider.defaultModel
+                        }
+                    } header: {
+                        Text("AI 服务商").font(.headline)
+                    }
+
+                    Section {
                         VStack(alignment: .leading, spacing: 6) {
                             Text("API Endpoint").font(.caption).foregroundStyle(.secondary)
-                            TextField("https://api.openai.com/v1", text: $endpoint)
+                            TextField(provider.defaultEndpoint, text: $endpoint)
                                 .textFieldStyle(.roundedBorder)
                         }
                         VStack(alignment: .leading, spacing: 6) {
                             Text("API Key").font(.caption).foregroundStyle(.secondary)
-                            SecureField("sk-…", text: $apiKey)
+                            SecureField(provider.apiKeyPlaceholder, text: $apiKey)
                                 .textFieldStyle(.roundedBorder)
                         }
                         VStack(alignment: .leading, spacing: 6) {
                             Text("Model").font(.caption).foregroundStyle(.secondary)
-                            TextField("gpt-4o-mini", text: $model)
+                            TextField(provider.defaultModel, text: $model)
                                 .textFieldStyle(.roundedBorder)
                         }
                     } header: {
-                        Text("OpenAI 兼容 API").font(.headline)
+                        Text("连接配置").font(.headline)
                     } footer: {
-                        Text("支持任何 OpenAI 兼容服务，如 OpenAI、Azure、DeepSeek、通义千问等。")
+                        Text(provider == .openAI
+                             ? "支持 OpenAI、Azure、DeepSeek、通义千问等兼容服务。"
+                             : "使用 Anthropic Messages API，支持 Claude 系列模型。")
                             .font(.caption)
                             .foregroundStyle(.tertiary)
                     }
@@ -40,7 +57,6 @@ struct SettingsView: View {
                     Section {
                         HStack {
                             Button("保存") {
-                                // Validate endpoint is HTTPS before saving
                                 let trimmed = endpoint.trimmingCharacters(in: .whitespaces)
                                     .trimmingCharacters(in: CharacterSet(charactersIn: "/"))
                                 guard let url = URL(string: trimmed),
@@ -48,6 +64,7 @@ struct SettingsView: View {
                                     viewModel.errorMessage = "API 端点必须使用 HTTPS"
                                     return
                                 }
+                                viewModel.aiService.config.provider = provider
                                 viewModel.aiService.config.endpoint = trimmed
                                 viewModel.aiService.config.apiKey = apiKey
                                 viewModel.aiService.config.model = model
@@ -74,12 +91,12 @@ struct SettingsView: View {
                 Label("AI", systemImage: "brain.head.profile")
             }
             .onAppear {
+                provider = viewModel.aiService.config.provider
                 endpoint = viewModel.aiService.config.endpoint
                 apiKey = viewModel.aiService.config.apiKey
                 model = viewModel.aiService.config.model
             }
 
-            // Cache
             VStack(alignment: .leading, spacing: 0) {
                 Form {
                     Section {
@@ -103,7 +120,6 @@ struct SettingsView: View {
                 Label("缓存", systemImage: "internaldrive")
             }
 
-            // General
             VStack(alignment: .leading, spacing: 0) {
                 Form {
                     Section {
@@ -127,7 +143,7 @@ struct SettingsView: View {
                 Label("通用", systemImage: "gearshape")
             }
         }
-        .frame(width: 480, height: 340)
+        .frame(width: 480, height: 400)
         .animation(.easeInOut(duration: 0.2), value: showSaved)
     }
 }

@@ -3,20 +3,39 @@ import NewReaderCore
 
 struct SettingsView: View {
     @EnvironmentObject var viewModel: ReaderViewModel
+    @State private var provider: AIProvider = .openAI
     @State private var endpoint: String = ""
     @State private var apiKey: String = ""
     @State private var model: String = ""
 
     var body: some View {
         Form {
-            Section("AI 配置") {
+            Section("AI 服务商") {
+                Picker("提供商", selection: $provider) {
+                    ForEach(AIProvider.allCases, id: \.self) { p in
+                        Text(p.displayName).tag(p)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .onChange(of: provider) { _, newProvider in
+                    endpoint = newProvider.defaultEndpoint
+                    model = newProvider.defaultModel
+                }
+            }
+
+            Section("连接配置") {
                 TextField("API Endpoint", text: $endpoint)
                     .autocorrectionDisabled()
-                SecureField("API Key", text: $apiKey)
+                SecureField(provider.apiKeyPlaceholder, text: $apiKey)
                 TextField("Model", text: $model)
                     .autocorrectionDisabled()
                 Button("保存") {
-                    viewModel.aiService.config.endpoint = endpoint
+                    let trimmed = endpoint.trimmingCharacters(in: .whitespaces)
+                        .trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+                    guard let url = URL(string: trimmed),
+                          url.scheme?.lowercased() == "https" else { return }
+                    viewModel.aiService.config.provider = provider
+                    viewModel.aiService.config.endpoint = trimmed
                     viewModel.aiService.config.apiKey = apiKey
                     viewModel.aiService.config.model = model
                     viewModel.aiService.saveConfig()
@@ -58,6 +77,7 @@ struct SettingsView: View {
         }
         .navigationTitle("设置")
         .onAppear {
+            provider = viewModel.aiService.config.provider
             endpoint = viewModel.aiService.config.endpoint
             apiKey = viewModel.aiService.config.apiKey
             model = viewModel.aiService.config.model
