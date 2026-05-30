@@ -12,7 +12,6 @@ public struct ArticleReaderView: View {
     @State private var isTranslating: Bool = false
     @State private var isExtracting: Bool = false
     @State private var showVoicePanel: Bool = false
-    @State private var webViewHeight: CGFloat = 500
 
     public init(article: Article, viewModel: ReaderViewModel) {
         self.article = article
@@ -20,85 +19,80 @@ public struct ArticleReaderView: View {
     }
 
     public var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
-                // Title
-                Text(article.title)
-                    .font(.title2.bold())
-                    .textSelection(.enabled)
+        VStack(spacing: 0) {
+            // Header — scrollable
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    Text(article.title)
+                        .font(.title2.bold())
+                        .textSelection(.enabled)
 
-                // Metadata
-                HStack(spacing: 12) {
-                    if let author = article.author {
-                        Label(author, systemImage: "person")
+                    HStack(spacing: 12) {
+                        if let author = article.author {
+                            Label(author, systemImage: "person")
+                        }
+                        if let date = article.publishedDate {
+                            Label(date.formatted(date: .abbreviated, time: .shortened), systemImage: "calendar")
+                        }
+                        Label(article.feed?.title ?? "", systemImage: "dot.radiowaves.left.and.right")
+                        if viewModel.isArticleCached(article) {
+                            Image(systemName: "arrow.down.circle.fill")
+                                .foregroundStyle(.green)
+                                .help("已缓存")
+                        }
                     }
-                    if let date = article.publishedDate {
-                        Label(date.formatted(date: .abbreviated, time: .shortened), systemImage: "calendar")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+
+                    Divider()
+
+                    if let summary = aiSummary ?? article.aiSummary {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Label("AI 摘要", systemImage: "sparkles")
+                                .font(.caption.bold())
+                                .foregroundStyle(.purple)
+                            Text(summary)
+                                .font(.callout)
+                                .foregroundStyle(.secondary)
+                                .textSelection(.enabled)
+                        }
+                        .padding(12)
+                        .background(Color.purple.opacity(0.06), in: RoundedRectangle(cornerRadius: 8))
                     }
-                    Label(article.feed?.title ?? "", systemImage: "dot.radiowaves.left.and.right")
-                    if viewModel.isArticleCached(article) {
-                        Image(systemName: "arrow.down.circle.fill")
-                            .foregroundStyle(.green)
-                            .help("已缓存")
+
+                    if let translation = translatedText {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Label("\(selectedLanguage.displayName) 翻译", systemImage: "globe")
+                                .font(.caption.bold())
+                                .foregroundStyle(.blue)
+                            Text(translation)
+                                .font(.body)
+                                .textSelection(.enabled)
+                        }
+                        .padding(12)
+                        .background(Color.blue.opacity(0.06), in: RoundedRectangle(cornerRadius: 8))
                     }
-                }
-                .font(.caption)
-                .foregroundStyle(.secondary)
 
-                Divider()
-
-                // AI Summary
-                if let summary = aiSummary ?? article.aiSummary {
-                    VStack(alignment: .leading, spacing: 6) {
-                        Label("AI 摘要", systemImage: "sparkles")
-                            .font(.caption.bold())
-                            .foregroundStyle(.purple)
-                        Text(summary)
-                            .font(.callout)
-                            .foregroundStyle(.secondary)
-                            .textSelection(.enabled)
+                    if showVoicePanel {
+                        VoiceControlPanel(ttsService: viewModel.ttsService)
                     }
-                    .padding(12)
-                    .background(Color.purple.opacity(0.06), in: RoundedRectangle(cornerRadius: 8))
-                }
 
-                // Translated content
-                if let translation = translatedText {
-                    VStack(alignment: .leading, spacing: 6) {
-                        Label("\(selectedLanguage.displayName) 翻译", systemImage: "globe")
-                            .font(.caption.bold())
-                            .foregroundStyle(.blue)
-                        Text(translation)
-                            .font(.body)
-                            .textSelection(.enabled)
-                    }
-                    .padding(12)
-                    .background(Color.blue.opacity(0.06), in: RoundedRectangle(cornerRadius: 8))
-                }
-
-                // Voice control panel
-                if showVoicePanel {
-                    VoiceControlPanel(ttsService: viewModel.ttsService)
-                        .transition(.move(edge: .top).combined(with: .opacity))
-                }
-
-                // Article content
-                VStack(alignment: .leading, spacing: 8) {
                     if translatedText != nil {
                         Text("原文")
                             .font(.caption.bold())
                             .foregroundStyle(.secondary)
                     }
-                    ArticleContentView(html: article.contentHTML, dynamicHeight: $webViewHeight)
-                        .frame(height: webViewHeight)
                 }
+                .padding(20)
+                .frame(maxWidth: .infinity)
             }
-            .padding(20)
-            .frame(maxWidth: .infinity)
+
+            // Article body fills remaining height, WKWebView scrolls internally
+            ArticleContentView(html: article.contentHTML)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .toolbar {
             ToolbarItemGroup {
-                // Voice toggle
                 Button {
                     withAnimation { showVoicePanel.toggle() }
                     if showVoicePanel {
@@ -111,7 +105,6 @@ public struct ArticleReaderView: View {
                 }
                 .help("语音朗读")
 
-                // Full-text extraction
                 Button {
                     Task {
                         isExtracting = true
@@ -124,7 +117,6 @@ public struct ArticleReaderView: View {
                 .help("提取全文")
                 .disabled(isExtracting)
 
-                // Cache
                 Button {
                     if viewModel.isArticleCached(article) {
                         viewModel.cacheService.removeCache(id: article.id)
@@ -136,7 +128,6 @@ public struct ArticleReaderView: View {
                 }
                 .help(viewModel.isArticleCached(article) ? "已缓存" : "缓存离线阅读")
 
-                // AI tools
                 Menu {
                     Button {
                         Task {
@@ -169,7 +160,6 @@ public struct ArticleReaderView: View {
                 }
                 .help("AI 功能")
 
-                // Star
                 Button {
                     viewModel.toggleStarred(article)
                 } label: {
@@ -183,15 +173,15 @@ public struct ArticleReaderView: View {
             if isSummarizing || isTranslating || isExtracting {
                 ZStack {
                     Color.black.opacity(0.1)
-                    ProgressView()
-                        .scaleEffect(0.8)
+                    ProgressView().scaleEffect(0.8)
                 }
             }
         }
     }
 }
 
-/// Compact voice control panel
+// MARK: - Voice Control Panel
+
 struct VoiceControlPanel: View {
     @ObservedObject var ttsService: TTSService
     @State private var rate: Double = 0.5
@@ -214,14 +204,12 @@ struct VoiceControlPanel: View {
 
             Divider().frame(height: 16)
 
-            Image(systemName: "tortoise")
-                .font(.system(size: 10))
+            Image(systemName: "tortoise").font(.system(size: 10))
             Slider(value: $rate, in: 0...1) { _ in
                 ttsService.setRate(Float(rate))
             }
             .frame(width: 80)
-            Image(systemName: "hare")
-                .font(.system(size: 10))
+            Image(systemName: "hare").font(.system(size: 10))
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
@@ -229,21 +217,15 @@ struct VoiceControlPanel: View {
     }
 }
 
+// MARK: - Article Content (WKWebView)
+
 #if os(macOS)
 import WebKit
 
 public struct ArticleContentView: NSViewRepresentable {
     let html: String
-    @Binding var dynamicHeight: CGFloat
 
-    public init(html: String, dynamicHeight: Binding<CGFloat> = .constant(500)) {
-        self.html = html
-        self._dynamicHeight = dynamicHeight
-    }
-
-    public func makeCoordinator() -> Coordinator {
-        Coordinator(dynamicHeight: $dynamicHeight)
-    }
+    public init(html: String) { self.html = html }
 
     public func makeNSView(context: Context) -> WKWebView {
         let config = WKWebViewConfiguration()
@@ -251,7 +233,7 @@ public struct ArticleContentView: NSViewRepresentable {
         prefs.allowsContentJavaScript = false
         config.defaultWebpagePreferences = prefs
         config.preferences.javaScriptCanOpenWindowsAutomatically = false
-        let webView = context.coordinator.webView
+        let webView = WKWebView(frame: .zero, configuration: config)
         webView.setValue(false, forKey: "drawsBackground")
         return webView
     }
@@ -259,54 +241,22 @@ public struct ArticleContentView: NSViewRepresentable {
     public func updateNSView(_ webView: WKWebView, context: Context) {
         webView.loadHTMLString(wrapHTML(html), baseURL: nil)
     }
-
-    public class Coordinator: NSObject, WKNavigationDelegate {
-        let webView: WKWebView
-        private var heightBinding: Binding<CGFloat>
-        private var measured = false
-
-        init(dynamicHeight: Binding<CGFloat>) {
-            self.heightBinding = dynamicHeight
-            let config = WKWebViewConfiguration()
-            let prefs = WKWebpagePreferences()
-            prefs.allowsContentJavaScript = false
-            config.defaultWebpagePreferences = prefs
-            self.webView = WKWebView(frame: .zero, configuration: config)
-            super.init()
-            webView.navigationDelegate = self
-        }
-
-        public func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-            guard !measured else { return }
-            measured = true
-            // One-shot JS measurement — no ongoing observation loop
-            webView.evaluateJavaScript("document.body.scrollHeight") { [weak self] result, _ in
-                guard let self, let h = result as? CGFloat, h > 50 else { return }
-                DispatchQueue.main.async {
-                    self.heightBinding.wrappedValue = h + 16
-                }
-            }
-        }
-    }
 }
+
 #else
 import WebKit
 
 public struct ArticleContentView: UIViewRepresentable {
     let html: String
-    @Binding var dynamicHeight: CGFloat
 
-    public init(html: String, dynamicHeight: Binding<CGFloat> = .constant(500)) {
-        self.html = html
-        self._dynamicHeight = dynamicHeight
-    }
-
-    public func makeCoordinator() -> Coordinator {
-        Coordinator(dynamicHeight: $dynamicHeight)
-    }
+    public init(html: String) { self.html = html }
 
     public func makeUIView(context: Context) -> WKWebView {
-        let webView = context.coordinator.webView
+        let config = WKWebViewConfiguration()
+        let prefs = WKWebpagePreferences()
+        prefs.allowsContentJavaScript = false
+        config.defaultWebpagePreferences = prefs
+        let webView = WKWebView(frame: .zero, configuration: config)
         webView.isOpaque = false
         webView.backgroundColor = .clear
         webView.scrollView.backgroundColor = .clear
@@ -316,36 +266,10 @@ public struct ArticleContentView: UIViewRepresentable {
     public func updateUIView(_ webView: WKWebView, context: Context) {
         webView.loadHTMLString(wrapHTML(html), baseURL: nil)
     }
-
-    public class Coordinator: NSObject, WKNavigationDelegate {
-        let webView: WKWebView
-        private var heightBinding: Binding<CGFloat>
-        private var measured = false
-
-        init(dynamicHeight: Binding<CGFloat>) {
-            self.heightBinding = dynamicHeight
-            let config = WKWebViewConfiguration()
-            let prefs = WKWebpagePreferences()
-            prefs.allowsContentJavaScript = false
-            config.defaultWebpagePreferences = prefs
-            self.webView = WKWebView(frame: .zero, configuration: config)
-            super.init()
-            webView.navigationDelegate = self
-        }
-
-        public func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-            guard !measured else { return }
-            measured = true
-            webView.evaluateJavaScript("document.body.scrollHeight") { [weak self] result, _ in
-                guard let self, let h = result as? CGFloat, h > 50 else { return }
-                DispatchQueue.main.async {
-                    self.heightBinding.wrappedValue = h + 16
-                }
-            }
-        }
-    }
 }
 #endif
+
+// MARK: - HTML Wrapper
 
 public func wrapHTML(_ html: String) -> String {
     """

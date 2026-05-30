@@ -26,7 +26,6 @@ public final class CacheService {
         <title>\(escapeHTML(title))</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src https: http: data:; style-src 'unsafe-inline'; font-src 'none'; frame-src 'none'; media-src https: http:;">
-        <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src https: http: data:; style-src 'unsafe-inline'; font-src 'none'; frame-src 'none'; media-src https: http:;">
         <style>
           :root { color-scheme: light dark; }
           body { font-family: -apple-system, sans-serif; font-size: 16px;
