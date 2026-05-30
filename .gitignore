@@ -22,3 +22,5 @@ xcuserdata/
 
 # Local Netlify folder
 .netlify
+dist/
+*.zip
