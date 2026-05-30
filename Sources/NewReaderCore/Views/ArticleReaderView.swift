@@ -12,6 +12,7 @@ public struct ArticleReaderView: View {
     @State private var isTranslating: Bool = false
     @State private var isExtracting: Bool = false
     @State private var showVoicePanel: Bool = false
+    @State private var webViewHeight: CGFloat = 500
 
     public init(article: Article, viewModel: ReaderViewModel) {
         self.article = article
@@ -88,8 +89,8 @@ public struct ArticleReaderView: View {
                             .font(.caption.bold())
                             .foregroundStyle(.secondary)
                     }
-                    ArticleContentView(html: article.contentHTML)
-                        .frame(minHeight: 200)
+                    ArticleContentView(html: article.contentHTML, dynamicHeight: $webViewHeight)
+                        .frame(height: webViewHeight)
                 }
             }
             .padding(20)
@@ -233,8 +234,16 @@ import WebKit
 
 public struct ArticleContentView: NSViewRepresentable {
     let html: String
+    @Binding var dynamicHeight: CGFloat
 
-    public init(html: String) { self.html = html }
+    public init(html: String, dynamicHeight: Binding<CGFloat> = .constant(500)) {
+        self.html = html
+        self._dynamicHeight = dynamicHeight
+    }
+
+    public func makeCoordinator() -> Coordinator {
+        Coordinator(dynamicHeight: $dynamicHeight)
+    }
 
     public func makeNSView(context: Context) -> WKWebView {
         let config = WKWebViewConfiguration()
@@ -242,7 +251,7 @@ public struct ArticleContentView: NSViewRepresentable {
         prefs.allowsContentJavaScript = false
         config.defaultWebpagePreferences = prefs
         config.preferences.javaScriptCanOpenWindowsAutomatically = false
-        let webView = WKWebView(frame: .zero, configuration: config)
+        let webView = context.coordinator.webView
         webView.setValue(false, forKey: "drawsBackground")
         return webView
     }
@@ -250,22 +259,57 @@ public struct ArticleContentView: NSViewRepresentable {
     public func updateNSView(_ webView: WKWebView, context: Context) {
         webView.loadHTMLString(wrapHTML(html), baseURL: nil)
     }
+
+    public class Coordinator: NSObject, WKNavigationDelegate {
+        let webView: WKWebView
+        private var heightBinding: Binding<CGFloat>
+        private var observation: NSKeyValueObservation?
+
+        init(dynamicHeight: Binding<CGFloat>) {
+            self.heightBinding = dynamicHeight
+            let config = WKWebViewConfiguration()
+            let prefs = WKWebpagePreferences()
+            prefs.allowsContentJavaScript = false
+            config.defaultWebpagePreferences = prefs
+            self.webView = WKWebView(frame: .zero, configuration: config)
+            super.init()
+            webView.navigationDelegate = self
+            observation = webView.scrollView.observe(\.documentView?.frame) { [weak self] _, _ in
+                self?.updateHeight()
+            }
+        }
+
+        private func updateHeight() {
+            guard let docView = webView.scrollView.documentView else { return }
+            let h = docView.frame.height
+            if h > 50 {
+                DispatchQueue.main.async { self.heightBinding.wrappedValue = h }
+            }
+        }
+
+        public func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+            updateHeight()
+        }
+    }
 }
 #else
 import WebKit
 
 public struct ArticleContentView: UIViewRepresentable {
     let html: String
+    @Binding var dynamicHeight: CGFloat
 
-    public init(html: String) { self.html = html }
+    public init(html: String, dynamicHeight: Binding<CGFloat> = .constant(500)) {
+        self.html = html
+        self._dynamicHeight = dynamicHeight
+    }
+
+    public func makeCoordinator() -> Coordinator {
+        Coordinator(dynamicHeight: $dynamicHeight)
+    }
 
     public func makeUIView(context: Context) -> WKWebView {
-        let config = WKWebViewConfiguration()
-        let prefs = WKWebpagePreferences()
-        prefs.allowsContentJavaScript = false
-        config.defaultWebpagePreferences = prefs
-        config.preferences.javaScriptCanOpenWindowsAutomatically = false
-        let webView = WKWebView(frame: .zero, configuration: config)
+        let webView = context.coordinator.webView
         webView.isOpaque = false
         webView.backgroundColor = .clear
         webView.scrollView.backgroundColor = .clear
@@ -274,6 +318,37 @@ public struct ArticleContentView: UIViewRepresentable {
 
     public func updateUIView(_ webView: WKWebView, context: Context) {
         webView.loadHTMLString(wrapHTML(html), baseURL: nil)
+    }
+
+    public class Coordinator: NSObject, WKNavigationDelegate {
+        let webView: WKWebView
+        private var heightBinding: Binding<CGFloat>
+        private var observation: NSKeyValueObservation?
+
+        init(dynamicHeight: Binding<CGFloat>) {
+            self.heightBinding = dynamicHeight
+            let config = WKWebViewConfiguration()
+            let prefs = WKWebpagePreferences()
+            prefs.allowsContentJavaScript = false
+            config.defaultWebpagePreferences = prefs
+            self.webView = WKWebView(frame: .zero, configuration: config)
+            super.init()
+            webView.navigationDelegate = self
+            observation = webView.scrollView.observe(\.contentSize) { [weak self] _, _ in
+                self?.updateHeight()
+            }
+        }
+
+        private func updateHeight() {
+            let h = webView.scrollView.contentSize.height
+            if h > 50 {
+                DispatchQueue.main.async { self.heightBinding.wrappedValue = h }
+            }
+        }
+
+        public func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+            updateHeight()
+        }
     }
 }
 #endif
