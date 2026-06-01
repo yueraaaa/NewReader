@@ -3,6 +3,7 @@ import NewReaderCore
 
 struct ContentView: View {
     @EnvironmentObject var viewModel: ReaderViewModel
+    @Environment(\.openSettings) private var openSettings
 
     var body: some View {
         NavigationSplitView {
@@ -53,7 +54,7 @@ struct ContentView: View {
             // Right side: settings
             ToolbarItem(placement: .primaryAction) {
                 Button {
-                    NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
+                    openSettings()
                 } label: {
                     Image(systemName: "gearshape")
                 }
@@ -70,6 +71,7 @@ struct ContentView: View {
 }
 
 struct WelcomeView: View {
+    @Environment(\.openSettings) private var openSettings
     var body: some View {
         VStack(spacing: 16) {
             Image(systemName: "newspaper")
@@ -85,7 +87,7 @@ struct WelcomeView: View {
                 .foregroundStyle(.tertiary)
 
             Button {
-                NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
+                openSettings()
             } label: {
                 Label("打开设置", systemImage: "gearshape")
             }
