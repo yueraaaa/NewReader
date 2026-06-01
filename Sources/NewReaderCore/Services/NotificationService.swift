@@ -33,6 +33,7 @@ public final class NotificationService: NSObject, @unchecked Sendable {
     /// Send a notification for a batch of new articles
     public func notifyNewArticles(_ articles: [(title: String, feedTitle: String)]) {
         #if os(macOS)
+        guard Bundle.main.bundleURL.pathExtension == "app" else { return }
         guard !articles.isEmpty else { return }
 
         let content = UNMutableNotificationContent()
@@ -60,6 +61,7 @@ public final class NotificationService: NSObject, @unchecked Sendable {
     /// Clear all delivered notifications
     public func clearAll() {
         #if os(macOS)
+        guard Bundle.main.bundleURL.pathExtension == "app" else { return }
         UNUserNotificationCenter.current().removeAllDeliveredNotifications()
         #endif
     }
