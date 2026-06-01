@@ -36,7 +36,7 @@ public struct ArticleReaderView: View {
             Divider()
 
             // Article body fills remaining height, WKWebView scrolls internally
-            ArticleContentView(html: article.contentHTML)
+            ArticleContentView(html: article.contentHTML, baseURL: article.url)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .toolbar {
@@ -240,8 +240,12 @@ import WebKit
 
 public struct ArticleContentView: NSViewRepresentable {
     let html: String
+    let baseURL: URL?
 
-    public init(html: String) { self.html = html }
+    public init(html: String, baseURL: String? = nil) {
+        self.html = html
+        self.baseURL = baseURL.flatMap { URL(string: $0) }
+    }
 
     public func makeNSView(context: Context) -> WKWebView {
         let config = WKWebViewConfiguration()
@@ -255,7 +259,7 @@ public struct ArticleContentView: NSViewRepresentable {
     }
 
     public func updateNSView(_ webView: WKWebView, context: Context) {
-        webView.loadHTMLString(wrapHTML(html), baseURL: nil)
+        webView.loadHTMLString(wrapHTML(html), baseURL: baseURL)
     }
 }
 
@@ -264,8 +268,12 @@ import WebKit
 
 public struct ArticleContentView: UIViewRepresentable {
     let html: String
+    let baseURL: URL?
 
-    public init(html: String) { self.html = html }
+    public init(html: String, baseURL: String? = nil) {
+        self.html = html
+        self.baseURL = baseURL.flatMap { URL(string: $0) }
+    }
 
     public func makeUIView(context: Context) -> WKWebView {
         let config = WKWebViewConfiguration()
@@ -280,7 +288,7 @@ public struct ArticleContentView: UIViewRepresentable {
     }
 
     public func updateUIView(_ webView: WKWebView, context: Context) {
-        webView.loadHTMLString(wrapHTML(html), baseURL: nil)
+        webView.loadHTMLString(wrapHTML(html), baseURL: baseURL)
     }
 }
 #endif
