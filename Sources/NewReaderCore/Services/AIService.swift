@@ -155,6 +155,24 @@ public final class AIService: ObservableObject {
         UserDefaults.standard.set(config.endpoint, forKey: endpointUDKey)
         UserDefaults.standard.set(config.model, forKey: modelUDKey)
         UserDefaults.standard.set(config.provider.rawValue, forKey: providerUDKey)
+        UserDefaults.standard.synchronize()
+    }
+
+    /// Test the AI connection with current config. Returns nil on success, or error message.
+    public func testConnection() async -> String? {
+        guard !config.apiKey.isEmpty else { return "请先填写 API Key" }
+        guard (config.endpoint.hasPrefix("https")) else { return "API 端点必须使用 HTTPS" }
+        do {
+            switch config.provider {
+            case .openAI:
+                _ = try await chatOpenAI(prompt: "reply with just: OK", systemPrompt: "")
+            case .anthropic:
+                _ = try await chatAnthropic(prompt: "reply with just: OK", systemPrompt: "")
+            }
+            return ""
+        } catch {
+            return error.localizedDescription
+        }
     }
 
     /// Load API key from Keychain; non-sensitive fields from UserDefaults.
@@ -322,9 +340,9 @@ public final class AIService: ObservableObject {
         }
         return html
     }
-}
 
 /// Legacy config struct used only for one-time migration.
+}
 private struct LegacyAIConfig: Codable {
     var endpoint: String
     var apiKey: String

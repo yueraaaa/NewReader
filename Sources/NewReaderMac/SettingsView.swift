@@ -8,6 +8,8 @@ struct SettingsView: View {
     @State private var apiKey: String = ""
     @State private var model: String = ""
     @State private var showSaved: Bool = false
+    @State private var isTesting: Bool = false
+    @State private var testError: String?
     @State private var selectedPage: SettingsPage = .ai
 
     enum SettingsPage: String, CaseIterable {
@@ -115,31 +117,65 @@ struct SettingsView: View {
             }
 
             Section {
-                HStack(spacing: 12) {
-                    Button("保存") {
-                        let trimmed = endpoint.trimmingCharacters(in: .whitespaces)
-                            .trimmingCharacters(in: CharacterSet(charactersIn: "/"))
-                        guard let url = URL(string: trimmed),
-                              url.scheme?.lowercased() == "https" else {
-                            viewModel.errorMessage = "API 端点必须使用 HTTPS"
-                            return
-                        }
-                        viewModel.aiService.config.provider = provider
-                        viewModel.aiService.config.endpoint = trimmed
-                        viewModel.aiService.config.apiKey = apiKey
-                        viewModel.aiService.config.model = model
-                        viewModel.aiService.saveConfig()
+                VStack(alignment: .leading, spacing: 10) {
+                    HStack(spacing: 12) {
+                        Button("测试连接") {
+                            let trimmed = endpoint.trimmingCharacters(in: .whitespaces)
+                                .trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+                            viewModel.aiService.config.provider = provider
+                            viewModel.aiService.config.endpoint = trimmed
+                            viewModel.aiService.config.apiKey = apiKey
+                            viewModel.aiService.config.model = model
 
-                        showSaved = true
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                            showSaved = false
+                            isTesting = true
+                            testError = nil
+                            Task {
+                                testError = await viewModel.aiService.testConnection()
+                                isTesting = false
+                            }
+                        }
+                        .buttonStyle(.bordered)
+                        .disabled(isTesting)
+
+                        if isTesting {
+                            ProgressView().scaleEffect(0.7).frame(width: 16, height: 16)
+                        }
+
+                        Button("保存") {
+                            let trimmed = endpoint.trimmingCharacters(in: .whitespaces)
+                                .trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+                            guard let url = URL(string: trimmed),
+                                  url.scheme?.lowercased() == "https" else {
+                                viewModel.errorMessage = "API 端点必须使用 HTTPS"
+                                return
+                            }
+                            viewModel.aiService.config.provider = provider
+                            viewModel.aiService.config.endpoint = trimmed
+                            viewModel.aiService.config.apiKey = apiKey
+                            viewModel.aiService.config.model = model
+                            viewModel.aiService.saveConfig()
+
+                            showSaved = true
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                                showSaved = false
+                            }
+                        }
+                        .buttonStyle(.borderedProminent)
+
+                        if showSaved {
+                            Label("已保存", systemImage: "checkmark.circle.fill")
+                                .foregroundStyle(.green)
                         }
                     }
-                    .buttonStyle(.borderedProminent)
 
-                    if showSaved {
-                        Label("已保存", systemImage: "checkmark.circle.fill")
-                            .foregroundStyle(.green)
+                    if let err = testError {
+                        if err.isEmpty {
+                            Label("连接成功", systemImage: "checkmark.circle.fill")
+                                .foregroundStyle(.green)
+                        } else {
+                            Label(err, systemImage: "xmark.circle.fill")
+                                .foregroundStyle(.red)
+                        }
                     }
                 }
             }
