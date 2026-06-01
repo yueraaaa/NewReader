@@ -56,6 +56,12 @@ struct SettingsView: View {
             endpoint = viewModel.aiService.config.endpoint
             apiKey = viewModel.aiService.config.apiKey
             model = viewModel.aiService.config.model
+            DispatchQueue.main.async {
+                NSApp.activate(ignoringOtherApps: true)
+                if let sw = NSApp.windows.first(where: { $0.className.contains("Settings") }) {
+                    sw.makeKeyAndOrderFront(nil)
+                }
+            }
         }
     }
 
