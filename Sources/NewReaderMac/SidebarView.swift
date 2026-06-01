@@ -54,20 +54,6 @@ struct SidebarView: View {
             ToolbarItem {
                 Menu {
                     Button {
-                        viewModel.showSubscribe = true
-                    } label: {
-                        Label("添加订阅", systemImage: "plus")
-                    }
-                    Button {
-                        Task { await viewModel.refreshAll() }
-                    } label: {
-                        Label("刷新全部", systemImage: "arrow.clockwise")
-                    }
-                    .disabled(viewModel.isRefreshing)
-
-                    Divider()
-
-                    Button {
                         showImportOPML = true
                     } label: {
                         Label("导入 OPML…", systemImage: "square.and.arrow.down")
@@ -98,16 +84,7 @@ struct SidebarView: View {
                 } label: {
                     Image(systemName: "ellipsis.circle")
                 }
-            }
-
-            ToolbarItem {
-                Button {
-                    // Open Settings window via AppKit
-                    NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
-                } label: {
-                    Image(systemName: "gearshape")
-                }
-                .help("设置")
+                .help("更多操作")
             }
         }
         .fileImporter(

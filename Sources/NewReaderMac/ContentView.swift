@@ -5,33 +5,59 @@ struct ContentView: View {
     @EnvironmentObject var viewModel: ReaderViewModel
 
     var body: some View {
-        ZStack {
-            NavigationSplitView {
-                SidebarView()
-                    .frame(minWidth: 220)
-            } content: {
-                ArticleListView()
-                    .frame(minWidth: 320)
-            } detail: {
-                if let article = viewModel.selectedArticle {
-                    ArticleReaderView(article: article, viewModel: viewModel)
-                } else {
-                    WelcomeView()
-                }
+        NavigationSplitView {
+            SidebarView()
+                .frame(minWidth: 220)
+        } content: {
+            ArticleListView()
+                .frame(minWidth: 320)
+        } detail: {
+            if let article = viewModel.selectedArticle {
+                ArticleReaderView(article: article, viewModel: viewModel)
+            } else {
+                WelcomeView()
             }
-            .disabled(viewModel.showSubscribe)
-            .overlay {
-                if viewModel.showSubscribe {
-                    Color.black.opacity(0.3)
-                        .ignoresSafeArea()
-                        .onTapGesture { viewModel.showSubscribe = false }
-                }
+        }
+        .disabled(viewModel.showSubscribe)
+        .overlay {
+            if viewModel.showSubscribe {
+                Color.black.opacity(0.3)
+                    .ignoresSafeArea()
+                    .onTapGesture { viewModel.showSubscribe = false }
             }
-
-            // Subscribe overlay on top so it can receive focus
+        }
+        .overlay {
             if viewModel.showSubscribe {
                 SubscribeOverlayView()
                     .environmentObject(viewModel)
+            }
+        }
+        .toolbar {
+            // Left side: primary actions
+            ToolbarItemGroup {
+                Button {
+                    viewModel.showSubscribe = true
+                } label: {
+                    Image(systemName: "plus")
+                }
+                .help("添加订阅 (⌘N)")
+
+                Button {
+                    Task { await viewModel.refreshAll() }
+                } label: {
+                    Image(systemName: "arrow.clockwise")
+                }
+                .help("刷新全部订阅源")
+                .disabled(viewModel.isRefreshing)
+            }
+            // Right side: settings
+            ToolbarItem(placement: .primaryAction) {
+                Button {
+                    NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
+                } label: {
+                    Image(systemName: "gearshape")
+                }
+                .help("设置 (⌘,)")
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: .showSubscribeSheet)) { _ in
