@@ -1,6 +1,14 @@
 import Foundation
 
 /// Validates URLs for network safety: protocol allowlist + private IP blocking.
+///
+/// Coverage:
+/// - Scheme allowlist (http/https only)
+/// - Private/reserved IPv4 ranges (RFC 1918 + loopback + link-local + CGN + multicast + reserved)
+/// - IPv6 loopback, link-local fe80::/10, ULA fc00::/7, NAT64 64:ff9b::/96,
+///   IPv4-mapped IPv6 (::ffff:a.b.c.d) and 6to4 (::a.b.c.d)
+/// - Integer/hex-encoded IPv4 (2130706433, 0x7f000001)
+/// - Hostnames `localhost` and `localhost.localdomain`
 public enum URLValidator {
 
     /// Allowed URL schemes for fetching remote content.
@@ -31,14 +39,28 @@ public enum URLValidator {
             return nil
         }
 
-        // Block raw IPv4 addresses in private ranges.
-        if isPrivateIPv4(host) { return nil }
+        // Strip IPv6 brackets (e.g. "[::1]" -> "::1") so the rest of the
+        // checks can treat hostnames uniformly.
+        let bareHost: String
+        if host.hasPrefix("[") && host.hasSuffix("]") {
+            bareHost = String(host.dropFirst().dropLast())
+        } else {
+            bareHost = host
+        }
 
-        // Block IPv6 loopback / link-local.
-        if host == "::1" || host.hasPrefix("fe80:") { return nil }
+        // Block integer/decimal-encoded IPv4 (e.g. http://2130706433/ = 127.0.0.1,
+        // http://0x7f000001/) — some URL parsers accept these and resolve them
+        // to loopback.
+        if isIntegerEncodedIPv4(bareHost) { return nil }
+
+        // Block raw IPv4 addresses in private ranges.
+        if isPrivateIPv4(bareHost) { return nil }
+
+        // Block IPv6 special-purpose ranges.
+        if isPrivateIPv6(bareHost) { return nil }
 
         // Block common internal hostnames.
-        if host == "localhost" || host == "localhost.localdomain" { return nil }
+        if bareHost == "localhost" || bareHost == "localhost.localdomain" { return nil }
 
         return url
     }
@@ -75,5 +97,74 @@ public enum URLValidator {
             ip |= octet << (24 - i * 8)
         }
         return ip
+    }
+
+    /// Detect decimal / octal / hex encoded IPv4 that some URL parsers
+    /// resolve to private addresses (e.g. `2130706433` == `127.0.0.1`,
+    /// `0x7f000001` == `127.0.0.1`).
+    private static func isIntegerEncodedIPv4(_ host: String) -> Bool {
+        // Must be a single token of digits / hex chars only.
+        let chars = CharacterSet(charactersIn: "0123456789abcdefABCDEFxX")
+        if host.unicodeScalars.contains(where: { !chars.contains($0) }) { return false }
+        if host.isEmpty { return false }
+
+        // Reject forms like 127.1, 0x7f.0x0.0x0.0x1 by ensuring host is a
+        // single number, not dotted.
+        if host.contains(".") { return false }
+
+        let value: UInt64?
+        if host.lowercased().hasPrefix("0x") {
+            value = UInt64(host.dropFirst(2), radix: 16)
+        } else {
+            value = UInt64(host, radix: 10)
+        }
+        guard let v = value, v <= 0xFFFFFFFF else { return true }
+        // Treat as the IPv4 address it would resolve to and re-check the
+        // private-range table.
+        let a = UInt32((v >> 24) & 0xFF)
+        let b = UInt32((v >> 16) & 0xFF)
+        let c = UInt32((v >> 8) & 0xFF)
+        let d = UInt32(v & 0xFF)
+        return isPrivateIPv4("\(a).\(b).\(c).\(d)")
+    }
+
+    /// Block IPv6 special-purpose ranges that should never be fetched
+    /// from a user-supplied URL (SSRF defense).
+    private static func isPrivateIPv6(_ host: String) -> Bool {
+        let lower = host.lowercased()
+
+        // Strip the zone ID if present (e.g. fe80::1%eth0)
+        let bare = lower.split(separator: "%").first.map(String.init) ?? lower
+
+        // Loopback
+        if bare == "::1" || bare == "::" { return true }
+
+        // Link-local fe80::/10
+        if bare.hasPrefix("fe8") || bare.hasPrefix("fe9") ||
+           bare.hasPrefix("fea") || bare.hasPrefix("feb") { return true }
+
+        // Unique local addresses fc00::/7 (covers fc00::/8 and fd00::/8)
+        if bare.hasPrefix("fc") || bare.hasPrefix("fd") { return true }
+
+        // NAT64 well-known prefix 64:ff9b::/96
+        if bare.hasPrefix("64:ff9b:") { return true }
+
+        // Discard prefix 100::/64
+        if bare.hasPrefix("100:") && bare.count >= 4 { return true }
+
+        // IPv4-mapped IPv6 (::ffff:a.b.c.d). Catches ::ffff:127.0.0.1 etc.
+        if bare.hasPrefix("::ffff:") {
+            let v4 = String(bare.dropFirst("::ffff:".count))
+            return isPrivateIPv4(v4)
+        }
+
+        // 6to4 / IPv4-compatible (::a.b.c.d) — deprecated but some parsers
+        // still accept it; treat conservatively.
+        if bare.hasPrefix("::") && bare.contains(".") {
+            let v4 = String(bare.dropFirst(2))
+            return isPrivateIPv4(v4)
+        }
+
+        return false
     }
 }

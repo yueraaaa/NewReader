@@ -104,11 +104,18 @@ public final class AIService: ObservableObject {
         let urlConfig = URLSessionConfiguration.default
         urlConfig.timeoutIntervalForRequest = 60
         self.session = URLSession(configuration: urlConfig)
-        loadConfig()
     }
+
+    /// Ensure config is loaded from disk / Keychain. Call before any AI request.
+    private func ensureConfigLoaded() {
+        if !configLoaded { loadConfig() }
+    }
+
+    private var configLoaded = false
 
     /// Generate a concise AI summary of the given HTML content
     public func summarize(html: String, title: String) async throws -> String {
+        ensureConfigLoaded()
         guard !config.apiKey.isEmpty else { throw AIServiceError.notConfigured }
 
         let plainText = stripHTML(html)
@@ -130,6 +137,7 @@ public final class AIService: ObservableObject {
 
     /// Translate HTML content to the target language
     public func translate(html: String, to language: TranslationLanguage) async throws -> String {
+        ensureConfigLoaded()
         guard !config.apiKey.isEmpty else { throw AIServiceError.notConfigured }
 
         let plainText = stripHTML(html)
@@ -220,6 +228,7 @@ public final class AIService: ObservableObject {
             }
             saveConfig()
         }
+        configLoaded = true
     }
 
     private func loadLegacyConfig() -> AIConfig? {
@@ -303,7 +312,7 @@ public final class AIService: ObservableObject {
             throw AIServiceError.invalidResponse
         }
 
-        return stripThinking(content)
+        return Self.stripThinking(content)
     }
 
     // MARK: - Anthropic Messages API
@@ -343,13 +352,14 @@ public final class AIService: ObservableObject {
             throw AIServiceError.invalidResponse
         }
 
-        return stripThinking(text)
+        return Self.stripThinking(text)
     }
 
     // MARK: - Helpers
 
-    /// Strip <think>...</think> blocks from model output (DeepSeek-R1, MiniMax-M3, etc.)
-    private func stripThinking(_ text: String) -> String {
+    /// Strip `<think>...</think>` blocks from model output (DeepSeek-R1, Claude, etc.).
+    /// Exposed as `nonisolated static` so unit tests in NewReaderCoreTests can cover it directly.
+    nonisolated static func stripThinking(_ text: String) -> String {
         var result = text
         while let start = result.range(of: "<think>"),
               let end = result.range(of: "</think>", range: start.upperBound..<result.endIndex) {
@@ -360,19 +370,14 @@ public final class AIService: ObservableObject {
 
 
     private func stripHTML(_ html: String) -> String {
-        guard let data = html.data(using: .utf8) else { return html }
-        if let plain = try? NSAttributedString(
-            data: data,
-            options: [.documentType: NSAttributedString.DocumentType.html],
-            documentAttributes: nil
-        ).string {
-            return plain
-        }
-        return html
+        // Use the safe regex-based extractor so we never trigger remote
+        // resource fetches (privacy) or stall waiting for image timeouts.
+        HTMLSanitizer.toPlainText(html)
     }
 
-/// Legacy config struct used only for one-time migration.
 }
+
+/// Legacy config struct used only for one-time migration.
 private struct LegacyAIConfig: Codable {
     var endpoint: String
     var apiKey: String

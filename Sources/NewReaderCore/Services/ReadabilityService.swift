@@ -1,7 +1,7 @@
 import Foundation
 
 /// Extracts full article text from web pages (simplified Mercury/Readability-style)
-public final class ReadabilityService: @unchecked Sendable {
+public final class ReadabilityService: Sendable {
     private let session: URLSession
 
     public init() {
@@ -60,19 +60,8 @@ public final class ReadabilityService: @unchecked Sendable {
             }
         }
 
-        // Convert to plain text
-        guard let data = extractedHTML.data(using: .utf8) else {
-            throw ReadabilityError.invalidContent
-        }
-
-        let plainText = try NSAttributedString(
-            data: data,
-            options: [.documentType: NSAttributedString.DocumentType.html,
-                      .characterEncoding: String.Encoding.utf8.rawValue],
-            documentAttributes: nil
-        ).string
-
-        // Clean up whitespace
+        // Convert to plain text via safe regex stripping (no remote fetches).
+        let plainText = HTMLSanitizer.toPlainText(extractedHTML)
         let lines = plainText.components(separatedBy: "\n")
             .map { $0.trimmingCharacters(in: .whitespaces) }
             .filter { !$0.isEmpty }

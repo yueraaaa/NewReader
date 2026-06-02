@@ -7,9 +7,18 @@ struct NewReaderMacApp: App {
     @StateObject private var viewModel: ReaderViewModel
 
     init() {
+        // Reduce system tooltip delay so toolbar hints appear instantly
+        UserDefaults.standard.set(50, forKey: "NSInitialToolTipDelay")
+
         let schema = Schema([Feed.self, Article.self, Folder.self])
         let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
-        let container = try! ModelContainer(for: schema, configurations: config)
+        let container: ModelContainer
+        do {
+            container = try ModelContainer(for: schema, configurations: config)
+        } catch {
+            print("[NewReader] ModelContainer failed, falling back to in-memory: \(error)")
+            container = try! ModelContainer(for: schema, configurations: .init(schema: schema, isStoredInMemoryOnly: true))
+        }
         _viewModel = StateObject(wrappedValue: ReaderViewModel(modelContext: container.mainContext))
 
         Task {

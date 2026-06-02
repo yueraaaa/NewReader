@@ -13,6 +13,11 @@ public struct ArticleReaderView: View {
     @State private var isExtracting: Bool = false
     @State private var showVoicePanel: Bool = false
 
+    /// ID of the article the in-flight AI/extract task belongs to. Results from
+    /// tasks that don't match the currently shown article are dropped, so
+    /// switching articles mid-request never paints stale data on the new one.
+    @State private var activeTaskArticleID: UUID?
+
     public init(article: Article, viewModel: ReaderViewModel) {
         self.article = article
         self.viewModel = viewModel
@@ -38,8 +43,81 @@ public struct ArticleReaderView: View {
             )
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
+        .onChange(of: article.id) { _, _ in
+            if !article.isRead { viewModel.toggleRead(article) }
+            aiSummary = nil
+            translatedText = nil
+            showVoicePanel = false
+            isSummarizing = false
+            isTranslating = false
+            isExtracting = false
+            activeTaskArticleID = article.id
+            viewModel.ttsService.stop()
+        }
         .toolbar {
             ToolbarItemGroup {
+                // AI 摘要 — direct button
+                Button {
+                    Task {
+                        let taskID = article.id
+                        activeTaskArticleID = taskID
+                        isSummarizing = true
+                        let result = await viewModel.summarize(article)
+                        if activeTaskArticleID == taskID {
+                            aiSummary = result
+                            isSummarizing = false
+                        }
+                    }
+                } label: {
+                    Image(systemName: isSummarizing ? "sparkles" : "sparkle")
+                }
+                .disabled(isSummarizing)
+                .help("AI 摘要")
+
+                // 翻译 — standalone menu with language options
+                Menu {
+                    ForEach(TranslationLanguage.allCases, id: \.self) { lang in
+                        Button {
+                            Task {
+                                let taskID = article.id
+                                activeTaskArticleID = taskID
+                                isTranslating = true
+                                selectedLanguage = lang
+                                let result = await viewModel.translate(article, to: lang)
+                                if activeTaskArticleID == taskID {
+                                    translatedText = result
+                                    isTranslating = false
+                                }
+                            }
+                        } label: {
+                            Label("翻译为 \(lang.displayName)", systemImage: "globe")
+                        }
+                    }
+                    .disabled(isTranslating)
+                } label: {
+                    Image(systemName: isTranslating ? "globe.americas.fill" : "globe")
+                }
+                .disabled(isTranslating)
+                .help("翻译")
+
+                // 提取全文
+                Button {
+                    Task {
+                        let taskID = article.id
+                        activeTaskArticleID = taskID
+                        isExtracting = true
+                        _ = await viewModel.extractFullText(article)
+                        if activeTaskArticleID == taskID {
+                            isExtracting = false
+                        }
+                    }
+                } label: {
+                    Image(systemName: isExtracting ? "doc.text.magnifyingglass" : "doc.text")
+                }
+                .disabled(isExtracting)
+                .help("提取全文")
+
+                // TTS 语音朗读
                 Button {
                     withAnimation { showVoicePanel.toggle() }
                     if showVoicePanel {
@@ -52,18 +130,7 @@ public struct ArticleReaderView: View {
                 }
                 .help("语音朗读")
 
-                Button {
-                    Task {
-                        isExtracting = true
-                        _ = await viewModel.extractFullText(article)
-                        isExtracting = false
-                    }
-                } label: {
-                    Image(systemName: isExtracting ? "doc.text.magnifyingglass" : "doc.text")
-                }
-                .help("提取全文")
-                .disabled(isExtracting)
-
+                // 缓存
                 Button {
                     if viewModel.isArticleCached(article) {
                         viewModel.cacheService.removeCache(id: article.id)
@@ -75,38 +142,7 @@ public struct ArticleReaderView: View {
                 }
                 .help(viewModel.isArticleCached(article) ? "已缓存" : "缓存离线阅读")
 
-                Menu {
-                    Button {
-                        Task {
-                            isSummarizing = true
-                            aiSummary = await viewModel.summarize(article)
-                            isSummarizing = false
-                        }
-                    } label: {
-                        Label("AI 摘要", systemImage: "sparkles")
-                    }
-                    .disabled(isSummarizing)
-
-                    Divider()
-
-                    ForEach(TranslationLanguage.allCases, id: \.self) { lang in
-                        Button {
-                            Task {
-                                isTranslating = true
-                                selectedLanguage = lang
-                                translatedText = await viewModel.translate(article, to: lang)
-                                isTranslating = false
-                            }
-                        } label: {
-                            Label("翻译为 \(lang.displayName)", systemImage: "globe")
-                        }
-                    }
-                    .disabled(isTranslating)
-                } label: {
-                    Image(systemName: "brain.head.profile")
-                }
-                .help("AI 功能")
-
+                // 星标
                 Button {
                     viewModel.toggleStarred(article)
                 } label: {
@@ -159,6 +195,9 @@ public struct ArticleReaderView: View {
     }
 
 }
+
+
+
 
 
 // MARK: - Voice Control Panel
@@ -218,7 +257,10 @@ public struct ArticleContentView: NSViewRepresentable {
         translationLanguage: String? = nil
     ) {
         self.html = html
-        self.baseURL = baseURL.flatMap { URL(string: $0) }
+        // Validate via URLValidator so an attacker-controlled feed URL can't
+        // smuggle in a private/loopback baseURL into WKWebView. Falls back to
+        // nil (no relative-URL resolution) on rejection.
+        self.baseURL = baseURL.flatMap { URLValidator.validate($0) }
         self.summary = summary
         self.translation = translation
         self.translationLanguage = translationLanguage
@@ -258,7 +300,10 @@ public struct ArticleContentView: UIViewRepresentable {
         translationLanguage: String? = nil
     ) {
         self.html = html
-        self.baseURL = baseURL.flatMap { URL(string: $0) }
+        // Validate via URLValidator so an attacker-controlled feed URL can't
+        // smuggle in a private/loopback baseURL into WKWebView. Falls back to
+        // nil (no relative-URL resolution) on rejection.
+        self.baseURL = baseURL.flatMap { URLValidator.validate($0) }
         self.summary = summary
         self.translation = translation
         self.translationLanguage = translationLanguage

@@ -21,6 +21,11 @@ let package = Package(
             dependencies: ["FeedKit"],
             path: "Sources/NewReaderCore"
         ),
+        .testTarget(
+            name: "NewReaderCoreTests",
+            dependencies: ["NewReaderCore"],
+            path: "Tests/NewReaderCoreTests"
+        ),
         .executableTarget(
             name: "NewReaderMac",
             dependencies: ["NewReaderCore"],

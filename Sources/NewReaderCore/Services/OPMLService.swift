@@ -65,7 +65,7 @@ public final class OPMLService {
         guard let data = try? Data(contentsOf: url),
               let xml = String(data: data, encoding: .utf8) else { return 0 }
 
-        let outlines = parseOutlines(from: xml)
+        let outlines = Self.parseOutlines(from: xml)
         var count = 0
 
         for (_, feedURL) in outlines {
@@ -102,7 +102,9 @@ public final class OPMLService {
             .replacingOccurrences(of: "'", with: "&apos;")
     }
 
-    private func parseOutlines(from xml: String) -> [(title: String, url: String)] {
+    /// Parse `<outline>` entries out of an OPML blob. Exposed as `internal`
+    /// for unit testing; the public surface is `importOPML(from:)`.
+    nonisolated static func parseOutlines(from xml: String) -> [(title: String, url: String)] {
         var results: [(String, String)] = []
         let urlPattern = #"xmlUrl="([^"]+)""#
         let titlePattern = #"text="([^"]+)""#
@@ -114,17 +116,48 @@ public final class OPMLService {
         let range = NSRange(xml.startIndex..., in: xml)
         let matches = urlRegex.matches(in: xml, range: range)
 
+        // Pre-scan all title matches so we can find the title regardless
+        // of whether `text=` appears before or after `xmlUrl=`.
+        let titleMatches = titleRegex.matches(in: xml, range: range)
+        let titles: [(pos: Int, text: String)] = titleMatches.compactMap { m in
+            guard let r = Range(m.range(at: 1), in: xml) else { return nil }
+            return (m.range.location, String(xml[r]))
+        }
+
         for match in matches {
             guard let urlRange = Range(match.range(at: 1), in: xml) else { continue }
             let url = String(xml[urlRange])
-
-            let lineStart = xml.index(xml.startIndex, offsetBy: match.range.location)
+            let position = match.range.location
+            let lineStart = xml.index(xml.startIndex, offsetBy: position)
             let linePrefix = String(xml[..<lineStart]).components(separatedBy: "\n").last ?? ""
-            var title = "Untitled"
 
-            if let titleMatch = titleRegex.firstMatch(in: linePrefix, range: NSRange(linePrefix.startIndex..., in: linePrefix)),
-               let titleRange = Range(titleMatch.range(at: 1), in: linePrefix) {
-                title = String(linePrefix[titleRange])
+            // Try the title that appears on the *same line* as the url,
+            // which could be before or after xmlUrl.
+            var title = "Untitled"
+            var bestDist = Int.max
+            for (tp, tt) in titles {
+                // Estimate line bounds: search backwards from position for '<'
+                let lineBoundary: Int = {
+                    var p = position
+                    while p > 0 {
+                        let idx = xml.index(xml.startIndex, offsetBy: p - 1)
+                        if xml[idx] == "<" { break }
+                        p -= 1
+                    }
+                    return p
+                }()
+                if tp >= lineBoundary && tp < position + url.count + 30 {
+                    let dist = abs(tp - position)
+                    if dist < bestDist { bestDist = dist; title = tt }
+                }
+            }
+
+            // Fallback to pre-scan on the same line
+            if title == "Untitled" {
+                if let titleMatch = titleRegex.firstMatch(in: linePrefix, range: NSRange(linePrefix.startIndex..., in: linePrefix)),
+                   let titleRange = Range(titleMatch.range(at: 1), in: linePrefix) {
+                    title = String(linePrefix[titleRange])
+                }
             }
 
             results.append((title, url))

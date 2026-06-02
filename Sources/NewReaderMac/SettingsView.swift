@@ -211,7 +211,7 @@ struct SettingsView: View {
         Form {
             Section {
                 LabeledContent("版本") {
-                    Text("1.0.1").foregroundStyle(.secondary)
+                    Text(AppVersion.short).foregroundStyle(.secondary)
                 }
                 LabeledContent("订阅源") {
                     Text("\(viewModel.feeds.count)").foregroundStyle(.secondary)

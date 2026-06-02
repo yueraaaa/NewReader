@@ -14,13 +14,16 @@ public final class NotificationService: NSObject, @unchecked Sendable {
     /// Request notification permissions.
     /// Returns false when running outside a proper app bundle (e.g., debug builds from CLI).
     public func requestPermission() async -> Bool {
-        #if os(macOS)
+        #if canImport(UserNotifications)
         // UNUserNotificationCenter.current() crashes without a main bundle
         guard Bundle.main.bundleURL.pathExtension == "app" else { return false }
+        #if os(macOS)
         let center = UNUserNotificationCenter.current()
         center.delegate = self
+        #endif
         do {
-            let granted = try await center.requestAuthorization(options: [.alert, .sound, .badge])
+            let granted = try await UNUserNotificationCenter.current()
+                .requestAuthorization(options: [.alert, .sound, .badge])
             return granted
         } catch {
             return false
@@ -32,7 +35,7 @@ public final class NotificationService: NSObject, @unchecked Sendable {
 
     /// Send a notification for a batch of new articles
     public func notifyNewArticles(_ articles: [(title: String, feedTitle: String)]) {
-        #if os(macOS)
+        #if canImport(UserNotifications)
         guard Bundle.main.bundleURL.pathExtension == "app" else { return }
         guard !articles.isEmpty else { return }
 
@@ -60,7 +63,7 @@ public final class NotificationService: NSObject, @unchecked Sendable {
 
     /// Clear all delivered notifications
     public func clearAll() {
-        #if os(macOS)
+        #if canImport(UserNotifications)
         guard Bundle.main.bundleURL.pathExtension == "app" else { return }
         UNUserNotificationCenter.current().removeAllDeliveredNotifications()
         #endif
@@ -74,6 +77,15 @@ extension NotificationService: UNUserNotificationCenterDelegate {
         willPresent notification: UNNotification
     ) async -> UNNotificationPresentationOptions {
         [.banner, .sound]
+    }
+}
+#elseif os(iOS)
+extension NotificationService: UNUserNotificationCenterDelegate {
+    public nonisolated func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        willPresent notification: UNNotification
+    ) async -> UNNotificationPresentationOptions {
+        [.banner, .sound, .list]
     }
 }
 #endif

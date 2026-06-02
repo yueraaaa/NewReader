@@ -33,7 +33,7 @@ public final class TTSService: NSObject, ObservableObject, AVSpeechSynthesizerDe
         utterance.volume = 1.0
 
         currentUtterance = utterance
-        pendingText = nil
+        pendingText = plainText
         synthesizer.speak(utterance)
         isSpeaking = true
         isPaused = false
@@ -60,9 +60,24 @@ public final class TTSService: NSObject, ObservableObject, AVSpeechSynthesizerDe
         currentUtterance = nil
     }
 
-    /// Adjust speaking rate (0.0 – 1.0, where 0.5 is default)
+    /// Adjust speaking rate (0.0 – 1.0, where 0.5 is default).
+    /// If already speaking the utterance is restarted at the new rate.
     public func setRate(_ newRate: Float) {
         rate = AVSpeechUtteranceMinimumSpeechRate + newRate * (AVSpeechUtteranceMaximumSpeechRate - AVSpeechUtteranceMinimumSpeechRate)
+        guard synthesizer.isSpeaking, let text = pendingText ?? currentUtterance?.speechString else { return }
+        let wasPaused = isPaused
+        let lang = currentUtterance?.voice?.language ?? "zh-CN"
+        synthesizer.stopSpeaking(at: .immediate)
+        let utterance = AVSpeechUtterance(string: text)
+        utterance.voice = AVSpeechSynthesisVoice(language: lang)
+        utterance.rate = rate
+        utterance.pitchMultiplier = 1.0
+        utterance.volume = 1.0
+        currentUtterance = utterance
+        synthesizer.speak(utterance)
+        if wasPaused { synthesizer.pauseSpeaking(at: .word) }
+        isSpeaking = true
+        isPaused = wasPaused
     }
 
     /// Available voice languages on the device
@@ -93,14 +108,6 @@ public final class TTSService: NSObject, ObservableObject, AVSpeechSynthesizerDe
     // MARK: - Private
 
     private func stripHTML(_ html: String) -> String {
-        guard let data = html.data(using: .utf8) else { return html }
-        if let plain = try? NSAttributedString(
-            data: data,
-            options: [.documentType: NSAttributedString.DocumentType.html],
-            documentAttributes: nil
-        ).string {
-            return plain
-        }
-        return html
+        HTMLSanitizer.toPlainText(html)
     }
 }
