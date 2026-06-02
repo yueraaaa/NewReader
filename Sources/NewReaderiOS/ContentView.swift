@@ -60,6 +60,7 @@ struct ArticleListTabView: View {
         List(filtered) { article in
             NavigationLink {
                 ArticleReaderView(article: article, viewModel: viewModel)
+                    .id(article.id)
             } label: {
                 ArticleRowView(article: article, isSelected: false, onTap: {})
             }

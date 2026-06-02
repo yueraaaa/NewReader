@@ -15,6 +15,7 @@ struct ContentView: View {
         } detail: {
             if let article = viewModel.selectedArticle {
                 ArticleReaderView(article: article, viewModel: viewModel)
+                    .id(article.id)
             } else {
                 WelcomeView()
             }

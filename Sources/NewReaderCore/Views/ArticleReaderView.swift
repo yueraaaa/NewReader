@@ -20,23 +20,22 @@ public struct ArticleReaderView: View {
 
     public var body: some View {
         VStack(spacing: 0) {
-            // Header: ViewThatFits prevents ScrollView from expanding in VStack
-            ViewThatFits(in: .vertical) {
-                headerContent
-                    .padding(20)
-
-                ScrollView {
-                    headerContent
-                        .padding(20)
-                }
-                .frame(maxHeight: 380)
-            }
+            // Title + metadata in native SwiftUI (always visible, never scrolls separately)
+            titleBar
+                .padding(.horizontal, 20)
+                .padding(.vertical, 12)
             .frame(maxWidth: .infinity)
 
             Divider()
 
-            // Article body fills remaining height, WKWebView scrolls internally
-            ArticleContentView(html: article.contentHTML, baseURL: article.url)
+            // AI summary + translation + article body in one scrollable WKWebView
+            ArticleContentView(
+                html: article.contentHTML,
+                baseURL: article.url,
+                summary: aiSummary ?? article.aiSummary,
+                translation: translatedText,
+                translationLanguage: translatedText != nil ? selectedLanguage.displayName : nil
+            )
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .toolbar {
@@ -127,13 +126,16 @@ public struct ArticleReaderView: View {
         }
     }
 
-    // MARK: - Header Content
+
+
+    // MARK: - Title Bar
 
     @ViewBuilder
-    private var headerContent: some View {
-        VStack(alignment: .leading, spacing: 16) {
+    private var titleBar: some View {
+        VStack(alignment: .leading, spacing: 6) {
             Text(article.title)
-                .font(.title2.bold())
+                .font(.title3.bold())
+                .lineLimit(2)
                 .textSelection(.enabled)
 
             HStack(spacing: 12) {
@@ -152,49 +154,12 @@ public struct ArticleReaderView: View {
             }
             .font(.caption)
             .foregroundStyle(.secondary)
-
-            Divider()
-
-            if let summary = aiSummary ?? article.aiSummary {
-                VStack(alignment: .leading, spacing: 6) {
-                    Label("AI 摘要", systemImage: "sparkles")
-                        .font(.caption.bold())
-                        .foregroundStyle(.purple)
-                    Text(summary)
-                        .font(.callout)
-                        .foregroundStyle(.secondary)
-                        .textSelection(.enabled)
-                }
-                .padding(12)
-                .background(Color.purple.opacity(0.06), in: RoundedRectangle(cornerRadius: 8))
-            }
-
-            if let translation = translatedText {
-                VStack(alignment: .leading, spacing: 6) {
-                    Label("\(selectedLanguage.displayName) 翻译", systemImage: "globe")
-                        .font(.caption.bold())
-                        .foregroundStyle(.blue)
-                    Text(translation)
-                        .font(.body)
-                        .textSelection(.enabled)
-                }
-                .padding(12)
-                .background(Color.blue.opacity(0.06), in: RoundedRectangle(cornerRadius: 8))
-            }
-
-            if showVoicePanel {
-                VoiceControlPanel(ttsService: viewModel.ttsService)
-            }
-
-            if translatedText != nil {
-                Text("原文")
-                    .font(.caption.bold())
-                    .foregroundStyle(.secondary)
-            }
         }
-        .frame(maxWidth: .infinity)
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
+
 }
+
 
 // MARK: - Voice Control Panel
 
@@ -241,10 +206,22 @@ import WebKit
 public struct ArticleContentView: NSViewRepresentable {
     let html: String
     let baseURL: URL?
+    let summary: String?
+    let translation: String?
+    let translationLanguage: String?
 
-    public init(html: String, baseURL: String? = nil) {
+    public init(
+        html: String,
+        baseURL: String? = nil,
+        summary: String? = nil,
+        translation: String? = nil,
+        translationLanguage: String? = nil
+    ) {
         self.html = html
         self.baseURL = baseURL.flatMap { URL(string: $0) }
+        self.summary = summary
+        self.translation = translation
+        self.translationLanguage = translationLanguage
     }
 
     public func makeNSView(context: Context) -> WKWebView {
@@ -259,7 +236,7 @@ public struct ArticleContentView: NSViewRepresentable {
     }
 
     public func updateNSView(_ webView: WKWebView, context: Context) {
-        webView.loadHTMLString(wrapHTML(html), baseURL: baseURL)
+        webView.loadHTMLString(wrapHTMLWithExtras(html, summary: summary, translation: translation, translationLanguage: translationLanguage), baseURL: baseURL)
     }
 }
 
@@ -269,10 +246,22 @@ import WebKit
 public struct ArticleContentView: UIViewRepresentable {
     let html: String
     let baseURL: URL?
+    let summary: String?
+    let translation: String?
+    let translationLanguage: String?
 
-    public init(html: String, baseURL: String? = nil) {
+    public init(
+        html: String,
+        baseURL: String? = nil,
+        summary: String? = nil,
+        translation: String? = nil,
+        translationLanguage: String? = nil
+    ) {
         self.html = html
         self.baseURL = baseURL.flatMap { URL(string: $0) }
+        self.summary = summary
+        self.translation = translation
+        self.translationLanguage = translationLanguage
     }
 
     public func makeUIView(context: Context) -> WKWebView {
@@ -288,7 +277,7 @@ public struct ArticleContentView: UIViewRepresentable {
     }
 
     public func updateUIView(_ webView: WKWebView, context: Context) {
-        webView.loadHTMLString(wrapHTML(html), baseURL: baseURL)
+        webView.loadHTMLString(wrapHTMLWithExtras(html, summary: summary, translation: translation, translationLanguage: translationLanguage), baseURL: baseURL)
     }
 }
 #endif
@@ -310,6 +299,60 @@ public func wrapHTML(_ html: String) -> String {
       }
       img, video, iframe { max-width: 100%; height: auto; }
       pre { overflow-x: auto; padding: 12px; background: #f5f5f5; border-radius: 6px; }
+      .ai-summary { margin: 8px 0 20px 0; padding: 14px 16px; background: #f3e8ff; border-radius: 8px; border-left: 3px solid #a855f7; }
+      .ai-summary .label { font-size: 11px; font-weight: 700; color: #9333ea; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+      .ai-summary .text { font-size: 14px; color: #555; line-height: 1.6; }
+      .ai-translation { margin: 8px 0 20px 0; padding: 14px 16px; background: #eff6ff; border-radius: 8px; border-left: 3px solid #3b82f6; }
+      .ai-translation .label { font-size: 11px; font-weight: 700; color: #2563eb; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+      .ai-translation .text { font-size: 15px; color: #333; line-height: 1.7; }
+      .original-label { font-size: 12px; font-weight: 700; color: #999; margin: 24px 0 8px 0; padding-top: 16px; border-top: 1px solid #e5e5e5; }
+      @media (prefers-color-scheme: dark) {
+        .ai-summary { background: #2d1f3d; border-left-color: #a855f7; }
+        .ai-summary .label { color: #c084fc; }
+        .ai-summary .text { color: #bbb; }
+        .ai-translation { background: #1e2a3d; border-left-color: #3b82f6; }
+        .ai-translation .label { color: #60a5fa; }
+        .ai-translation .text { color: #ccc; }
+        .original-label { border-top-color: #444; color: #777; }
+      }
     </style></head><body>\(html)</body></html>
     """
+}
+
+/// Wrap HTML content with injected metadata, AI summary, and translation at the top
+public func wrapHTMLWithExtras(
+    _ html: String,
+    summary: String? = nil,
+    translation: String? = nil,
+    translationLanguage: String? = nil
+) -> String {
+    var extras = ""
+    
+    // AI Summary
+    if let summary = summary, !summary.isEmpty {
+        let escaped = summary
+            .replacingOccurrences(of: "&", with: "&amp;")
+            .replacingOccurrences(of: "<", with: "&lt;")
+            .replacingOccurrences(of: ">", with: "&gt;")
+            .replacingOccurrences(of: "\n", with: "<br>")
+        extras += "<div class=\"ai-summary\"><div class=\"label\">✨ AI 摘要</div><div class=\"text\">\(escaped)</div></div>\n"
+    }
+    
+    // Translation
+    if let translation = translation, !translation.isEmpty {
+        let langLabel = translationLanguage.map { "\($0) 翻译" } ?? "翻译"
+        let escaped = translation
+            .replacingOccurrences(of: "&", with: "&amp;")
+            .replacingOccurrences(of: "<", with: "&lt;")
+            .replacingOccurrences(of: ">", with: "&gt;")
+            .replacingOccurrences(of: "\n", with: "<br>")
+        extras += "<div class=\"ai-translation\"><div class=\"label\">🌐 \(langLabel)</div><div class=\"text\">\(escaped)</div></div>\n"
+    }
+    
+    if !extras.isEmpty {
+        extras += "<div class=\"original-label\">原文</div>\n"
+    }
+    
+    let wrapped = wrapHTML(extras + html)
+    return wrapped
 }
