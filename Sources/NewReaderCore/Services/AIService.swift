@@ -303,7 +303,7 @@ public final class AIService: ObservableObject {
             throw AIServiceError.invalidResponse
         }
 
-        return content.trimmingCharacters(in: .whitespacesAndNewlines)
+        return stripThinking(content)
     }
 
     // MARK: - Anthropic Messages API
@@ -343,10 +343,21 @@ public final class AIService: ObservableObject {
             throw AIServiceError.invalidResponse
         }
 
-        return text.trimmingCharacters(in: .whitespacesAndNewlines)
+        return stripThinking(text)
     }
 
     // MARK: - Helpers
+
+    /// Strip <think>...</think> blocks from model output (DeepSeek-R1, MiniMax-M3, etc.)
+    private func stripThinking(_ text: String) -> String {
+        var result = text
+        while let start = result.range(of: "<think>"),
+              let end = result.range(of: "</think>", range: start.upperBound..<result.endIndex) {
+            result.removeSubrange(start.lowerBound..<end.upperBound)
+        }
+        return result.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
 
     private func stripHTML(_ html: String) -> String {
         guard let data = html.data(using: .utf8) else { return html }
