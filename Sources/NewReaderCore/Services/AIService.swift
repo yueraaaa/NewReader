@@ -93,9 +93,12 @@ public final class AIService: ObservableObject {
 
     private let session: URLSession
     private let keychainKey = "ai_api_key"
-    private let endpointUDKey = "ai_endpoint"
-    private let modelUDKey = "ai_model"
-    private let providerUDKey = "ai_provider"
+
+    private var configFileURL: URL? {
+        FileManager.default
+            .urls(for: .applicationSupportDirectory, in: .userDomainMask).first?
+            .appendingPathComponent("NewReader/ai_config.json")
+    }
 
     public init() {
         let urlConfig = URLSessionConfiguration.default
@@ -147,15 +150,26 @@ public final class AIService: ObservableObject {
 
     /// Save API key to Keychain; non-sensitive fields to UserDefaults.
     public func saveConfig() {
+        // Save API key to Keychain
         if !config.apiKey.isEmpty {
             KeychainHelper.save(key: keychainKey, value: config.apiKey)
         } else {
             KeychainHelper.delete(key: keychainKey)
         }
-        UserDefaults.standard.set(config.endpoint, forKey: endpointUDKey)
-        UserDefaults.standard.set(config.model, forKey: modelUDKey)
-        UserDefaults.standard.set(config.provider.rawValue, forKey: providerUDKey)
-        UserDefaults.standard.synchronize()
+
+        // Save non-sensitive config to JSON file
+        let dict: [String: String] = [
+            "provider": config.provider.rawValue,
+            "endpoint": config.endpoint,
+            "model": config.model
+        ]
+        guard let data = try? JSONEncoder().encode(dict),
+              let url = configFileURL else { return }
+        try? FileManager.default.createDirectory(
+            at: url.deletingLastPathComponent(),
+            withIntermediateDirectories: true
+        )
+        try? data.write(to: url, options: .atomic)
     }
 
     /// Test the AI connection with current config. Returns nil on success, or error message.
@@ -177,29 +191,34 @@ public final class AIService: ObservableObject {
 
     /// Load API key from Keychain; non-sensitive fields from UserDefaults.
     private func loadConfig() {
+        // Load API key from Keychain
         if let key = KeychainHelper.load(key: keychainKey), !key.isEmpty {
             self.config.apiKey = key
-        } else if let legacy = loadLegacyConfig() {
-            self.config.apiKey = legacy.apiKey
-            if !legacy.apiKey.isEmpty {
-                KeychainHelper.save(key: keychainKey, value: legacy.apiKey)
-            }
-            self.config.endpoint = legacy.endpoint
-            self.config.model = legacy.model
-            self.config.provider = legacy.provider
         }
 
-        if let endpoint = UserDefaults.standard.string(forKey: endpointUDKey),
-           !endpoint.isEmpty {
-            self.config.endpoint = endpoint
-        }
-        if let model = UserDefaults.standard.string(forKey: modelUDKey),
-           !model.isEmpty {
-            self.config.model = model
-        }
-        if let raw = UserDefaults.standard.string(forKey: providerUDKey),
-           let provider = AIProvider(rawValue: raw) {
-            self.config.provider = provider
+        // Load non-sensitive config from JSON file
+        if let url = configFileURL,
+           let data = try? Data(contentsOf: url),
+           let dict = try? JSONDecoder().decode([String: String].self, from: data) {
+            if let raw = dict["provider"], let p = AIProvider(rawValue: raw) {
+                self.config.provider = p
+            }
+            if let e = dict["endpoint"], !e.isEmpty {
+                self.config.endpoint = e
+            }
+            if let m = dict["model"], !m.isEmpty {
+                self.config.model = m
+            }
+        } else if let legacy = loadLegacyConfig() {
+            // One-time migration from legacy config file
+            self.config.provider = legacy.provider
+            self.config.endpoint = legacy.endpoint
+            self.config.model = legacy.model
+            if !legacy.apiKey.isEmpty {
+                self.config.apiKey = legacy.apiKey
+                KeychainHelper.save(key: keychainKey, value: legacy.apiKey)
+            }
+            saveConfig()
         }
     }
 
