@@ -107,7 +107,7 @@ public final class AIService: ObservableObject {
     }
 
     /// Ensure config is loaded from disk / Keychain. Call before any AI request.
-    private func ensureConfigLoaded() {
+    public func ensureConfigLoaded() {
         if !configLoaded { loadConfig() }
     }
 

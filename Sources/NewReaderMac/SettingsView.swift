@@ -10,16 +10,33 @@ struct SettingsView: View {
     @State private var showSaved: Bool = false
     @State private var isTesting: Bool = false
     @State private var testError: String?
+    @State private var ttsEngine: TTSEngine = .apple
+    @State private var ttsEndpoint: String = ""
+    @State private var ttsApiKey: String = ""
+    @State private var ttsVoiceId: String = "male-qn-qingse"
+    @State private var ttsSpeed: Double = 1.0
+    @State private var isTestingTTS: Bool = false
+    @State private var ttsTestError: String?
     @State private var selectedPage: SettingsPage = .ai
+
+    private func loadAIConfigFromDisk() {
+        viewModel.aiService.ensureConfigLoaded()
+        provider = viewModel.aiService.config.provider
+        endpoint = viewModel.aiService.config.endpoint
+        apiKey = viewModel.aiService.config.apiKey
+        model = viewModel.aiService.config.model
+    }
 
     enum SettingsPage: String, CaseIterable {
         case ai = "AI"
+        case tts = "语音"
         case storage = "存储"
         case about = "关于"
 
         var icon: String {
             switch self {
             case .ai: return "brain.head.profile"
+            case .tts: return "speaker.wave.2"
             case .storage: return "internaldrive"
             case .about: return "gearshape"
             }
@@ -44,6 +61,8 @@ struct SettingsView: View {
                 switch selectedPage {
                 case .ai:
                     aiPage
+                case .tts:
+                    ttsPage
                 case .storage:
                     storagePage
                 case .about:
@@ -52,12 +71,15 @@ struct SettingsView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .frame(width: 440, height: 380)
+        .frame(width: 460, height: 520)
         .onAppear {
-            provider = viewModel.aiService.config.provider
-            endpoint = viewModel.aiService.config.endpoint
-            apiKey = viewModel.aiService.config.apiKey
-            model = viewModel.aiService.config.model
+            loadAIConfigFromDisk()
+            let ttsCfg = MiniMaxTTSConfig.load()
+            ttsEngine = ttsCfg.engine
+            ttsEndpoint = ttsCfg.endpoint
+            ttsApiKey = ttsCfg.apiKey
+            ttsVoiceId = ttsCfg.voiceId
+            ttsSpeed = ttsCfg.speed
             DispatchQueue.main.async {
                 NSApp.activate(ignoringOtherApps: true)
                 if let sw = NSApp.windows.first(where: { $0.className.contains("Settings") }) {
@@ -175,6 +197,123 @@ struct SettingsView: View {
                         } else {
                             Label(err, systemImage: "xmark.circle.fill")
                                 .foregroundStyle(.red)
+                        }
+                    }
+                }
+            }
+        }
+        .formStyle(.grouped)
+    }
+
+
+    // MARK: - TTS Page
+
+    private var ttsPage: some View {
+        Form {
+            Section {
+                Picker("TTS 引擎", selection: $ttsEngine) {
+                    ForEach(TTSEngine.allCases, id: \.self) { e in
+                        Text(e.displayName).tag(e)
+                    }
+                }
+                .pickerStyle(.radioGroup)
+                .onChange(of: ttsEngine) { _, newEngine in
+                    viewModel.ttsService.setEngine(newEngine)
+                }
+            } header: {
+                Text("语音引擎").textCase(nil).font(.headline)
+            } footer: {
+                Text(ttsEngine == .apple
+                     ? "使用 macOS 内置语音引擎，离线可用。"
+                     : "使用 MiniMax TTS API，需要网络连接，音质更自然。")
+                    .font(.caption).foregroundStyle(.tertiary)
+            }
+
+            if ttsEngine == .minimax {
+                Section {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("API Endpoint").font(.caption).foregroundStyle(.secondary)
+                        TextField("https://api.minimaxi.com/v1/t2a_v2", text: $ttsEndpoint)
+                            .textFieldStyle(.roundedBorder)
+                    }
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("API Key").font(.caption).foregroundStyle(.secondary)
+                        SecureField("输入 MiniMax API Key", text: $ttsApiKey)
+                            .textFieldStyle(.roundedBorder)
+                    }
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("音色").font(.caption).foregroundStyle(.secondary)
+                        Picker("", selection: $ttsVoiceId) {
+                            ForEach(MiniMaxTTSConfig.voicePresets, id: \.id) { v in
+                                Text(v.name).tag(v.id)
+                            }
+                        }
+                        .labelsHidden()
+                    }
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("语速: \(String(format: "%.1f", ttsSpeed))").font(.caption).foregroundStyle(.secondary)
+                        Slider(value: $ttsSpeed, in: 0.5...2.0, step: 0.1)
+                    }
+                } header: {
+                    Text("MiniMax 配置").textCase(nil).font(.headline)
+                }
+
+                Section {
+                    HStack(spacing: 12) {
+                        Button("测试朗读") {
+                            isTestingTTS = true
+                            ttsTestError = nil
+                            // Build config directly from UI state, NOT from Keychain
+                            var cfg = MiniMaxTTSConfig()
+                            cfg.endpoint = ttsEndpoint.trimmingCharacters(in: .whitespaces)
+                                .trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+                            cfg.apiKey = ttsApiKey.trimmingCharacters(in: .whitespaces)
+                            cfg.voiceId = ttsVoiceId
+                            cfg.speed = ttsSpeed
+                            let provider = MiniMaxTTSProvider(config: cfg)
+                            Task {
+                                let ok = await provider.speak("你好，这是 MiniMax 语音合成测试。")
+                                ttsTestError = ok ? "" : (provider.errorMessage ?? "请求失败")
+                                isTestingTTS = false
+                            }
+                        }
+                        .buttonStyle(.bordered)
+                        .disabled(isTestingTTS)
+
+                        if isTestingTTS {
+                            ProgressView().scaleEffect(0.7)
+                        }
+
+                        Button("保存") {
+                            let trimmed = ttsEndpoint.trimmingCharacters(in: .whitespaces)
+                                .trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+                            var cfg = MiniMaxTTSConfig.load()
+                            cfg.endpoint = trimmed
+                            cfg.apiKey = ttsApiKey
+                            cfg.voiceId = ttsVoiceId
+                            cfg.speed = ttsSpeed
+                            cfg.save()
+                            viewModel.ttsService.setEngine(.minimax)
+                        }
+                        .buttonStyle(.borderedProminent)
+                    }
+
+                    if let err = ttsTestError {
+                        if err.isEmpty {
+                            Label("朗读成功", systemImage: "checkmark.circle.fill")
+                                .foregroundStyle(.green)
+                        } else {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Label("请求失败，查看原始返回：", systemImage: "xmark.circle.fill")
+                                    .foregroundStyle(.red)
+                                ScrollView {
+                                    Text(err)
+                                        .font(.system(size: 10, design: .monospaced))
+                                        .textSelection(.enabled)
+                                        .foregroundStyle(.secondary)
+                                }
+                                .frame(maxHeight: 120)
+                            }
                         }
                     }
                 }

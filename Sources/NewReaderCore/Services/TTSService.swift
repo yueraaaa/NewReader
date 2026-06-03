@@ -11,10 +11,29 @@ public final class TTSService: NSObject, ObservableObject, AVSpeechSynthesizerDe
     private var currentUtterance: AVSpeechUtterance?
     private var pendingText: String?
     private var rate: Float = AVSpeechUtteranceDefaultSpeechRate
+    private var minimaxProvider: MiniMaxTTSProvider?
+
+    public var engine: TTSEngine = .apple
 
     override init() {
         super.init()
         synthesizer.delegate = self
+        engine = MiniMaxTTSConfig.load().engine
+        if engine == .minimax { initMiniMax() }
+    }
+
+    /// Switch TTS engine at runtime.
+    public func setEngine(_ newEngine: TTSEngine) {
+        engine = newEngine
+        if newEngine == .minimax { initMiniMax() }
+        var config = MiniMaxTTSConfig.load()
+        config.engine = newEngine
+        config.save()
+    }
+
+    private func initMiniMax() {
+        let config = MiniMaxTTSConfig.load()
+        minimaxProvider = MiniMaxTTSProvider(config: config)
     }
 
     /// Start speaking the given text
@@ -22,21 +41,45 @@ public final class TTSService: NSObject, ObservableObject, AVSpeechSynthesizerDe
         let plainText = stripHTML(text)
         guard !plainText.isEmpty else { return }
 
-        if synthesizer.isSpeaking {
-            synthesizer.stopSpeaking(at: .immediate)
-        }
+        // Stop any current playback
+        if synthesizer.isSpeaking { synthesizer.stopSpeaking(at: .immediate) }
+        minimaxProvider?.stop()
 
-        let utterance = AVSpeechUtterance(string: plainText)
+        switch engine {
+        case .apple:
+            speakWithApple(plainText, language: language)
+        case .minimax:
+            speakWithMiniMax(plainText, language: language)
+        }
+    }
+
+    private func speakWithApple(_ text: String, language: String) {
+        let utterance = AVSpeechUtterance(string: text)
         utterance.voice = AVSpeechSynthesisVoice(language: language)
         utterance.rate = rate
         utterance.pitchMultiplier = 1.0
         utterance.volume = 1.0
 
         currentUtterance = utterance
-        pendingText = plainText
+        pendingText = text
         synthesizer.speak(utterance)
         isSpeaking = true
         isPaused = false
+    }
+
+    private func speakWithMiniMax(_ text: String, language: String) {
+        guard let provider = minimaxProvider else {
+            // Fallback: no provider configured
+            speakWithApple(text, language: language)
+            return
+        }
+        Task {
+            let success = await provider.speak(text)
+            if !success {
+                // Auto-fallback to Apple TTS
+                speakWithApple(text, language: language)
+            }
+        }
     }
 
     /// Pause playback, can resume later
