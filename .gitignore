@@ -24,3 +24,6 @@ xcuserdata/
 .netlify
 dist/
 *.zip
+
+# App bundle (distributed via GitHub Releases, not git)
+NewReader.app/
