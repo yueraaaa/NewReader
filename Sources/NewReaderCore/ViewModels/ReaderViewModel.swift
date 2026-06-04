@@ -25,6 +25,7 @@ public final class ReaderViewModel: ObservableObject {
     public let notificationService = NotificationService.shared
 
     public let modelContext: ModelContext
+    public let syncMonitor: SyncMonitor
     private var feedService: FeedService { FeedService(modelContext: modelContext) }
     private var opmlService: OPMLService { OPMLService(modelContext: modelContext) }
 
@@ -39,8 +40,9 @@ public final class ReaderViewModel: ObservableObject {
         }
     }
 
-    public init(modelContext: ModelContext) {
+    public init(modelContext: ModelContext, iCloudContainerID: String? = nil) {
         self.modelContext = modelContext
+        self.syncMonitor = SyncMonitor(configuredContainerID: iCloudContainerID)
         loadData()
     }
 
@@ -56,7 +58,7 @@ public final class ReaderViewModel: ObservableObject {
     public func selectFeed(_ feed: Feed?) {
         selectedFeed = feed
         selectedArticle = nil
-        articles = sortedArticles(from: feed?.articles ?? allFlatArticles)
+        articles = sortedArticles(from: feed?.allArticles ?? allFlatArticles)
     }
 
     public func selectAllArticles() {
@@ -78,7 +80,7 @@ public final class ReaderViewModel: ObservableObject {
     }
 
     private var allFlatArticles: [Article] {
-        feeds.flatMap { $0.articles }
+        feeds.flatMap { $0.allArticles }
     }
 
     private func sortedArticles(from articles: [Article]) -> [Article] {
@@ -95,7 +97,7 @@ public final class ReaderViewModel: ObservableObject {
             let feed = try await feedService.subscribe(urlString: url)
             feeds.append(feed)
             feeds.sort { $0.addedDate < $1.addedDate }
-            await autoSummarizeNewArticles(feed.articles)
+            await autoSummarizeNewArticles(feed.allArticles)
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -108,7 +110,7 @@ public final class ReaderViewModel: ObservableObject {
                 notifyNewArticles(newArticles, feed: feed)
                 cacheNewArticles(newArticles)
                 if selectedFeed?.id == feed.id {
-                    articles = sortedArticles(from: feed.articles)
+                    articles = sortedArticles(from: feed.allArticles)
                 }
             }
         } catch {
@@ -155,7 +157,7 @@ public final class ReaderViewModel: ObservableObject {
     }
 
     public func markAllAsRead(in feed: Feed) {
-        feed.articles.forEach { $0.isRead = true }
+        feed.allArticles.forEach { $0.isRead = true }
         try? modelContext.save()
     }
 
@@ -292,6 +294,13 @@ public final class ReaderViewModel: ObservableObject {
         modelContext.insert(folder)
         try? modelContext.save()
         folders.append(folder)
+    }
+
+    public func renameFeed(_ feed: Feed, to newTitle: String) {
+        let trimmed = newTitle.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        feed.title = trimmed
+        try? modelContext.save()
     }
 
     public func moveFeed(_ feed: Feed, to folder: Folder?) {

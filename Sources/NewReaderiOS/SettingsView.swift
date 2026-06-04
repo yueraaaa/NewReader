@@ -47,12 +47,23 @@ struct SettingsView: View {
                 }
             }
 
-            Section("缓存") {
+            Section("缓存与同步") {
                 HStack {
                     Text("离线缓存")
                     Spacer()
                     Text(viewModel.cacheSizeFormatted())
                         .foregroundStyle(.secondary)
+                }
+                HStack {
+                    Text("iCloud 同步")
+                    Spacer()
+                    HStack(spacing: 4) {
+                        Circle()
+                            .fill(viewModel.syncMonitor.isCloudSyncActive ? Color.green : Color.secondary)
+                            .frame(width: 8, height: 8)
+                        Text(viewModel.syncMonitor.isCloudSyncActive ? "已激活" : "未激活")
+                            .foregroundStyle(.secondary)
+                    }
                 }
                 Button("清除缓存", role: .destructive) {
                     viewModel.clearCache()
@@ -113,17 +124,15 @@ struct SettingsView: View {
                 HStack {
                     Text("文章")
                     Spacer()
-                    Text("\(viewModel.feeds.flatMap { $0.articles }.count)")
+                    Text("\(viewModel.feeds.flatMap { $0.allArticles }.count)")
                         .foregroundStyle(.secondary)
                 }
             }
         }
         .navigationTitle("设置")
         .onAppear {
-            viewModel.aiService.ensureConfigLoaded()
             provider = viewModel.aiService.config.provider
             endpoint = viewModel.aiService.config.endpoint
-            apiKey = viewModel.aiService.config.apiKey
             model = viewModel.aiService.config.model
             let ttsCfg = MiniMaxTTSConfig.load()
             ttsEngine = ttsCfg.engine

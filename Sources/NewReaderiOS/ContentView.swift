@@ -17,17 +17,17 @@ struct ContentView: View {
 
             NavigationStack {
                 ArticleListTabView(
-                    articles: viewModel.feeds.flatMap { $0.articles }.filter { !$0.isRead },
+                    articles: viewModel.feeds.flatMap { $0.allArticles }.filter { !$0.isRead },
                     title: "未读文章"
                 )
             }
             .tabItem { Label("未读", systemImage: "envelope.badge") }
-            .badge(viewModel.feeds.flatMap { $0.articles }.filter { !$0.isRead }.count)
+            .badge(viewModel.feeds.flatMap { $0.allArticles }.filter { !$0.isRead }.count)
             .tag(Tab.unread)
 
             NavigationStack {
                 ArticleListTabView(
-                    articles: viewModel.feeds.flatMap { $0.articles }.filter { $0.isStarred },
+                    articles: viewModel.feeds.flatMap { $0.allArticles }.filter { $0.isStarred },
                     title: "星标文章"
                 )
             }

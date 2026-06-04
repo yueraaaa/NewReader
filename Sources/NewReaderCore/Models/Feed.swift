@@ -12,8 +12,11 @@ public final class Feed {
     public var lastFetched: Date?
     public var addedDate: Date = Date()
 
-    @Relationship(deleteRule: .cascade)
-    public var articles: [Article]
+    @Relationship(deleteRule: .cascade, inverse: \Article.feed)
+    public var articles: [Article]?
+
+    /// CloudKit-safe accessor. Use this instead of `articles` directly.
+    public var allArticles: [Article] { articles ?? [] }
 
     public var folder: Folder?
 
@@ -22,12 +25,11 @@ public final class Feed {
         self.url = url
         self.feedDescription = feedDescription
         self.siteURL = siteURL
-        self.articles = []
     }
 
     /// Sorted unread articles, newest first
     public var unreadArticles: [Article] {
-        articles.filter { !$0.isRead }
+        (articles ?? []).filter { !$0.isRead }
             .sorted { ($0.publishedDate ?? .distantPast) > ($1.publishedDate ?? .distantPast) }
     }
 }

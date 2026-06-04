@@ -6,6 +6,8 @@ struct FeedsListView: View {
     @EnvironmentObject var viewModel: ReaderViewModel
     @State private var showSubscribe: Bool = false
     @State private var showImportOPML: Bool = false
+    @State private var feedToRename: Feed?
+    @State private var renameText: String = ""
 
     var body: some View {
         List {
@@ -29,6 +31,13 @@ struct FeedsListView: View {
                     }
                 }
                 .swipeActions(edge: .trailing) {
+                    Button {
+                        feedToRename = feed
+                        renameText = feed.title
+                    } label: {
+                        Label("重命名", systemImage: "pencil")
+                    }
+                    .tint(.orange)
                     Button(role: .destructive) { viewModel.deleteFeed(feed) } label: {
                         Label("删除", systemImage: "trash")
                     }
@@ -68,6 +77,21 @@ struct FeedsListView: View {
             }
         }
         .sheet(isPresented: $showSubscribe) { SubscribeView() }
+        .alert("重命名订阅源", isPresented: Binding(
+            get: { feedToRename != nil },
+            set: { if !$0 { feedToRename = nil } }
+        )) {
+            TextField("新名称", text: $renameText)
+            Button("取消", role: .cancel) { feedToRename = nil }
+            Button("确定") {
+                if let feed = feedToRename {
+                    viewModel.renameFeed(feed, to: renameText)
+                }
+                feedToRename = nil
+            }
+        } message: {
+            Text("为订阅源「\(feedToRename?.title ?? "")」输入新名称")
+        }
         .fileImporter(
             isPresented: $showImportOPML,
             allowedContentTypes: [.xml, UTType(filenameExtension: "opml") ?? .xml],
@@ -98,6 +122,6 @@ struct FeedArticlesView: View {
 
 extension Feed {
     var sortedArticles: [Article] {
-        articles.sorted { ($0.publishedDate ?? .distantPast) > ($1.publishedDate ?? .distantPast) }
+        (articles ?? []).sorted { ($0.publishedDate ?? .distantPast) > ($1.publishedDate ?? .distantPast) }
     }
 }

@@ -83,7 +83,7 @@ public final class FeedService {
         feed.lastFetched = Date()
 
         var newArticles: [Article] = []
-        let existingURLs = Set(feed.articles.map { $0.url })
+        let existingURLs = Set(feed.allArticles.map { $0.url })
 
         for item in parsedFeed.items {
             let articleURL = item.link ?? url.absoluteString

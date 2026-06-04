@@ -6,20 +6,21 @@ import NewReaderCore
 struct NewReaderMacApp: App {
     @StateObject private var viewModel: ReaderViewModel
 
+    static let iCloudContainerID = "iCloud.com.newreader.app"
+
     init() {
         // Reduce system tooltip delay so toolbar hints appear instantly
         UserDefaults.standard.set(50, forKey: "NSInitialToolTipDelay")
 
         let schema = Schema([Feed.self, Article.self, Folder.self])
-        let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
-        let container: ModelContainer
-        do {
-            container = try ModelContainer(for: schema, configurations: config)
-        } catch {
-            print("[NewReader] ModelContainer failed, falling back to in-memory: \(error)")
-            container = try! ModelContainer(for: schema, configurations: .init(schema: schema, isStoredInMemoryOnly: true))
-        }
-        _viewModel = StateObject(wrappedValue: ReaderViewModel(modelContext: container.mainContext))
+        let result = ModelContainerFactory.makeContainer(
+            schema: schema,
+            options: .init(iCloudContainerID: Self.iCloudContainerID)
+        )
+        _viewModel = StateObject(wrappedValue: ReaderViewModel(
+            modelContext: result.container.mainContext,
+            iCloudContainerID: Self.iCloudContainerID
+        ))
 
         Task {
             _ = await NotificationService.shared.requestPermission()
@@ -34,7 +35,7 @@ struct NewReaderMacApp: App {
         }
         .windowToolbarStyle(.unifiedCompact)
         .commands {
-            SidebarCommands()
+SidebarCommands()
             CommandGroup(replacing: .newItem) {
                 Button("添加订阅…") {
                     NotificationCenter.default.post(name: .showSubscribeSheet, object: nil)
@@ -49,6 +50,7 @@ struct NewReaderMacApp: App {
         }
     }
 }
+
 
 extension Notification.Name {
     static let showSubscribeSheet = Notification.Name("showSubscribeSheet")

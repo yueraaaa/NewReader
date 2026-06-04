@@ -24,15 +24,15 @@ public final class OPMLService {
 
         """
 
-        for folder in folders where !folder.feeds.isEmpty {
+        for folder in folders where !folder.allFeeds.isEmpty {
             xml += "    <outline text=\"\(escapeXML(folder.name))\" title=\"\(escapeXML(folder.name))\">\n"
-            for feed in folder.feeds {
+            for feed in folder.allFeeds {
                 xml += outlineXML(for: feed, indent: "      ")
             }
             xml += "    </outline>\n"
         }
 
-        let folderFeedIDs = Set(folders.flatMap { $0.feeds.map { $0.id } })
+        let folderFeedIDs = Set(folders.flatMap { $0.allFeeds.map { $0.id } })
         for feed in feeds where !folderFeedIDs.contains(feed.id) {
             xml += outlineXML(for: feed, indent: "    ")
         }

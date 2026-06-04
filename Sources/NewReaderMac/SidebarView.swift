@@ -5,6 +5,8 @@ import UniformTypeIdentifiers
 struct SidebarView: View {
     @EnvironmentObject var viewModel: ReaderViewModel
     @State private var showImportOPML: Bool = false
+    @State private var feedToRename: Feed?
+    @State private var renameText: String = ""
 
     var body: some View {
         List(selection: $viewModel.selectedFeed) {
@@ -12,19 +14,19 @@ struct SidebarView: View {
                 SmartViewRow(
                     icon: "tray.full",
                     label: "全部文章",
-                    count: viewModel.feeds.flatMap { $0.articles }.count,
+                    count: viewModel.feeds.flatMap { $0.allArticles }.count,
                     action: { viewModel.selectAllArticles() }
                 )
                 SmartViewRow(
                     icon: "envelope.badge",
                     label: "未读",
-                    count: viewModel.feeds.flatMap { $0.articles }.filter { !$0.isRead }.count,
+                    count: viewModel.feeds.flatMap { $0.allArticles }.filter { !$0.isRead }.count,
                     action: { viewModel.selectUnread() }
                 )
                 SmartViewRow(
                     icon: "star",
                     label: "星标",
-                    count: viewModel.feeds.flatMap { $0.articles }.filter { $0.isStarred }.count,
+                    count: viewModel.feeds.flatMap { $0.allArticles }.filter { $0.isStarred }.count,
                     action: { viewModel.selectStarred() }
                 )
             }
@@ -40,6 +42,12 @@ struct SidebarView: View {
                             Divider()
                             Button("标为已读") {
                                 viewModel.markAllAsRead(in: feed)
+                            }
+                            Divider()
+                            Divider()
+                            Button("重命名") {
+                                feedToRename = feed
+                                renameText = feed.title
                             }
                             Divider()
                             Button("删除", role: .destructive) {
@@ -86,6 +94,21 @@ struct SidebarView: View {
                 }
                 .help("更多操作")
             }
+        }
+        .alert("重命名订阅源", isPresented: Binding(
+            get: { feedToRename != nil },
+            set: { if !$0 { feedToRename = nil } }
+        )) {
+            TextField("新名称", text: $renameText)
+            Button("取消", role: .cancel) { feedToRename = nil }
+            Button("确定") {
+                if let feed = feedToRename {
+                    viewModel.renameFeed(feed, to: renameText)
+                }
+                feedToRename = nil
+            }
+        } message: {
+            Text("为订阅源「\(feedToRename?.title ?? "")」输入新名称")
         }
         .fileImporter(
             isPresented: $showImportOPML,

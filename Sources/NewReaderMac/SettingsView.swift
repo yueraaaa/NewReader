@@ -19,13 +19,6 @@ struct SettingsView: View {
     @State private var ttsTestError: String?
     @State private var selectedPage: SettingsPage = .ai
 
-    private func loadAIConfigFromDisk() {
-        viewModel.aiService.ensureConfigLoaded()
-        provider = viewModel.aiService.config.provider
-        endpoint = viewModel.aiService.config.endpoint
-        apiKey = viewModel.aiService.config.apiKey
-        model = viewModel.aiService.config.model
-    }
 
     enum SettingsPage: String, CaseIterable {
         case ai = "AI"
@@ -73,7 +66,10 @@ struct SettingsView: View {
         }
         .frame(width: 460, height: 520)
         .onAppear {
-            loadAIConfigFromDisk()
+            // Load non-sensitive config from disk only (no Keychain)
+            provider = viewModel.aiService.config.provider
+            endpoint = viewModel.aiService.config.endpoint
+            model = viewModel.aiService.config.model
             let ttsCfg = MiniMaxTTSConfig.load()
             ttsEngine = ttsCfg.engine
             ttsEndpoint = ttsCfg.endpoint
@@ -146,6 +142,7 @@ struct SettingsView: View {
                                 .trimmingCharacters(in: CharacterSet(charactersIn: "/"))
                             viewModel.aiService.config.provider = provider
                             viewModel.aiService.config.endpoint = trimmed
+                            viewModel.aiService.ensureConfigLoaded()
                             viewModel.aiService.config.apiKey = apiKey
                             viewModel.aiService.config.model = model
 
@@ -173,6 +170,7 @@ struct SettingsView: View {
                             }
                             viewModel.aiService.config.provider = provider
                             viewModel.aiService.config.endpoint = trimmed
+                            viewModel.aiService.ensureConfigLoaded()
                             viewModel.aiService.config.apiKey = apiKey
                             viewModel.aiService.config.model = model
                             viewModel.aiService.saveConfig()
@@ -331,8 +329,36 @@ struct SettingsView: View {
                     Text(viewModel.cacheSizeFormatted())
                         .foregroundStyle(.secondary)
                 }
+                LabeledContent("iCloud 同步") {
+                    HStack(spacing: 4) {
+                        Circle()
+                            .fill(viewModel.syncMonitor.isCloudSyncActive ? Color.green : Color.secondary)
+                            .frame(width: 8, height: 8)
+                        Text(viewModel.syncMonitor.isCloudSyncActive ? "已激活" : "未激活")
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                if let containerID = viewModel.syncMonitor.configuredContainerID {
+                    LabeledContent("容器") {
+                        Text(containerID)
+                            .font(.caption.monospaced())
+                            .foregroundStyle(.tertiary)
+                    }
+                }
+                if let lastEvent = viewModel.syncMonitor.lastEvent {
+                    LabeledContent("上次检测") {
+                        Text(lastEvent, style: .relative)
+                            .foregroundStyle(.tertiary)
+                    }
+                }
             } header: {
                 Text("存储").textCase(nil).font(.headline)
+            } footer: {
+                Text(viewModel.syncMonitor.accountState == .signedOut
+                     ? "登录 iCloud 后自动开启跨设备同步。"
+                     : "Feed 和文章自动通过 iCloud 同步至同一 Apple ID 的其他设备。")
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
             }
 
             Section {
@@ -356,7 +382,7 @@ struct SettingsView: View {
                     Text("\(viewModel.feeds.count)").foregroundStyle(.secondary)
                 }
                 LabeledContent("文章总数") {
-                    Text("\(viewModel.feeds.flatMap { $0.articles }.count)")
+                    Text("\(viewModel.feeds.flatMap { $0.allArticles }.count)")
                         .foregroundStyle(.secondary)
                 }
             } header: {
