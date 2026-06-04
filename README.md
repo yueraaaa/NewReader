@@ -7,7 +7,7 @@
 ![iOS](https://img.shields.io/badge/iOS-18%2B-000000?logo=apple)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 
-[🌐 产品介绍](https://clever-semolina-241f17.netlify.app) · [📦 下载最新版](https://github.com/yueraaaa/NewReader/releases/latest)
+[🌐 产品介绍](https://newreader.netlify.app) · [📦 下载最新版](https://github.com/yueraaaa/NewReader/releases/latest)
 
 ---
 
