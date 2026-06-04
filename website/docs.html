@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>使用文档 — NewReader</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+    background: #faf9f6;
+    color: #2c2c2c;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; }
+
+  /* Nav */
+  .nav {
+    padding: 24px 32px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    border-bottom: 1px solid #e8e4dc;
+    background: rgba(250,249,246,0.9);
+    backdrop-filter: blur(12px);
+    position: sticky; top: 0; z-index: 10;
+  }
+  .nav a { text-decoration: none; }
+  .nav .logo { font-size: 1.15rem; font-weight: 700; color: #1a1a1a; }
+  .nav .back { font-size: 0.9rem; color: #999; }
+  .nav .back:hover { color: #333; }
+
+  /* Content */
+  .content {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+  }
+  h1 { font-size: 2rem; font-weight: 700; margin-bottom: 8px; color: #1a1a1a; }
+  h2 {
+    font-size: 1.25rem; font-weight: 600; color: #1a1a1a;
+    margin-top: 48px; margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e8e4dc;
+  }
+  h3 { font-size: 1rem; font-weight: 600; color: #333; margin-top: 28px; margin-bottom: 10px; }
+  p { font-size: 0.95rem; color: #555; margin-bottom: 14px; }
+  ul, ol { margin: 0 0 16px 20px; font-size: 0.95rem; color: #555; }
+  li { margin-bottom: 6px; }
+  code {
+    background: #f0ede6; padding: 2px 7px; border-radius: 4px;
+    font-size: 0.88rem; font-family: "SF Mono", Monaco, monospace; color: #333;
+  }
+  pre {
+    background: #1a1a1a; color: #e0dcd4; padding: 16px 20px;
+    border-radius: 8px; overflow-x: auto; font-size: 0.85rem;
+    font-family: "SF Mono", Monaco, monospace;
+    line-height: 1.55; margin-bottom: 16px;
+  }
+  .note {
+    background: #f5f2ed; border-left: 3px solid #c4b89e;
+    padding: 12px 16px; border-radius: 0 6px 6px 0;
+    margin-bottom: 16px; font-size: 0.9rem; color: #666;
+  }
+  table {
+    width: 100%; border-collapse: collapse; margin-bottom: 16px;
+    font-size: 0.9rem;
+  }
+  th, td {
+    text-align: left; padding: 10px 14px;
+    border-bottom: 1px solid #e8e4dc;
+  }
+  th { font-weight: 600; color: #1a1a1a; background: #f5f2ed; }
+  td { color: #555; }
+
+  .sidebar-toc {
+    display: none;
+    position: fixed; left: calc(50% + 400px); top: 120px;
+    font-size: 0.82rem; line-height: 2;
+  }
+  .sidebar-toc a { text-decoration: none; color: #999; }
+  .sidebar-toc a:hover { color: #1a1a1a; }
+
+  @media (min-width: 1200px) {
+    .sidebar-toc { display: block; }
+  }
+  @media (max-width: 640px) {
+    .content { padding: 32px 20px 60px; }
+    h1 { font-size: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="index.html" class="back">← 首页</a>
+  <a href="index.html" class="logo">NewReader</a>
+</nav>
+
+<div class="content">
+
+<h1>使用文档</h1>
+<p>NewReader 是一款精致、安全的 RSS 阅读器，覆盖 macOS 与 iOS。本文档介绍从安装到高级配置的全部步骤。</p>
+
+<h2>安装</h2>
+
+<h3>macOS</h3>
+<ol>
+  <li>前往 <a href="https://github.com/yueraaaa/NewReader/releases/latest" style="color:#555;">GitHub Releases</a> 下载最新 <code>NewReader-macOS.zip</code></li>
+  <li>解压后将 <strong>NewReader.app</strong> 拖入 <code>/Applications</code></li>
+  <li>首次运行时，系统提示「无法验证开发者」，请在 <strong>系统设置 → 隐私与安全性</strong> 中点击「仍要打开」</li>
+</ol>
+
+<h3>iOS</h3>
+<p>通过 Xcode 编译安装到设备。在 Xcode 中打开 <code>Package.swift</code>，选择 <strong>NewReaderiOS</strong> target，连接 iPhone 后运行。</p>
+
+<h2>添加订阅源</h2>
+<ol>
+  <li>按 <code>⌘N</code> 或点工具栏 <strong>+</strong> 按钮</li>
+  <li>输入 RSS / Atom / JSON Feed 地址</li>
+  <li>点击「订阅」，Feed 标题和文章将自动出现在侧栏</li>
+</ol>
+<p>支持导入 OPML 文件：点侧栏 <strong>⋯</strong> → 导入 OPML，选择你的 <code>.opml</code> 文件。</p>
+
+<h2>订阅源管理</h2>
+<ul>
+  <li><strong>刷新</strong>：右键 Feed → 刷新，或工具栏刷新按钮刷新全部</li>
+  <li><strong>重命名</strong>：右键 Feed → 重命名，在弹窗中输入新名称即可</li>
+  <li><strong>标为已读</strong>：右键 Feed → 标为已读，将当前 Feed 所有文章标记已读</li>
+  <li><strong>删除</strong>：右键 Feed → 删除，移除订阅源及其所有文章</li>
+</ul>
+
+<h2>配置 AI 摘要与翻译</h2>
+<p>NewReader 支持 OpenAI 兼容 API（适用于 OpenAI、DeepSeek、通义千问等）和 Anthropic Claude。</p>
+<ol>
+  <li>打开设置（<code>⌘,</code>）→ <strong>AI</strong> 标签</li>
+  <li>选择 AI 服务商</li>
+  <li>填写 API 端点、API Key、模型名称</li>
+  <li>可选：点击「测试连接」验证配置</li>
+  <li>点击「保存」</li>
+</ol>
+
+<div class="note">
+  API Key 加密存储在系统 Keychain 中，明文不会写入磁盘。端点必须使用 HTTPS。
+</div>
+
+<h3>在文章中使用 AI</h3>
+<ul>
+  <li><strong>AI 摘要</strong>：阅读文章时点工具栏 <strong>✨</strong> 按钮，自动生成 3-5 句中文摘要</li>
+  <li><strong>批量摘要</strong>：侧栏 <strong>⋯</strong> → 批量 AI 摘要，为所有未读文章生成摘要</li>
+  <li><strong>翻译</strong>：工具栏 <strong>🌐</strong> 按钮展开语言菜单，选择目标语言即可翻译</li>
+</ul>
+
+<h2>语音朗读 (TTS)</h2>
+<p>双引擎支持，可随时切换：</p>
+<table>
+  <tr><th>引擎</th><th>说明</th><th>网络要求</th></tr>
+  <tr><td>Apple 系统语音</td><td>macOS / iOS 内置引擎，支持中文普通话、英日韩</td><td>离线可用</td></tr>
+  <tr><td>MiniMax TTS</td><td>AI 语音合成，音质更自然</td><td>需要网络</td></tr>
+</table>
+<p>在阅读文章时，点工具栏 <strong>🔊</strong> 按钮即可朗读。设置 → 语音 标签可切换引擎并配置 MiniMax API Key。</p>
+
+<h2>全文提取</h2>
+<p>部分 RSS Feed 只提供摘要而非正文。点工具栏 <strong>📄</strong> 按钮，NewReader 自动从原文链接拉取完整正文。</p>
+
+<h2>iCloud 跨设备同步</h2>
+<p>同一 Apple ID 设备间自动同步订阅源、文章和阅读状态。</p>
+
+<h3>前提条件</h3>
+<ul>
+  <li>macOS 系统设置中登录 iCloud</li>
+  <li>使用正式签名的 App（通过 GitHub Release 下载）</li>
+</ul>
+
+<h3>查看同步状态</h3>
+<p>设置 → <strong>存储</strong> 标签中查看 iCloud 同步状态：</p>
+<ul>
+  <li><strong>🟢 已激活</strong> — 同步正常，数据自动跨设备传输</li>
+  <li><strong>⚫ 未激活</strong> — 未登录 iCloud 或签名缺失，使用本地存储</li>
+</ul>
+
+<h2>离线缓存</h2>
+<p>文章内容自动本地缓存，断网也能阅读。设置 → 存储 中可查看缓存大小并一键清除。</p>
+
+<h2>快捷键 (macOS)</h2>
+<table>
+  <tr><th>快捷键</th><th>功能</th></tr>
+  <tr><td><code>⌘N</code></td><td>添加订阅</td></tr>
+  <tr><td><code>⌘,</code></td><td>打开设置</td></tr>
+  <tr><td><code>⌘R</code></td><td>刷新当前订阅源</td></tr>
+</table>
+
+<h2>安全设计</h2>
+<ul>
+  <li>API Key 使用系统 Keychain 加密存储，不落盘明文</li>
+  <li>WKWebView 禁用 JavaScript + CSP 策略，阻止脚本注入</li>
+  <li>URL 仅允许 http/https 协议，拦截私有 IP / localhost 防 SSRF</li>
+  <li>HTML 消毒移除 script / iframe / 事件处理器 / javascript: 链接</li>
+  <li>OPML 导入文件大小上限 5MB，防内存耗尽</li>
+</ul>
+
+</div>
+
+<footer style="padding:40px 24px; text-align:center; font-size:0.8rem; color:#aaa; border-top:1px solid #e8e4dc;">
+  <p>
+    <a href="index.html" style="color:#999;">首页</a>
+    &nbsp;·&nbsp;
+    <a href="https://github.com/yueraaaa/NewReader" target="_blank" rel="noopener" style="color:#999;">GitHub</a>
+  </p>
+</footer>
+
+</body>
+</html>
