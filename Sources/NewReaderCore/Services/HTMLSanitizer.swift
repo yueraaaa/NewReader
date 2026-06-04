@@ -79,6 +79,14 @@ public enum HTMLSanitizer {
             options: [.regularExpression, .caseInsensitive]
         )
 
+        // Strip CSS url() references to prevent tracking pixels via
+        // background-image / @import etc.
+        cleaned = cleaned.replacingOccurrences(
+            of: #"url\s*\("#,
+            with: "url(data:,",
+            options: [.regularExpression, .caseInsensitive]
+        )
+
         // Remove <meta http-equiv="refresh"> — automatic redirect that works
         // even with JavaScript disabled.
         cleaned = cleaned.replacingOccurrences(

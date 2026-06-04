@@ -25,7 +25,7 @@ public final class CacheService {
         <!DOCTYPE html><html><head><meta charset="utf-8">
         <title>\(escapeHTML(title))</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src https: http: data:; style-src 'unsafe-inline'; font-src 'none'; frame-src 'none'; media-src https: http:;">
+        <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; style-src 'unsafe-inline'; font-src 'none'; frame-src 'none'; media-src data:;">
         <style>
           :root { color-scheme: light dark; }
           body { font-family: -apple-system, sans-serif; font-size: 16px;
@@ -36,6 +36,7 @@ public final class CacheService {
         </style></head><body>\(HTMLSanitizer.sanitize(html))</body></html>
         """
         try? wrapped.write(to: fileURL, atomically: true, encoding: .utf8)
+        evictIfNeeded()
     }
 
     /// Load cached article if available
@@ -54,6 +55,32 @@ public final class CacheService {
     public func removeCache(id: UUID) {
         let fileURL = cacheDirectory.appendingPathComponent("\(id.uuidString).html")
         try? FileManager.default.removeItem(at: fileURL)
+    }
+
+    /// Maximum total cache size in bytes (50 MB).
+    private let maxTotalCacheSize: Int64 = 50 * 1024 * 1024
+
+    /// Evict oldest cache entries until under the size limit.
+    public func evictIfNeeded() {
+        let total = cacheSize()
+        guard total > maxTotalCacheSize else { return }
+        guard let files = try? FileManager.default.contentsOfDirectory(
+            at: cacheDirectory, includingPropertiesForKeys: [.contentModificationDateKey, .fileSizeKey]
+        ) else { return }
+
+        let sorted = files.sorted { url1, url2 in
+            let d1 = (try? url1.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate) ?? .distantPast
+            let d2 = (try? url2.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate) ?? .distantPast
+            return d1 < d2
+        }
+
+        var remaining = total
+        for url in sorted {
+            guard remaining > maxTotalCacheSize else { break }
+            let size = Int64((try? url.resourceValues(forKeys: [.fileSizeKey]).fileSize) ?? 0)
+            try? FileManager.default.removeItem(at: url)
+            remaining -= size
+        }
     }
 
     /// Clear all cached articles

@@ -108,5 +108,26 @@ struct ArticleListView: View {
         .onChange(of: searchText) { _, newValue in
             viewModel.searchQuery = newValue
         }
-    }
+        .onKeyPress(characters: .alphanumerics) { press in
+            guard let idx = viewModel.filteredArticles.firstIndex(where: { $0.id == viewModel.selectedArticle?.id }) else {
+                return .ignored
+            }
+            switch press.characters {
+            case "j":
+                let next = min(idx + 1, viewModel.filteredArticles.count - 1)
+                let article = viewModel.filteredArticles[next]
+                if !article.isRead { viewModel.toggleRead(article) }
+                viewModel.selectedArticle = article
+                return .handled
+            case "k":
+                let prev = max(idx - 1, 0)
+                let article = viewModel.filteredArticles[prev]
+                if !article.isRead { viewModel.toggleRead(article) }
+                viewModel.selectedArticle = article
+                return .handled
+            default:
+                return .ignored
+            }
+        }
+            }
 }

@@ -38,6 +38,7 @@ struct ContentView: View {
                 .tabItem { Label("设置", systemImage: "gearshape") }
                 .tag(Tab.settings)
         }
+        .preferredColorScheme(viewModel.appTheme.colorScheme)
     }
 }
 

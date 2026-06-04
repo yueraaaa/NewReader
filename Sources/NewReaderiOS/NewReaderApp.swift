@@ -26,7 +26,7 @@ struct NewReaderiOSApp: App {
             ContentView()
                 .environmentObject(viewModel)
                 .task {
-                    viewModel.selectAllArticles()
+                    viewModel.selectUnread()
                 }
         }
     }

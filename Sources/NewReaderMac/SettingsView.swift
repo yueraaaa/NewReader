@@ -173,6 +173,10 @@ struct SettingsView: View {
                             viewModel.aiService.ensureConfigLoaded()
                             viewModel.aiService.config.apiKey = apiKey
                             viewModel.aiService.config.model = model
+                            guard (endpoint.trimmingCharacters(in: .whitespaces).trimmingCharacters(in: CharacterSet(charactersIn: "/")).hasPrefix("https")) else {
+                                viewModel.errorMessage = "API 端点必须使用 HTTPS"
+                                return
+                            }
                             viewModel.aiService.saveConfig()
 
                             showSaved = true
@@ -324,6 +328,17 @@ struct SettingsView: View {
 
     private var storagePage: some View {
         Form {
+            Section {
+                Picker("外观", selection: $viewModel.appTheme) {
+                    ForEach(AppTheme.allCases, id: \.self) { t in
+                        Text(t.displayName).tag(t)
+                    }
+                }
+                .pickerStyle(.menu)
+            } header: {
+                Text("外观").textCase(nil).font(.headline)
+            }
+
             Section {
                 LabeledContent("离线缓存大小") {
                     Text(viewModel.cacheSizeFormatted())

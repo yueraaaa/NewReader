@@ -2,6 +2,21 @@ import Foundation
 import FeedKit
 import SwiftData
 
+/// Limits feed download size to prevent OOM from malicious servers.
+final class LimitedDataDelegate: NSObject, URLSessionDataDelegate {
+    let maxBytes: Int = 10 * 1024 * 1024
+    var accumulatedData = Data()
+    var error: Error?
+
+    func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
+        accumulatedData.append(data)
+        if accumulatedData.count > maxBytes {
+            error = FeedServiceError.networkError
+            dataTask.cancel()
+        }
+    }
+}
+
 /// Errors that can occur during feed operations
 public enum FeedServiceError: LocalizedError {
     case invalidURL
@@ -115,7 +130,9 @@ public final class FeedService {
     // MARK: - Private
 
     private func fetchAndParse(url: URL) async throws -> ParsedFeed {
-        let (data, _) = try await session.data(from: url)
+        let delegate = LimitedDataDelegate()
+        let (data, _) = try await session.data(from: url, delegate: delegate)
+        if let error = delegate.error { throw error }
         let parser = FeedParser(data: data)
         let result = parser.parse()
 

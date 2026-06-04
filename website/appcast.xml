@@ -5,20 +5,24 @@
   <description>精致、安全的 RSS 阅读器</description>
   <language>zh-CN</language>
   <item>
-    <title>v1.1.0</title>
+    <title>v1.2.0</title>
     <pubDate>Thu, 04 Jun 2026 00:00:00 +0800 00:00:00 +0800</pubDate>
-    <sparkle:version>1.1.0</sparkle:version>
-    <sparkle:shortVersionString>1.1.0</sparkle:shortVersionString>
+    <sparkle:version>1.2.0</sparkle:version>
+    <sparkle:shortVersionString>1.2.0</sparkle:shortVersionString>
     <sparkle:minimumSystemVersion>15.0</sparkle:minimumSystemVersion>
-    <enclosure url="https://github.com/yueraaaa/NewReader/releases/download/v1.1.0/NewReader-macOS-v1.1.0.zip"
+    <enclosure url="https://github.com/yueraaaa/NewReader/releases/download/v1.2.0/NewReader-macOS-v1.2.0.zip"
               length="972800" type="application/octet-stream"
               sparkle:edSignature=""/>
     <description><![CDATA[
-      <h2>iCloud 同步 + 订阅源改名 + 安全加固</h2>
+      <h2>分类管理 + 主题切换 + 键盘导航 + 安全审计修复</h2>
       <ul>
         <li>MiniMax TTS 语音引擎</li>
         <li>IPv6 SSRF 防护</li>
         <li>iCloud 跨设备同步（SwiftData + CloudKit）</li>
+        <li>订阅源分类管理（新建/折叠/重命名/删除）</li>
+        <li>主题切换（浅色/深色/跟随系统）</li>
+        <li>J/K 键盘导航 + 字号调节</li>
+        <li>安全审计修复（MiniMax 隐私/Keychain/CSP/缓存淘汰/响应体限制）</li>
         <li>订阅源重命名（macOS 右键 / iOS 左滑）</li>
         <li>HTML 深度消毒</li>
       </ul>

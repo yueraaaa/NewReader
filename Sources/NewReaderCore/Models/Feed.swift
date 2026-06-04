@@ -8,6 +8,8 @@ public final class Feed {
     public var feedDescription: String = ""
     public var url: String = ""
     public var siteURL: String?
+    /// Non-nil when the last refresh failed. Cleared on successful refresh.
+    public var lastError: String?
     public var imageURL: String?
     public var lastFetched: Date?
     public var addedDate: Date = Date()

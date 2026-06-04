@@ -17,6 +17,7 @@ public struct ArticleReaderView: View {
     /// tasks that don't match the currently shown article are dropped, so
     /// switching articles mid-request never paints stale data on the new one.
     @State private var activeTaskArticleID: UUID?
+    @State private var fontSize: CGFloat = 16
 
     public init(article: Article, viewModel: ReaderViewModel) {
         self.article = article
@@ -150,6 +151,17 @@ public struct ArticleReaderView: View {
                         .foregroundStyle(article.isStarred ? .yellow : .secondary)
                 }
                 .help(article.isStarred ? "取消星标" : "星标")
+
+                // Font size
+                Button {
+                    let sizes: [CGFloat] = [14, 16, 18, 20, 22]
+                    if let i = sizes.firstIndex(of: fontSize) {
+                        fontSize = sizes[(i + 1) % sizes.count]
+                    }
+                } label: {
+                    Image(systemName: "textformat.size")
+                }
+                .help("字号: \(Int(fontSize))pt")
             }
         }
         .overlay {
@@ -245,6 +257,7 @@ import WebKit
 public struct ArticleContentView: NSViewRepresentable {
     let html: String
     let baseURL: URL?
+    let fontSize: CGFloat
     let summary: String?
     let translation: String?
     let translationLanguage: String?
@@ -252,6 +265,7 @@ public struct ArticleContentView: NSViewRepresentable {
     public init(
         html: String,
         baseURL: String? = nil,
+        fontSize: CGFloat = 16,
         summary: String? = nil,
         translation: String? = nil,
         translationLanguage: String? = nil
@@ -261,6 +275,7 @@ public struct ArticleContentView: NSViewRepresentable {
         // smuggle in a private/loopback baseURL into WKWebView. Falls back to
         // nil (no relative-URL resolution) on rejection.
         self.baseURL = baseURL.flatMap { URLValidator.validate($0) }
+        self.fontSize = fontSize
         self.summary = summary
         self.translation = translation
         self.translationLanguage = translationLanguage
@@ -278,7 +293,7 @@ public struct ArticleContentView: NSViewRepresentable {
     }
 
     public func updateNSView(_ webView: WKWebView, context: Context) {
-        webView.loadHTMLString(wrapHTMLWithExtras(html, summary: summary, translation: translation, translationLanguage: translationLanguage), baseURL: baseURL)
+        webView.loadHTMLString(wrapHTMLWithExtras(html, fontSize: fontSize, summary: summary, translation: translation, translationLanguage: translationLanguage), baseURL: baseURL)
     }
 }
 
@@ -288,6 +303,7 @@ import WebKit
 public struct ArticleContentView: UIViewRepresentable {
     let html: String
     let baseURL: URL?
+    let fontSize: CGFloat
     let summary: String?
     let translation: String?
     let translationLanguage: String?
@@ -295,6 +311,7 @@ public struct ArticleContentView: UIViewRepresentable {
     public init(
         html: String,
         baseURL: String? = nil,
+        fontSize: CGFloat = 16,
         summary: String? = nil,
         translation: String? = nil,
         translationLanguage: String? = nil
@@ -304,6 +321,7 @@ public struct ArticleContentView: UIViewRepresentable {
         // smuggle in a private/loopback baseURL into WKWebView. Falls back to
         // nil (no relative-URL resolution) on rejection.
         self.baseURL = baseURL.flatMap { URLValidator.validate($0) }
+        self.fontSize = fontSize
         self.summary = summary
         self.translation = translation
         self.translationLanguage = translationLanguage
@@ -314,6 +332,9 @@ public struct ArticleContentView: UIViewRepresentable {
         let prefs = WKWebpagePreferences()
         prefs.allowsContentJavaScript = false
         config.defaultWebpagePreferences = prefs
+        if #available(iOS 14.0, *) {
+            config.limitsNavigationsToAppBoundDomains = true
+        }
         let webView = WKWebView(frame: .zero, configuration: config)
         webView.isOpaque = false
         webView.backgroundColor = .clear
@@ -322,14 +343,14 @@ public struct ArticleContentView: UIViewRepresentable {
     }
 
     public func updateUIView(_ webView: WKWebView, context: Context) {
-        webView.loadHTMLString(wrapHTMLWithExtras(html, summary: summary, translation: translation, translationLanguage: translationLanguage), baseURL: baseURL)
+        webView.loadHTMLString(wrapHTMLWithExtras(html, fontSize: fontSize, summary: summary, translation: translation, translationLanguage: translationLanguage), baseURL: baseURL)
     }
 }
 #endif
 
 // MARK: - HTML Wrapper
 
-public func wrapHTML(_ html: String) -> String {
+public func wrapHTML(_ html: String, fontSize: CGFloat = 16) -> String {
     """
     <!DOCTYPE html><html><head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
@@ -337,7 +358,7 @@ public func wrapHTML(_ html: String) -> String {
     <style>
       :root { color-scheme: light dark; }
       body { font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-             font-size: 16px; line-height: 1.7; color: #333;
+             font-size: \(Int(fontSize))px; line-height: 1.7; color: #333;
              padding: 20px 24px; margin: 0 auto; max-width: 740px; word-wrap: break-word; overflow-wrap: break-word; }
       @media (prefers-color-scheme: dark) {
         body { color: #ddd; background: transparent; } a { color: #6ea8fe; }
@@ -367,6 +388,7 @@ public func wrapHTML(_ html: String) -> String {
 /// Wrap HTML content with injected metadata, AI summary, and translation at the top
 public func wrapHTMLWithExtras(
     _ html: String,
+    fontSize: CGFloat = 16,
     summary: String? = nil,
     translation: String? = nil,
     translationLanguage: String? = nil
@@ -398,6 +420,6 @@ public func wrapHTMLWithExtras(
         extras += "<div class=\"original-label\">原文</div>\n"
     }
     
-    let wrapped = wrapHTML(extras + html)
+    let wrapped = wrapHTML(extras + html, fontSize: fontSize)
     return wrapped
 }

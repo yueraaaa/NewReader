@@ -7,6 +7,7 @@ struct SubscribeView: View {
 
     @State private var urlString: String = ""
     @State private var isSubscribing: Bool = false
+    @State private var selectedFolder: Folder? = nil
 
     var body: some View {
         NavigationStack {
@@ -28,7 +29,7 @@ struct SubscribeView: View {
                     Task {
                         isSubscribing = true
                         viewModel.errorMessage = nil
-                        await viewModel.subscribe(url: urlString)
+                        await viewModel.subscribe(url: urlString, folder: selectedFolder)
                         isSubscribing = false
                         if viewModel.errorMessage == nil {
                             dismiss()

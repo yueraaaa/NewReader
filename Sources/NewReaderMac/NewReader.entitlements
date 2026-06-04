@@ -9,5 +9,9 @@
     <array>
         <string>CloudKit</string>
     </array>
+    <key>keychain-access-groups</key>
+    <array>
+        <string>$(AppIdentifierPrefix)com.newreader.app</string>
+    </array>
 </dict>
 </plist>

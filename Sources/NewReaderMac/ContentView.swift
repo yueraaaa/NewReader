@@ -28,6 +28,24 @@ struct ContentView: View {
                     .onTapGesture { viewModel.showSubscribe = false }
             }
         }
+        .overlay(alignment: .bottom) {
+            if let feed = viewModel.lastDeletedFeed {
+                HStack {
+                    Label("已删除「\(feed.title)」", systemImage: "trash")
+                        .font(.callout)
+                    Button("撤销") {
+                        viewModel.undoDeleteFeed()
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.small)
+                }
+                .padding(12)
+                .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 10))
+                .padding(.bottom, 40)
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+                .animation(.spring, value: viewModel.lastDeletedFeed != nil)
+            }
+        }
         .overlay {
             if viewModel.showSubscribe {
                 SubscribeOverlayView()
@@ -66,8 +84,9 @@ struct ContentView: View {
             viewModel.showSubscribe = true
         }
         .task {
-            viewModel.selectAllArticles()
+            viewModel.selectUnread()
         }
+        .preferredColorScheme(viewModel.appTheme.colorScheme)
     }
 }
 

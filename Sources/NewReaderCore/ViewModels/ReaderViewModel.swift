@@ -26,6 +26,11 @@ public final class ReaderViewModel: ObservableObject {
 
     public let modelContext: ModelContext
     public let syncMonitor: SyncMonitor
+    @Published public var appTheme: AppTheme {
+        didSet {
+            UserDefaults.standard.set(appTheme.rawValue, forKey: "newreader_theme")
+        }
+    }
     private var feedService: FeedService { FeedService(modelContext: modelContext) }
     private var opmlService: OPMLService { OPMLService(modelContext: modelContext) }
 
@@ -42,6 +47,7 @@ public final class ReaderViewModel: ObservableObject {
 
     public init(modelContext: ModelContext, iCloudContainerID: String? = nil) {
         self.modelContext = modelContext
+        self.appTheme = AppTheme(rawValue: UserDefaults.standard.string(forKey: "newreader_theme") ?? "system") ?? .system
         self.syncMonitor = SyncMonitor(configuredContainerID: iCloudContainerID)
         loadData()
     }
@@ -49,6 +55,7 @@ public final class ReaderViewModel: ObservableObject {
     // MARK: - Data loading
 
     public func loadData() {
+        invalidateCache()
         let feedDescriptor = FetchDescriptor<Feed>(sortBy: [SortDescriptor(\.addedDate)])
         let folderDescriptor = FetchDescriptor<Folder>(sortBy: [SortDescriptor(\.sortOrder)])
         if let f = try? modelContext.fetch(feedDescriptor) { feeds = f }
@@ -79,8 +86,17 @@ public final class ReaderViewModel: ObservableObject {
         articles = sortedArticles(from: allFlatArticles.filter { $0.isStarred })
     }
 
+    private var _cachedAllArticles: [Article] = []
+    private var _articlesCacheInvalid = true
+
+    private func invalidateCache() { _articlesCacheInvalid = true }
+
     private var allFlatArticles: [Article] {
-        feeds.flatMap { $0.allArticles }
+        if _articlesCacheInvalid {
+            _cachedAllArticles = feeds.flatMap { $0.allArticles }
+            _articlesCacheInvalid = false
+        }
+        return _cachedAllArticles
     }
 
     private func sortedArticles(from articles: [Article]) -> [Article] {
@@ -89,12 +105,14 @@ public final class ReaderViewModel: ObservableObject {
 
     // MARK: - Feed operations
 
-    public func subscribe(url: String) async {
+    public func subscribe(url: String, folder: Folder? = nil) async {
         isLoading = true
         errorMessage = nil
         defer { isLoading = false }
         do {
             let feed = try await feedService.subscribe(urlString: url)
+            feed.folder = folder
+            try? modelContext.save()
             feeds.append(feed)
             feeds.sort { $0.addedDate < $1.addedDate }
             await autoSummarizeNewArticles(feed.allArticles)
@@ -137,11 +155,32 @@ public final class ReaderViewModel: ObservableObject {
         else { selectAllArticles() }
     }
 
+    /// Recently deleted feeds with undo window (5s).
+    @Published public var lastDeletedFeed: Feed?
+    private var undoTask: Task<Void, Never>?
+
     public func deleteFeed(_ feed: Feed) {
+        let snapshot = feed
         modelContext.delete(feed)
         try? modelContext.save()
         feeds.removeAll { $0.id == feed.id }
         if selectedFeed?.id == feed.id { selectAllArticles() }
+        lastDeletedFeed = snapshot
+        undoTask?.cancel()
+        undoTask = Task {
+            try? await Task.sleep(for: .seconds(5))
+            if !Task.isCancelled { lastDeletedFeed = nil }
+        }
+    }
+
+    public func undoDeleteFeed() {
+        guard let feed = lastDeletedFeed else { return }
+        modelContext.insert(feed)
+        try? modelContext.save()
+        feeds.append(feed)
+        feeds.sort { $0.addedDate < $1.addedDate }
+        lastDeletedFeed = nil
+        undoTask?.cancel()
     }
 
     // MARK: - Article operations
@@ -301,6 +340,23 @@ public final class ReaderViewModel: ObservableObject {
         guard !trimmed.isEmpty else { return }
         feed.title = trimmed
         try? modelContext.save()
+    }
+
+    public func renameFolder(_ folder: Folder, to newName: String) {
+        let trimmed = newName.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        folder.name = trimmed
+        try? modelContext.save()
+    }
+
+    public func deleteFolder(_ folder: Folder) {
+        // Unlink all feeds from this folder
+        for feed in folder.allFeeds {
+            feed.folder = nil
+        }
+        modelContext.delete(folder)
+        try? modelContext.save()
+        folders.removeAll { $0.id == folder.id }
     }
 
     public func moveFeed(_ feed: Feed, to folder: Folder?) {

@@ -47,6 +47,15 @@ struct SettingsView: View {
                 }
             }
 
+            Section("外观") {
+                Picker("", selection: $viewModel.appTheme) {
+                    ForEach(AppTheme.allCases, id: \.self) { t in
+                        Text(t.displayName).tag(t)
+                    }
+                }
+                .pickerStyle(.segmented)
+            }
+
             Section("缓存与同步") {
                 HStack {
                     Text("离线缓存")

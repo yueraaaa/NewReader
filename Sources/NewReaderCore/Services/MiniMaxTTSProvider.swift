@@ -135,7 +135,7 @@ public final class MiniMaxTTSProvider: NSObject, ObservableObject, AVAudioPlayer
         let key = config.apiKey.trimmingCharacters(in: .whitespaces)
         guard !key.isEmpty else {
             var loaded = MiniMaxTTSConfig.load()
-            errorMessage = "[v2] API Key 为空！请先填写并点击「保存」。\n当前 config.apiKey 长度=\(config.apiKey.count)"
+            errorMessage = "API Key 为空，请先填写并保存。"
             return false
         }
         guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
@@ -148,8 +148,10 @@ public final class MiniMaxTTSProvider: NSObject, ObservableObject, AVAudioPlayer
         defer { isLoading = false }
 
         let endpoint = config.endpoint.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
-        guard let url = URL(string: endpoint) else {
-            errorMessage = "无效的 API 端点"
+        guard let url = URL(string: endpoint),
+              let scheme = url.scheme?.lowercased(),
+              scheme == "https" else {
+            errorMessage = "API 端点必须使用 HTTPS"
             return false
         }
 
@@ -179,14 +181,12 @@ public final class MiniMaxTTSProvider: NSObject, ObservableObject, AVAudioPlayer
 
         do {
             let (data, response) = try await session.data(for: request)
-            let rawBody = String(data: data, encoding: .utf8) ?? "nil"
             guard let http = response as? HTTPURLResponse else {
-                errorMessage = "[v2] MiniMax TTS 响应类型异常: \(rawBody.prefix(300))"
+                errorMessage = "MiniMax TTS 响应格式异常"
                 return false
             }
             guard http.statusCode == 200 else {
-                let keyLen = config.apiKey.count
-                errorMessage = "[v2] MiniMax TTS HTTP \(http.statusCode) url=\(url.absoluteString) keyLen=\(keyLen):\n\(rawBody.prefix(500))"
+                errorMessage = "MiniMax TTS 请求失败 (HTTP \(http.statusCode))"
                 return false
             }
             guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
@@ -198,7 +198,7 @@ public final class MiniMaxTTSProvider: NSObject, ObservableObject, AVAudioPlayer
             // Check for API-level error
             if let br = json["base_resp"] as? [String: Any],
                let code = br["status_code"] as? Int, code != 0 {
-                errorMessage = "MiniMax API 错误 (\(code)) keyLen=\(config.apiKey.count): \(br["status_msg"] as? String ?? "未知")"
+                errorMessage = "MiniMax API 错误 (\(code)): \(br["status_msg"] as? String ?? "未知")"
                 return false
             }
 
@@ -220,7 +220,7 @@ public final class MiniMaxTTSProvider: NSObject, ObservableObject, AVAudioPlayer
 
             guard let audio = audioData else {
                 let raw = String(data: data, encoding: .utf8) ?? "nil"
-                errorMessage = "[v2] MiniMax TTS 返回数据异常:\n\(raw.prefix(500))"
+                errorMessage = "MiniMax TTS 未返回有效音频数据"
                 return false
             }
 
@@ -276,11 +276,6 @@ public final class MiniMaxTTSProvider: NSObject, ObservableObject, AVAudioPlayer
         let url = tempDir.appendingPathComponent("minimax_\(UUID().uuidString).mp3")
         try? data.write(to: url, options: .atomic)
         tempAudioURL = url
-
-        // Save debug copy to Desktop
-        let desktop = FileManager.default.homeDirectoryForCurrentUser
-            .appendingPathComponent("Desktop/minimax_debug.mp3")
-        try? data.write(to: desktop, options: .atomic)
 
         // Try initWithData (more format-tolerant than initWithContentsOfURL)
         do {

@@ -21,8 +21,10 @@ public enum KeychainHelper {
         let addQuery: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrAccount as String: key,
+            kSecAttrAccessGroup as String: "com.newreader.app",
             kSecAttrService as String: serviceName,
             kSecValueData as String: data,
+            kSecAttrAccessGroup as String: "com.newreader.app",
             kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlock
         ]
 
@@ -36,6 +38,7 @@ public enum KeychainHelper {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrAccount as String: key,
+            kSecAttrAccessGroup as String: "com.newreader.app",
             kSecAttrService as String: serviceName,
             kSecReturnData as String: true,
             kSecMatchLimit as String: kSecMatchLimitOne
