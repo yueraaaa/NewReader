@@ -97,6 +97,22 @@
     animation: bob 2.2s ease-in-out infinite;
   }
   .scroll-hint svg { width: 22px; height: 22px; opacity: 0.25; stroke: #999; }
+  /* Top Nav */
+  .topnav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    padding: 16px 32px;
+    display: flex; align-items: center; justify-content: space-between;
+    background: rgba(250,249,246,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+  }
+  .topnav .logo { font-size: 1.1rem; font-weight: 700; color: #1a1a1a; }
+  .topnav .links { display: flex; gap: 20px; align-items: center; }
+  .topnav .links a {
+    font-size: 0.9rem; color: #666; text-decoration: none;
+    transition: color 0.2s;
+  }
+  .topnav .links a:hover { color: #1a1a1a; }
   @keyframes bob {
     0%, 100% { transform: translateX(-50%) translateY(0); }
     50% { transform: translateX(-50%) translateY(8px); }
@@ -207,6 +223,14 @@
 </style>
 </head>
 <body>
+<nav class="topnav">
+  <a href="index.html" class="logo">NewReader</a>
+  <div class="links">
+    <a href="docs.html">文档</a>
+    <a href="https://github.com/yueraaaa/NewReader" target="_blank" rel="noopener">GitHub</a>
+  </div>
+</nav>
+
 
 <section class="hero">
   <canvas id="hero-bg"></canvas>
