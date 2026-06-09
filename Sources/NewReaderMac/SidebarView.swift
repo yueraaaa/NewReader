@@ -9,7 +9,7 @@ struct SidebarView: View {
     @State private var renameText: String = ""
     @State private var folderToRename: Folder?
     @State private var folderRenameText: String = ""
-    @State private var showNewFolderAlert: Bool = false
+    @State private var showNewFolderSheet: Bool = false
     @State private var collapsedFolders: Set<UUID> = []
     @State private var newFolderName: String = ""
 
@@ -20,19 +20,31 @@ struct SidebarView: View {
                     icon: "tray.full",
                     label: "全部文章",
                     count: viewModel.feeds.flatMap { $0.allArticles }.count,
-                    action: { viewModel.selectAllArticles() }
+                    action: {
+                        viewModel.selectAllArticles()
+                    }
                 )
                 SmartViewRow(
                     icon: "envelope.badge",
                     label: "未读",
                     count: viewModel.feeds.flatMap { $0.allArticles }.filter { !$0.isRead }.count,
-                    action: { viewModel.selectUnread() }
+                    action: {
+                        viewModel.selectUnread()
+                    }
                 )
                 SmartViewRow(
                     icon: "star",
                     label: "星标",
                     count: viewModel.feeds.flatMap { $0.allArticles }.filter { $0.isStarred }.count,
-                    action: { viewModel.selectStarred() }
+                    action: {
+                        viewModel.selectStarred()
+                    }
+                )
+                SmartViewRow(
+                    icon: "sparkles",
+                    label: "工作台",
+                    count: viewModel.workspace?.articleCount ?? 0,
+                    action: { NotificationCenter.default.post(name: .showWorkspaceSheet, object: nil) }
                 )
             }
 
@@ -41,11 +53,16 @@ struct SidebarView: View {
                 Section {
                     if !collapsedFolders.contains(folder.id) {
                         ForEach(folder.allFeeds) { feed in
-                            FeedRowView(feed: feed)
-                                .tag(feed as Feed?)
-                                .contextMenu {
-                                    feedContextMenu(feed: feed)
-                                }
+                            Button {
+                                viewModel.selectFeed(feed)
+                            } label: {
+                                FeedRowView(feed: feed)
+                            }
+                            .buttonStyle(.plain)
+                            .tag(feed as Feed?)
+                            .contextMenu {
+                                feedContextMenu(feed: feed)
+                            }
                         }
                     }
                 } header: {
@@ -90,11 +107,16 @@ struct SidebarView: View {
             if !orphanFeeds.isEmpty {
                 Section(viewModel.folders.isEmpty ? "订阅源" : "未分类") {
                     ForEach(orphanFeeds) { feed in
-                        FeedRowView(feed: feed)
-                            .tag(feed as Feed?)
-                            .contextMenu {
-                                feedContextMenu(feed: feed)
-                            }
+                        Button {
+                            viewModel.selectFeed(feed)
+                        } label: {
+                            FeedRowView(feed: feed)
+                        }
+                        .buttonStyle(.plain)
+                        .tag(feed as Feed?)
+                        .contextMenu {
+                            feedContextMenu(feed: feed)
+                        }
                     }
                 }
             } else if viewModel.folders.isEmpty {
@@ -110,7 +132,7 @@ struct SidebarView: View {
             ToolbarItem {
                 Menu {
                     Button {
-                        showNewFolderAlert = true
+                        showNewFolderSheet = true
                     } label: {
                         Label("新建分类", systemImage: "folder.badge.plus")
                     }
@@ -149,46 +171,98 @@ struct SidebarView: View {
                 .help("更多操作")
             }
         }
-        // Rename feed alert
-        .alert("重命名订阅源", isPresented: Binding(
-            get: { feedToRename != nil },
-            set: { if !$0 { feedToRename = nil } }
-        )) {
-            TextField("新名称", text: $renameText)
-            Button("取消", role: .cancel) { feedToRename = nil }
-            Button("确定") {
-                if let feed = feedToRename {
-                    viewModel.renameFeed(feed, to: renameText)
+        // Rename feed sheet
+        .sheet(item: $feedToRename) { feed in
+            VStack(spacing: 16) {
+                Text("重命名订阅源")
+                    .font(.headline)
+                Text("为「\(feed.title)」输入新名称")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                TextField("新名称", text: $renameText)
+                    .textFieldStyle(.roundedBorder)
+                    .frame(width: 260)
+
+                HStack(spacing: 12) {
+                    Button("取消") {
+                        renameText = ""
+                        feedToRename = nil
+                    }
+                    .keyboardShortcut(.escape, modifiers: [])
+
+                    Button("确定") {
+                        viewModel.renameFeed(feed, to: renameText)
+                        renameText = ""
+                        feedToRename = nil
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .disabled(renameText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    .keyboardShortcut(.return, modifiers: [])
                 }
-                feedToRename = nil
             }
-        } message: {
-            Text("为订阅源「\(feedToRename?.title ?? "")」输入新名称")
+            .padding(30)
+            .frame(width: 360, height: 200)
         }
-        // Rename folder alert
-        .alert("重命名分类", isPresented: Binding(
-            get: { folderToRename != nil },
-            set: { if !$0 { folderToRename = nil } }
-        )) {
-            TextField("新名称", text: $folderRenameText)
-            Button("取消", role: .cancel) { folderToRename = nil }
-            Button("确定") {
-                if let folder = folderToRename {
-                    viewModel.renameFolder(folder, to: folderRenameText)
+        // Rename folder sheet
+        .sheet(item: $folderToRename) { folder in
+            VStack(spacing: 16) {
+                Text("重命名分类")
+                    .font(.headline)
+                Text("为「\(folder.name)」输入新名称")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                TextField("新名称", text: $folderRenameText)
+                    .textFieldStyle(.roundedBorder)
+                    .frame(width: 260)
+
+                HStack(spacing: 12) {
+                    Button("取消") {
+                        folderRenameText = ""
+                        folderToRename = nil
+                    }
+                    .keyboardShortcut(.escape, modifiers: [])
+
+                    Button("确定") {
+                        viewModel.renameFolder(folder, to: folderRenameText)
+                        folderRenameText = ""
+                        folderToRename = nil
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .disabled(folderRenameText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    .keyboardShortcut(.return, modifiers: [])
                 }
-                folderToRename = nil
             }
-        } message: {
-            Text("为分类「\(folderToRename?.name ?? "")」输入新名称")
+            .padding(30)
+            .frame(width: 360, height: 200)
         }
-        // New folder alert
-        .alert("新建分类", isPresented: $showNewFolderAlert) {
-            TextField("分类名称", text: $newFolderName)
-            Button("取消", role: .cancel) { newFolderName = "" }
-            Button("创建") {
-                viewModel.createFolder(name: newFolderName)
-                newFolderName = ""
+        // New folder sheet (avoids macOS alert TextField focus bug)
+        .sheet(isPresented: $showNewFolderSheet) {
+            VStack(spacing: 16) {
+                Text("新建分类")
+                    .font(.headline)
+                TextField("分类名称", text: $newFolderName)
+                    .textFieldStyle(.roundedBorder)
+                    .frame(width: 240)
+
+                HStack(spacing: 12) {
+                    Button("取消") {
+                        newFolderName = ""
+                        showNewFolderSheet = false
+                    }
+                    .keyboardShortcut(.escape, modifiers: [])
+
+                    Button("创建") {
+                        viewModel.createFolder(name: newFolderName)
+                        newFolderName = ""
+                        showNewFolderSheet = false
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .disabled(newFolderName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    .keyboardShortcut(.return, modifiers: [])
+                }
             }
+            .padding(30)
+            .frame(width: 320, height: 180)
         }
         .fileImporter(
             isPresented: $showImportOPML,
@@ -244,20 +318,28 @@ struct SmartViewRow: View {
     public let label: String
     public let count: Int
     public let action: () -> Void
+    @State private var isPressed = false
 
     public var body: some View {
-        Button(action: action) {
-            HStack {
-                Image(systemName: icon).frame(width: 20)
-                Text(label)
-                Spacer()
-                Text("\(count)")
-                    .font(.caption).foregroundStyle(.secondary)
-                    .padding(.horizontal, 6).padding(.vertical, 1)
-                    .background(.quaternary, in: Capsule())
-            }
+        HStack {
+            Image(systemName: icon).frame(width: 20)
+            Text(label)
+            Spacer()
+            Text("\(count)")
+                .font(.caption).foregroundStyle(.secondary)
+                .padding(.horizontal, 6).padding(.vertical, 1)
+                .background(.quaternary, in: Capsule())
         }
-        .buttonStyle(.plain)
+        .contentShape(Rectangle())
+        .scaleEffect(isPressed ? 0.97 : 1.0)
+        .animation(.spring(response: 0.2, dampingFraction: 0.6), value: isPressed)
+        .onTapGesture {
+            isPressed = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) {
+                isPressed = false
+            }
+            action()
+        }
     }
 }
 

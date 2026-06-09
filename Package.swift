@@ -13,12 +13,13 @@ let package = Package(
         .executable(name: "NewReaderiOS", targets: ["NewReaderiOS"])
     ],
     dependencies: [
-        .package(url: "https://github.com/nmdias/FeedKit", from: "9.1.2")
+        .package(url: "https://github.com/nmdias/FeedKit", from: "9.1.2"),
+        .package(url: "https://github.com/supabase/supabase-swift", from: "2.0.0")
     ],
     targets: [
         .target(
             name: "NewReaderCore",
-            dependencies: ["FeedKit"],
+            dependencies: ["FeedKit", .product(name: "Supabase", package: "supabase-swift")],
             path: "Sources/NewReaderCore"
         ),
         .testTarget(
@@ -30,7 +31,7 @@ let package = Package(
             name: "NewReaderMac",
             dependencies: ["NewReaderCore"],
             path: "Sources/NewReaderMac",
-            exclude: [],
+            exclude: ["Info.plist", "NewReader.entitlements", "Secrets.plist", "Secrets.plist.template"],
             resources: [
                 .process("AppIcon.icns")
             ]
@@ -38,7 +39,8 @@ let package = Package(
         .executableTarget(
             name: "NewReaderiOS",
             dependencies: ["NewReaderCore"],
-            path: "Sources/NewReaderiOS"
+            path: "Sources/NewReaderiOS",
+            exclude: ["NewReader.entitlements"]
         )
     ]
 )

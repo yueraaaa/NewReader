@@ -38,6 +38,7 @@ public struct ArticleReaderView: View {
             ArticleContentView(
                 html: article.contentHTML,
                 baseURL: article.url,
+                fontSize: fontSize,
                 summary: aiSummary ?? article.aiSummary,
                 translation: translatedText,
                 translationLanguage: translatedText != nil ? selectedLanguage.displayName : nil
@@ -75,31 +76,25 @@ public struct ArticleReaderView: View {
                 .disabled(isSummarizing)
                 .help("AI 摘要")
 
-                // 翻译 — standalone menu with language options
-                Menu {
-                    ForEach(TranslationLanguage.allCases, id: \.self) { lang in
-                        Button {
-                            Task {
-                                let taskID = article.id
-                                activeTaskArticleID = taskID
-                                isTranslating = true
-                                selectedLanguage = lang
-                                let result = await viewModel.translate(article, to: lang)
-                                if activeTaskArticleID == taskID {
-                                    translatedText = result
-                                    isTranslating = false
-                                }
-                            }
-                        } label: {
-                            Label("翻译为 \(lang.displayName)", systemImage: "globe")
+                // 翻译 — one-click translate to preferred language
+                Button {
+                    Task {
+                        let taskID = article.id
+                        activeTaskArticleID = taskID
+                        isTranslating = true
+                        let lang = TranslationLanguage.preferred
+                        selectedLanguage = lang
+                        let result = await viewModel.translate(article, to: lang)
+                        if activeTaskArticleID == taskID {
+                            translatedText = result
+                            isTranslating = false
                         }
                     }
-                    .disabled(isTranslating)
                 } label: {
                     Image(systemName: isTranslating ? "globe.americas.fill" : "globe")
                 }
                 .disabled(isTranslating)
-                .help("翻译")
+                .help("翻译为\(TranslationLanguage.preferred.displayName)")
 
                 // 提取全文
                 Button {
@@ -118,18 +113,24 @@ public struct ArticleReaderView: View {
                 .disabled(isExtracting)
                 .help("提取全文")
 
-                // TTS 语音朗读
+                // TTS 语音朗读 — 三态：播放 → 暂停 → 继续
+                let isActive = viewModel.ttsService.isSpeaking && !viewModel.ttsService.isPaused
+                let isPaused = viewModel.ttsService.isPaused
                 Button {
-                    withAnimation { showVoicePanel.toggle() }
-                    if showVoicePanel {
-                        viewModel.ttsService.speak(article.contentHTML)
+                    if isActive {
+                        viewModel.ttsService.pause()
+                    } else if isPaused {
+                        viewModel.ttsService.resume()
                     } else {
-                        viewModel.ttsService.stop()
+                        withAnimation { showVoicePanel = true }
+                        viewModel.ttsService.speak(article.contentHTML)
                     }
                 } label: {
-                    Image(systemName: showVoicePanel ? "speaker.wave.2.fill" : "speaker.wave.2")
+                    Image(systemName: isActive ? "speaker.wave.2.fill"
+                                   : isPaused ? "play.fill"
+                                   : "speaker.wave.2")
                 }
-                .help("语音朗读")
+                .help(isActive ? "暂停朗读" : isPaused ? "继续朗读" : "语音朗读")
 
                 // 缓存
                 Button {

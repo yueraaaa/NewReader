@@ -16,13 +16,13 @@
     <description><![CDATA[
       <h2>分类管理 + 主题切换 + 键盘导航 + 安全审计修复</h2>
       <ul>
-        <li>MiniMax TTS 语音引擎</li>
+        <li>自定义 TTS 语音引擎</li>
         <li>IPv6 SSRF 防护</li>
         <li>iCloud 跨设备同步（SwiftData + CloudKit）</li>
         <li>订阅源分类管理（新建/折叠/重命名/删除）</li>
         <li>主题切换（浅色/深色/跟随系统）</li>
         <li>J/K 键盘导航 + 字号调节</li>
-        <li>安全审计修复（MiniMax 隐私/Keychain/CSP/缓存淘汰/响应体限制）</li>
+        <li>安全审计修复（Keychain/CSP/缓存淘汰/响应体限制）</li>
         <li>订阅源重命名（macOS 右键 / iOS 左滑）</li>
         <li>HTML 深度消毒</li>
       </ul>

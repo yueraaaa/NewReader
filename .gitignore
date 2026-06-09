@@ -27,3 +27,9 @@ dist/
 
 # App bundle (distributed via GitHub Releases, not git)
 NewReader.app/
+Sources/NewReaderMac/Secrets.plist
+
+# Crash logs (user-specific)
+~/Library/Logs/NewReader/
+NewReader.dmg
+.agents/

@@ -6,10 +6,22 @@ struct ContentView: View {
     @State private var selectedTab: Tab = .feeds
 
     enum Tab: String, CaseIterable {
-        case feeds, unread, starred, settings
+        case feeds, unread, starred, workspace, settings
     }
 
     var body: some View {
+        Group {
+            if !viewModel.authService.isLoggedIn {
+                LoginView()
+                    .environmentObject(viewModel)
+            } else {
+                mainContent
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var mainContent: some View {
         TabView(selection: $selectedTab) {
             NavigationStack { FeedsListView() }
                 .tabItem { Label("订阅", systemImage: "dot.radiowaves.left.and.right") }
@@ -37,6 +49,10 @@ struct ContentView: View {
             NavigationStack { SettingsView() }
                 .tabItem { Label("设置", systemImage: "gearshape") }
                 .tag(Tab.settings)
+
+            NavigationStack { WorkspaceView() }
+                .tabItem { Label("工作台", systemImage: "sparkles") }
+                .tag(Tab.workspace)
         }
         .preferredColorScheme(viewModel.appTheme.colorScheme)
     }

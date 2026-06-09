@@ -3,30 +3,65 @@ import Foundation
 
 // MARK: - TTS Engine
 
-public enum TTSEngine: String, CaseIterable, Codable {
+public enum TTSEngine: CaseIterable {
     case apple
-    case minimax
+    case custom
 
     public var displayName: String {
         switch self {
         case .apple: return "Apple 系统语音"
-        case .minimax: return "MiniMax TTS"
+        case .custom: return "自定义 TTS API"
         }
     }
 }
 
-// MARK: - MiniMax TTS Config
+// MARK: - Codable (backward-compatible: decodes legacy "minimax" too)
+extension TTSEngine: Codable {
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        let value = try container.decode(String.self)
+        switch value {
+        case "minimax", "custom": self = .custom
+        default: self = .apple
+        }
+    }
 
-public struct MiniMaxTTSConfig: Codable {
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(rawValue)
+    }
+}
+
+// MARK: - RawRepresentable (for Picker bindings)
+extension TTSEngine: RawRepresentable {
+    public var rawValue: String {
+        switch self {
+        case .apple: return "apple"
+        case .custom: return "custom"
+        }
+    }
+
+    public init?(rawValue: String) {
+        switch rawValue {
+        case "apple": self = .apple
+        case "minimax", "custom": self = .custom
+        default: return nil
+        }
+    }
+}
+
+// MARK: - Custom TTS Config
+
+public struct CustomTTSConfig: Codable {
     public init() {}
     public var engine: TTSEngine = .apple
-    public var endpoint: String = "https://api.minimaxi.com/v1/t2a_v2"
+    public var endpoint: String = "https://your-tts-api.example.com/v1/tts"
     public var voiceId: String = "male-qn-qingse"
     public var speed: Double = 1.0
     public var pitch: Double = 0
     public var volume: Double = 1.0
 
-    /// Preset voices from MiniMax
+    /// Preset voice IDs (customize for your TTS provider)
     public static let voicePresets: [(id: String, name: String)] = [
         ("male-qn-qingse", "青涩青年男声"),
         ("male-qn-jingying", "精英青年男声"),
@@ -44,15 +79,15 @@ public struct MiniMaxTTSConfig: Codable {
     // MARK: - Persistence
 
     /// Load config from disk; API key from Keychain.
-    public static func load() -> MiniMaxTTSConfig {
+    public static func load() -> CustomTTSConfig {
         // Ensure config directory exists
         if let dir = configFileURL?.deletingLastPathComponent() {
             try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         }
-        var config = MiniMaxTTSConfig()
+        var config = CustomTTSConfig()
         if let url = configFileURL,
            let data = try? Data(contentsOf: url),
-           let saved = try? JSONDecoder().decode(MiniMaxTTSConfig.self, from: data) {
+           let saved = try? JSONDecoder().decode(CustomTTSConfig.self, from: data) {
             config = saved
         }
         if let key = KeychainHelper.load(key: keychainKey), !key.isEmpty {
@@ -74,12 +109,6 @@ public struct MiniMaxTTSConfig: Codable {
             KeychainHelper.delete(key: Self.keychainKey)
         }
 
-        // Save non-sensitive fields to JSON
-        var dict: [String: String] = [
-            "engine": engine.rawValue,
-            "endpoint": endpoint,
-            "voiceId": voiceId,
-        ]
         // Encode numeric fields
         if let data = try? JSONEncoder().encode(self) {
             if var json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
@@ -105,22 +134,22 @@ public struct MiniMaxTTSConfig: Codable {
     }
 }
 
-// MARK: - MiniMax TTS Provider
+// MARK: - Custom TTS Provider
 
 @MainActor
-public final class MiniMaxTTSProvider: NSObject, ObservableObject, AVAudioPlayerDelegate {
+public final class CustomTTSProvider: NSObject, ObservableObject, AVAudioPlayerDelegate {
     @Published public var isSpeaking: Bool = false
     @Published public var isPaused: Bool = false
     @Published public var isLoading: Bool = false
     @Published public var errorMessage: String?
 
-    public var config: MiniMaxTTSConfig
+    public var config: CustomTTSConfig
 
     private let session: URLSession
     private var player: AVAudioPlayer?
     private var tempAudioURL: URL?
 
-    public init(config: MiniMaxTTSConfig) {
+    public init(config: CustomTTSConfig) {
         self.config = config
         let urlConfig = URLSessionConfiguration.default
         urlConfig.timeoutIntervalForRequest = 60
@@ -129,12 +158,11 @@ public final class MiniMaxTTSProvider: NSObject, ObservableObject, AVAudioPlayer
         super.init()
     }
 
-    /// Speak the given text via MiniMax TTS API.
+    /// Speak the given text via TTS API.
     /// Fails gracefully — the caller should fall back to Apple TTS.
     public func speak(_ text: String) async -> Bool {
         let key = config.apiKey.trimmingCharacters(in: .whitespaces)
         guard !key.isEmpty else {
-            var loaded = MiniMaxTTSConfig.load()
             errorMessage = "API Key 为空，请先填写并保存。"
             return false
         }
@@ -182,23 +210,23 @@ public final class MiniMaxTTSProvider: NSObject, ObservableObject, AVAudioPlayer
         do {
             let (data, response) = try await session.data(for: request)
             guard let http = response as? HTTPURLResponse else {
-                errorMessage = "MiniMax TTS 响应格式异常"
+                errorMessage = "TTS 响应格式异常"
                 return false
             }
             guard http.statusCode == 200 else {
-                errorMessage = "MiniMax TTS 请求失败 (HTTP \(http.statusCode))"
+                errorMessage = "TTS 请求失败 (HTTP \(http.statusCode))"
                 return false
             }
             guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
                 let raw = String(data: data, encoding: .utf8) ?? "nil"
-                errorMessage = "MiniMax TTS 响应解析失败: \(raw.prefix(200))"
+                errorMessage = "TTS 响应解析失败: \(raw.prefix(200))"
                 return false
             }
 
             // Check for API-level error
             if let br = json["base_resp"] as? [String: Any],
                let code = br["status_code"] as? Int, code != 0 {
-                errorMessage = "MiniMax API 错误 (\(code)): \(br["status_msg"] as? String ?? "未知")"
+                errorMessage = "TTS API 错误 (\(code)): \(br["status_msg"] as? String ?? "未知")"
                 return false
             }
 
@@ -219,8 +247,7 @@ public final class MiniMaxTTSProvider: NSObject, ObservableObject, AVAudioPlayer
             }
 
             guard let audio = audioData else {
-                let raw = String(data: data, encoding: .utf8) ?? "nil"
-                errorMessage = "MiniMax TTS 未返回有效音频数据"
+                errorMessage = "TTS 未返回有效音频数据"
                 return false
             }
 
@@ -257,7 +284,7 @@ public final class MiniMaxTTSProvider: NSObject, ObservableObject, AVAudioPlayer
 
     // MARK: - Private
 
-    /// Decode a hex-encoded string (MiniMax returns audio as hex, not base64).
+    /// Decode a hex-encoded string (some TTS APIs return audio as hex, not base64).
     private func decodeHex(_ hex: String) -> Data? {
         let len = hex.count / 2
         var data = Data(capacity: len)
@@ -273,7 +300,7 @@ public final class MiniMaxTTSProvider: NSObject, ObservableObject, AVAudioPlayer
 
     private func playAudio(_ data: Data) -> Bool {
         let tempDir = FileManager.default.temporaryDirectory
-        let url = tempDir.appendingPathComponent("minimax_\(UUID().uuidString).mp3")
+        let url = tempDir.appendingPathComponent("tts_\(UUID().uuidString).mp3")
         try? data.write(to: url, options: .atomic)
         tempAudioURL = url
 
@@ -288,7 +315,7 @@ public final class MiniMaxTTSProvider: NSObject, ObservableObject, AVAudioPlayer
             return true
         } catch {
             let prefix = data.prefix(4).map { String(format: "%02x", $0) }.joined(separator: " ")
-            errorMessage = "[v2] 音频格式不支持 dataLen=\(data.count) hex=\(prefix): \(error.localizedDescription). 已保存桌面 minimax_debug.mp3"
+            errorMessage = "[v2] 音频格式不支持 dataLen=\(data.count) hex=\(prefix): \(error.localizedDescription). 已保存桌面 tts_debug.mp3"
             return false
         }
     }

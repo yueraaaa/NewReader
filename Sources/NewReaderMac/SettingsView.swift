@@ -3,13 +3,6 @@ import NewReaderCore
 
 struct SettingsView: View {
     @EnvironmentObject var viewModel: ReaderViewModel
-    @State private var provider: AIProvider = .openAI
-    @State private var endpoint: String = ""
-    @State private var apiKey: String = ""
-    @State private var model: String = ""
-    @State private var showSaved: Bool = false
-    @State private var isTesting: Bool = false
-    @State private var testError: String?
     @State private var ttsEngine: TTSEngine = .apple
     @State private var ttsEndpoint: String = ""
     @State private var ttsApiKey: String = ""
@@ -66,11 +59,7 @@ struct SettingsView: View {
         }
         .frame(width: 460, height: 520)
         .onAppear {
-            // Load non-sensitive config from disk only (no Keychain)
-            provider = viewModel.aiService.config.provider
-            endpoint = viewModel.aiService.config.endpoint
-            model = viewModel.aiService.config.model
-            let ttsCfg = MiniMaxTTSConfig.load()
+            let ttsCfg = CustomTTSConfig.load()
             ttsEngine = ttsCfg.engine
             ttsEndpoint = ttsCfg.endpoint
             ttsApiKey = ttsCfg.apiKey
@@ -90,125 +79,72 @@ struct SettingsView: View {
     private var aiPage: some View {
         Form {
             Section {
-                Picker("AI 服务商", selection: $provider) {
-                    ForEach(AIProvider.allCases, id: \.self) { p in
-                        Text(p.displayName).tag(p)
-                    }
+                LabeledContent("AI 引擎") {
+                    Text("DeepSeek")
+                        .foregroundStyle(.secondary)
                 }
-                .pickerStyle(.radioGroup)
-                .onChange(of: provider) { _, newProvider in
-                    endpoint = newProvider.defaultEndpoint
-                    model = newProvider.defaultModel
+                LabeledContent("模型") {
+                    Picker("", selection: Binding(
+                        get: { viewModel.aiService.config.model },
+                        set: { viewModel.aiService.config.model = $0; viewModel.aiService.saveConfig() }
+                    )) {
+                        Text("DeepSeek-V3").tag("deepseek-chat")
+                        Text("DeepSeek-R1").tag("deepseek-reasoner")
+                    }
+                    .pickerStyle(.menu)
+                    .labelsHidden()
+                }
+                LabeledContent("翻译语言") {
+                    Picker("", selection: Binding(
+                        get: { TranslationLanguage.preferred.rawValue },
+                        set: { TranslationLanguage.preferred = TranslationLanguage(rawValue: $0) ?? .zh }
+                    )) {
+                        ForEach(TranslationLanguage.allCases, id: \.self) { lang in
+                            Text(lang.displayName).tag(lang.rawValue)
+                        }
+                    }
+                    .pickerStyle(.menu)
+                    .labelsHidden()
                 }
             } header: {
-                Text("选择服务商").textCase(nil).font(.headline)
+                Text("AI 配置").textCase(nil).font(.headline)
             } footer: {
-                Text("选择 OpenAI 兼容（支持 DeepSeek、通义千问等）或 Anthropic（Claude 系列）。")
+                Text("AI 摘要和翻译由 NewReader 后端提供，无需自行配置 API Key。")
                     .font(.caption)
                     .foregroundStyle(.tertiary)
             }
 
             Section {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("API Endpoint").font(.caption).foregroundStyle(.secondary)
-                    TextField(provider.defaultEndpoint, text: $endpoint)
-                        .textFieldStyle(.roundedBorder)
+                if viewModel.authService.isLoggedIn {
+                    LabeledContent("状态") {
+                        HStack(spacing: 6) {
+                            Circle()
+                                .fill(Color.green)
+                                .frame(width: 8, height: 8)
+                            Text("已登录")
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                } else {
+                    LabeledContent("状态") {
+                        Text("未登录")
+                            .foregroundStyle(.secondary)
+                    }
                 }
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("API Key").font(.caption).foregroundStyle(.secondary)
-                    SecureField(provider.apiKeyPlaceholder, text: $apiKey)
-                        .textFieldStyle(.roundedBorder)
-                }
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("Model").font(.caption).foregroundStyle(.secondary)
-                    TextField(provider.defaultModel, text: $model)
-                        .textFieldStyle(.roundedBorder)
+
+                Button(role: .destructive) {
+                    Task { try? await viewModel.authService.signOut() }
+                } label: {
+                    Text(viewModel.authService.isLoggedIn ? "退出登录" : "登录")
                 }
             } header: {
-                Text("连接配置").textCase(nil).font(.headline)
-            } footer: {
-                Text(provider == .openAI
-                     ? "支持 OpenAI、Azure、DeepSeek、通义千问等兼容服务。"
-                     : "使用 Anthropic Messages API，支持 Claude 系列模型。")
-                    .font(.caption)
-                    .foregroundStyle(.tertiary)
-            }
-
-            Section {
-                VStack(alignment: .leading, spacing: 10) {
-                    HStack(spacing: 12) {
-                        Button("测试连接") {
-                            let trimmed = endpoint.trimmingCharacters(in: .whitespaces)
-                                .trimmingCharacters(in: CharacterSet(charactersIn: "/"))
-                            viewModel.aiService.config.provider = provider
-                            viewModel.aiService.config.endpoint = trimmed
-                            viewModel.aiService.ensureConfigLoaded()
-                            viewModel.aiService.config.apiKey = apiKey
-                            viewModel.aiService.config.model = model
-
-                            isTesting = true
-                            testError = nil
-                            Task {
-                                testError = await viewModel.aiService.testConnection()
-                                isTesting = false
-                            }
-                        }
-                        .buttonStyle(.bordered)
-                        .disabled(isTesting)
-
-                        if isTesting {
-                            ProgressView().scaleEffect(0.7).frame(width: 16, height: 16)
-                        }
-
-                        Button("保存") {
-                            let trimmed = endpoint.trimmingCharacters(in: .whitespaces)
-                                .trimmingCharacters(in: CharacterSet(charactersIn: "/"))
-                            guard let url = URL(string: trimmed),
-                                  url.scheme?.lowercased() == "https" else {
-                                viewModel.errorMessage = "API 端点必须使用 HTTPS"
-                                return
-                            }
-                            viewModel.aiService.config.provider = provider
-                            viewModel.aiService.config.endpoint = trimmed
-                            viewModel.aiService.ensureConfigLoaded()
-                            viewModel.aiService.config.apiKey = apiKey
-                            viewModel.aiService.config.model = model
-                            guard (endpoint.trimmingCharacters(in: .whitespaces).trimmingCharacters(in: CharacterSet(charactersIn: "/")).hasPrefix("https")) else {
-                                viewModel.errorMessage = "API 端点必须使用 HTTPS"
-                                return
-                            }
-                            viewModel.aiService.saveConfig()
-
-                            showSaved = true
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                                showSaved = false
-                            }
-                        }
-                        .buttonStyle(.borderedProminent)
-
-                        if showSaved {
-                            Label("已保存", systemImage: "checkmark.circle.fill")
-                                .foregroundStyle(.green)
-                        }
-                    }
-
-                    if let err = testError {
-                        if err.isEmpty {
-                            Label("连接成功", systemImage: "checkmark.circle.fill")
-                                .foregroundStyle(.green)
-                        } else {
-                            Label(err, systemImage: "xmark.circle.fill")
-                                .foregroundStyle(.red)
-                        }
-                    }
-                }
+                Text("账户").textCase(nil).font(.headline)
             }
         }
         .formStyle(.grouped)
     }
 
-
-    // MARK: - TTS Page
+// MARK: - TTS Page
 
     private var ttsPage: some View {
         Form {
@@ -227,26 +163,26 @@ struct SettingsView: View {
             } footer: {
                 Text(ttsEngine == .apple
                      ? "使用 macOS 内置语音引擎，离线可用。"
-                     : "使用 MiniMax TTS API，需要网络连接，音质更自然。")
+                     : "使用自定义 TTS API，需要网络连接，音质更自然。")
                     .font(.caption).foregroundStyle(.tertiary)
             }
 
-            if ttsEngine == .minimax {
+            if ttsEngine == .custom {
                 Section {
                     VStack(alignment: .leading, spacing: 6) {
                         Text("API Endpoint").font(.caption).foregroundStyle(.secondary)
-                        TextField("https://api.minimaxi.com/v1/t2a_v2", text: $ttsEndpoint)
+                        TextField("https://api.customi.com/v1/t2a_v2", text: $ttsEndpoint)
                             .textFieldStyle(.roundedBorder)
                     }
                     VStack(alignment: .leading, spacing: 6) {
                         Text("API Key").font(.caption).foregroundStyle(.secondary)
-                        SecureField("输入 MiniMax API Key", text: $ttsApiKey)
+                        SecureField("API Key", text: $ttsApiKey)
                             .textFieldStyle(.roundedBorder)
                     }
                     VStack(alignment: .leading, spacing: 6) {
                         Text("音色").font(.caption).foregroundStyle(.secondary)
                         Picker("", selection: $ttsVoiceId) {
-                            ForEach(MiniMaxTTSConfig.voicePresets, id: \.id) { v in
+                            ForEach(CustomTTSConfig.voicePresets, id: \.id) { v in
                                 Text(v.name).tag(v.id)
                             }
                         }
@@ -257,7 +193,7 @@ struct SettingsView: View {
                         Slider(value: $ttsSpeed, in: 0.5...2.0, step: 0.1)
                     }
                 } header: {
-                    Text("MiniMax 配置").textCase(nil).font(.headline)
+                    Text("TTS API 配置").textCase(nil).font(.headline)
                 }
 
                 Section {
@@ -266,15 +202,15 @@ struct SettingsView: View {
                             isTestingTTS = true
                             ttsTestError = nil
                             // Build config directly from UI state, NOT from Keychain
-                            var cfg = MiniMaxTTSConfig()
+                            var cfg = CustomTTSConfig()
                             cfg.endpoint = ttsEndpoint.trimmingCharacters(in: .whitespaces)
                                 .trimmingCharacters(in: CharacterSet(charactersIn: "/"))
                             cfg.apiKey = ttsApiKey.trimmingCharacters(in: .whitespaces)
                             cfg.voiceId = ttsVoiceId
                             cfg.speed = ttsSpeed
-                            let provider = MiniMaxTTSProvider(config: cfg)
+                            let provider = CustomTTSProvider(config: cfg)
                             Task {
-                                let ok = await provider.speak("你好，这是 MiniMax 语音合成测试。")
+                                let ok = await provider.speak("你好，这是 TTS 语音合成测试。")
                                 ttsTestError = ok ? "" : (provider.errorMessage ?? "请求失败")
                                 isTestingTTS = false
                             }
@@ -289,13 +225,13 @@ struct SettingsView: View {
                         Button("保存") {
                             let trimmed = ttsEndpoint.trimmingCharacters(in: .whitespaces)
                                 .trimmingCharacters(in: CharacterSet(charactersIn: "/"))
-                            var cfg = MiniMaxTTSConfig.load()
+                            var cfg = CustomTTSConfig.load()
                             cfg.endpoint = trimmed
                             cfg.apiKey = ttsApiKey
                             cfg.voiceId = ttsVoiceId
                             cfg.speed = ttsSpeed
                             cfg.save()
-                            viewModel.ttsService.setEngine(.minimax)
+                            viewModel.ttsService.setEngine(.custom)
                         }
                         .buttonStyle(.borderedProminent)
                     }

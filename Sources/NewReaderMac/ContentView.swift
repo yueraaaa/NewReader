@@ -5,7 +5,21 @@ struct ContentView: View {
     @EnvironmentObject var viewModel: ReaderViewModel
     @Environment(\.openSettings) private var openSettings
 
+    @State private var showWorkspace: Bool = false
+
     var body: some View {
+        Group {
+            if !viewModel.authService.isLoggedIn {
+                LoginView()
+                    .environmentObject(viewModel)
+            } else {
+                mainContent
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var mainContent: some View {
         NavigationSplitView {
             SidebarView()
                 .frame(minWidth: 220)
@@ -21,6 +35,12 @@ struct ContentView: View {
             }
         }
         .disabled(viewModel.showSubscribe)
+
+        .task {
+            // Override any SwiftUI-replayed actions after navigation transition
+            try? await Task.sleep(for: .milliseconds(800))
+            viewModel.selectUnread()
+        }
         .overlay {
             if viewModel.showSubscribe {
                 Color.black.opacity(0.3)
@@ -53,15 +73,15 @@ struct ContentView: View {
             }
         }
         .toolbar {
-            // Left side: primary actions
-            ToolbarItemGroup {
+            ToolbarItem {
                 Button {
                     viewModel.showSubscribe = true
                 } label: {
                     Image(systemName: "plus")
                 }
                 .help("添加订阅 (⌘N)")
-
+            }
+            ToolbarItem {
                 Button {
                     Task { await viewModel.refreshAll() }
                 } label: {
@@ -70,7 +90,6 @@ struct ContentView: View {
                 .help("刷新全部订阅源")
                 .disabled(viewModel.isRefreshing)
             }
-            // Right side: settings
             ToolbarItem(placement: .primaryAction) {
                 Button {
                     openSettings()
@@ -83,9 +102,24 @@ struct ContentView: View {
         .onReceive(NotificationCenter.default.publisher(for: .showSubscribeSheet)) { _ in
             viewModel.showSubscribe = true
         }
-        .task {
-            viewModel.selectUnread()
+        .onReceive(NotificationCenter.default.publisher(for: .showWorkspaceSheet)) { _ in
+            showWorkspace = true
         }
+        .sheet(isPresented: $showWorkspace) {
+            WorkspaceView()
+                .environmentObject(viewModel)
+        }
+        .onOpenURL { url in
+            guard url.scheme == "newreader" else { return }
+            Task {
+                do {
+                    try await viewModel.authService.handleCallback(url: url)
+                } catch {
+                    print("Auth callback error: \(error)")
+                }
+            }
+        }
+
         .preferredColorScheme(viewModel.appTheme.colorScheme)
     }
 }

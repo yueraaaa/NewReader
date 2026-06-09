@@ -3,7 +3,7 @@ import FeedKit
 import SwiftData
 
 /// Limits feed download size to prevent OOM from malicious servers.
-final class LimitedDataDelegate: NSObject, URLSessionDataDelegate {
+final class LimitedDataDelegate: NSObject, URLSessionDataDelegate, @unchecked Sendable {
     let maxBytes: Int = 10 * 1024 * 1024
     var accumulatedData = Data()
     var error: Error?

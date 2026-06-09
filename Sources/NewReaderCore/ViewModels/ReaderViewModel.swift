@@ -1,6 +1,7 @@
 import Foundation
 import SwiftData
 import Combine
+import CoreData
 
 /// Central ViewModel shared across macOS and iOS
 @MainActor
@@ -16,9 +17,15 @@ public final class ReaderViewModel: ObservableObject {
     @Published public var searchQuery: String = ""
     @Published public var isRefreshing: Bool = false
     @Published public var showSubscribe: Bool = false
+    @Published public var workspace: WorkspaceSnapshot?
+    @Published public var isGeneratingWorkspace = false
+    @Published public var workspaceStatusMessage: String?
 
     // Services
-    public let aiService = AIService()
+    public let aiService: AIService
+    public let authService = AuthService()
+
+    private var cancellables = Set<AnyCancellable>()
     public let ttsService = TTSService()
     public let readabilityService = ReadabilityService()
     public let cacheService = CacheService()
@@ -49,7 +56,26 @@ public final class ReaderViewModel: ObservableObject {
         self.modelContext = modelContext
         self.appTheme = AppTheme(rawValue: UserDefaults.standard.string(forKey: "newreader_theme") ?? "system") ?? .system
         self.syncMonitor = SyncMonitor(configuredContainerID: iCloudContainerID)
+        self.aiService = AIService(authService: authService)
+        authService.objectWillChange.sink { [weak self] _ in
+            self?.objectWillChange.send()
+        }.store(in: &cancellables)
         loadData()
+        selectUnread()
+        // Re-select unread when CloudKit delivers data after launch
+        NotificationCenter.default
+            .publisher(for: NSPersistentCloudKitContainer.eventChangedNotification)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] notification in
+                guard let self,
+                      let event = notification.userInfo?[NSPersistentCloudKitContainer.eventNotificationUserInfoKey]
+                        as? NSPersistentCloudKitContainer.Event,
+                      event.type == .import || event.type == .setup,
+                      event.endDate != nil else { return }
+                self.loadData()
+                self.selectUnread()
+            }
+            .store(in: &cancellables)
     }
 
     // MARK: - Data loading
@@ -60,6 +86,7 @@ public final class ReaderViewModel: ObservableObject {
         let folderDescriptor = FetchDescriptor<Folder>(sortBy: [SortDescriptor(\.sortOrder)])
         if let f = try? modelContext.fetch(feedDescriptor) { feeds = f }
         if let d = try? modelContext.fetch(folderDescriptor) { folders = d }
+        if !feeds.isEmpty { selectUnread() }
     }
 
     public func selectFeed(_ feed: Feed?) {
@@ -164,6 +191,7 @@ public final class ReaderViewModel: ObservableObject {
         modelContext.delete(feed)
         try? modelContext.save()
         feeds.removeAll { $0.id == feed.id }
+        invalidateCache()
         if selectedFeed?.id == feed.id { selectAllArticles() }
         lastDeletedFeed = snapshot
         undoTask?.cancel()
@@ -324,8 +352,61 @@ public final class ReaderViewModel: ObservableObject {
 
     public func backgroundRefresh() async {
         await refreshAll()
+        await maybeGenerateWorkspace()
     }
 
+
+    // MARK: - Workspace
+
+    /// Generate (or refresh) the workspace analysis from recently read articles.
+    public func generateWorkspace() async {
+        isGeneratingWorkspace = true
+        defer { isGeneratingWorkspace = false }
+        let recent = feeds.flatMap { $0.allArticles }
+            .filter { $0.isRead }
+            .filter { ($0.publishedDate ?? .distantPast) > Date().addingTimeInterval(-7 * 24 * 3600) }
+        guard recent.count >= 5 else {
+            workspaceStatusMessage = "需要至少阅读 5 篇文章才能生成分析"
+            return
+        }
+
+        let titles = recent.map { $0.title }
+
+        // Remove old snapshots
+        let descriptor = FetchDescriptor<WorkspaceSnapshot>()
+        if let oldSnapshots = try? modelContext.fetch(descriptor) {
+            for old in oldSnapshots { modelContext.delete(old) }
+        }
+
+        if let result = try? await aiService.analyzeReadingPatterns(titles: titles) {
+            workspaceStatusMessage = nil
+            let kwData = try? JSONEncoder().encode(result.keywords)
+            let relData = try? JSONEncoder().encode(result.relations)
+            let kwJSON = kwData.flatMap { String(data: $0, encoding: .utf8) } ?? ""
+            let relJSON = relData.flatMap { String(data: $0, encoding: .utf8) } ?? ""
+            let snap = WorkspaceSnapshot(
+                keywordsJSON: kwJSON,
+                relationsJSON: relJSON,
+                summaryText: result.summary,
+                articleCount: recent.count
+            )
+            modelContext.insert(snap)
+            try? modelContext.save()
+            workspace = snap
+        } else {
+            workspaceStatusMessage = "AI 分析失败，请稍后重试"
+        }
+    }
+
+    /// Trigger workspace generation when enough new articles have been read.
+    private func maybeGenerateWorkspace() async {
+        let recentReadCount = feeds.flatMap { $0.allArticles }
+            .filter { $0.isRead }
+            .filter { ($0.publishedDate ?? .distantPast) > Date().addingTimeInterval(-7 * 24 * 3600) }
+            .count
+        guard recentReadCount >= 10 else { return }
+        await generateWorkspace()
+    }
     // MARK: - Folder
 
     public func createFolder(name: String) {

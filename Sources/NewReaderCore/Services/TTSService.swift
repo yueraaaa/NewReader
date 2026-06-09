@@ -11,29 +11,29 @@ public final class TTSService: NSObject, ObservableObject, AVSpeechSynthesizerDe
     private var currentUtterance: AVSpeechUtterance?
     private var pendingText: String?
     private var rate: Float = AVSpeechUtteranceDefaultSpeechRate
-    private var minimaxProvider: MiniMaxTTSProvider?
+    private var customProvider: CustomTTSProvider?
 
     public var engine: TTSEngine = .apple
 
     override init() {
         super.init()
         synthesizer.delegate = self
-        engine = MiniMaxTTSConfig.load().engine
-        if engine == .minimax { initMiniMax() }
+        engine = CustomTTSConfig.load().engine
+        if engine == .custom { initCustom() }
     }
 
     /// Switch TTS engine at runtime.
     public func setEngine(_ newEngine: TTSEngine) {
         engine = newEngine
-        if newEngine == .minimax { initMiniMax() }
-        var config = MiniMaxTTSConfig.load()
+        if newEngine == .custom { initCustom() }
+        var config = CustomTTSConfig.load()
         config.engine = newEngine
         config.save()
     }
 
-    private func initMiniMax() {
-        let config = MiniMaxTTSConfig.load()
-        minimaxProvider = MiniMaxTTSProvider(config: config)
+    private func initCustom() {
+        let config = CustomTTSConfig.load()
+        customProvider = CustomTTSProvider(config: config)
     }
 
     /// Start speaking the given text
@@ -43,13 +43,13 @@ public final class TTSService: NSObject, ObservableObject, AVSpeechSynthesizerDe
 
         // Stop any current playback
         if synthesizer.isSpeaking { synthesizer.stopSpeaking(at: .immediate) }
-        minimaxProvider?.stop()
+        customProvider?.stop()
 
         switch engine {
         case .apple:
             speakWithApple(plainText, language: language)
-        case .minimax:
-            speakWithMiniMax(plainText, language: language)
+        case .custom:
+            speakWithCustom(plainText, language: language)
         }
     }
 
@@ -67,8 +67,8 @@ public final class TTSService: NSObject, ObservableObject, AVSpeechSynthesizerDe
         isPaused = false
     }
 
-    private func speakWithMiniMax(_ text: String, language: String) {
-        guard let provider = minimaxProvider else {
+    private func speakWithCustom(_ text: String, language: String) {
+        guard let provider = customProvider else {
             // Fallback: no provider configured
             speakWithApple(text, language: language)
             return

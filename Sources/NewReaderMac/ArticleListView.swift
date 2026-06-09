@@ -4,8 +4,13 @@ import NewReaderCore
 struct ArticleListView: View {
     @EnvironmentObject var viewModel: ReaderViewModel
     @State private var searchText: String = ""
+    
+    /// On launch, show only unread. Clears after first explicit 'show all' action.
+
 
     var body: some View {
+
+
         VStack(spacing: 0) {
             // Search bar
             HStack(spacing: 6) {
@@ -54,7 +59,7 @@ struct ArticleListView: View {
                     .tag(article as Article?)
                     .swipeActions(edge: .leading) {
                         Button {
-                            viewModel.toggleRead(article)
+                            if !article.isRead { viewModel.toggleRead(article) }
                         } label: {
                             Label(
                                 article.isRead ? "标为未读" : "标为已读",
@@ -116,13 +121,13 @@ struct ArticleListView: View {
             case "j":
                 let next = min(idx + 1, viewModel.filteredArticles.count - 1)
                 let article = viewModel.filteredArticles[next]
-                if !article.isRead { viewModel.toggleRead(article) }
+                if !article.isRead { if !article.isRead { viewModel.toggleRead(article) } }
                 viewModel.selectedArticle = article
                 return .handled
             case "k":
                 let prev = max(idx - 1, 0)
                 let article = viewModel.filteredArticles[prev]
-                if !article.isRead { viewModel.toggleRead(article) }
+                if !article.isRead { if !article.isRead { viewModel.toggleRead(article) } }
                 viewModel.selectedArticle = article
                 return .handled
             default:

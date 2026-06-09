@@ -3,10 +3,6 @@ import NewReaderCore
 
 struct SettingsView: View {
     @EnvironmentObject var viewModel: ReaderViewModel
-    @State private var provider: AIProvider = .openAI
-    @State private var endpoint: String = ""
-    @State private var apiKey: String = ""
-    @State private var model: String = ""
     @State private var ttsEngine: TTSEngine = .apple
     @State private var ttsEndpoint: String = ""
     @State private var ttsApiKey: String = ""
@@ -15,35 +11,53 @@ struct SettingsView: View {
 
     var body: some View {
         Form {
-            Section("AI 服务商") {
-                Picker("提供商", selection: $provider) {
-                    ForEach(AIProvider.allCases, id: \.self) { p in
-                        Text(p.displayName).tag(p)
-                    }
+            Section {
+                HStack {
+                    Text("AI 引擎")
+                    Spacer()
+                    Text("DeepSeek")
+                        .foregroundStyle(.secondary)
                 }
-                .pickerStyle(.segmented)
-                .onChange(of: provider) { _, newProvider in
-                    endpoint = newProvider.defaultEndpoint
-                    model = newProvider.defaultModel
+                Picker("模型", selection: Binding(
+                    get: { viewModel.aiService.config.model },
+                    set: { viewModel.aiService.config.model = $0; viewModel.aiService.saveConfig() }
+                )) {
+                    Text("DeepSeek-V3").tag("deepseek-chat")
+                    Text("DeepSeek-R1").tag("deepseek-reasoner")
                 }
+            } header: {
+                Text("AI 配置")
+            } footer: {
+                Text("AI 摘要和翻译由 NewReader 后端提供。")
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
             }
 
-            Section("连接配置") {
-                TextField("API Endpoint", text: $endpoint)
-                    .autocorrectionDisabled()
-                SecureField(provider.apiKeyPlaceholder, text: $apiKey)
-                TextField("Model", text: $model)
-                    .autocorrectionDisabled()
-                Button("保存") {
-                    let trimmed = endpoint.trimmingCharacters(in: .whitespaces)
-                        .trimmingCharacters(in: CharacterSet(charactersIn: "/"))
-                    guard let url = URL(string: trimmed),
-                          url.scheme?.lowercased() == "https" else { return }
-                    viewModel.aiService.config.provider = provider
-                    viewModel.aiService.config.endpoint = trimmed
-                    viewModel.aiService.config.apiKey = apiKey
-                    viewModel.aiService.config.model = model
-                    viewModel.aiService.saveConfig()
+            Section("账户") {
+                if viewModel.authService.isLoggedIn {
+                    HStack {
+                        Text("状态")
+                        Spacer()
+                        HStack(spacing: 6) {
+                            Circle()
+                                .fill(Color.green)
+                                .frame(width: 8, height: 8)
+                            Text("已登录")
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                } else {
+                    HStack {
+                        Text("状态")
+                        Spacer()
+                        Text("未登录")
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                Button(role: .destructive) {
+                    Task { try? await viewModel.authService.signOut() }
+                } label: {
+                    Text(viewModel.authService.isLoggedIn ? "退出登录" : "登录")
                 }
             }
 
@@ -79,7 +93,6 @@ struct SettingsView: View {
                 }
             }
 
-
             Section("语音") {
                 Picker("引擎", selection: $ttsEngine) {
                     ForEach(TTSEngine.allCases, id: \.self) { e in
@@ -90,12 +103,12 @@ struct SettingsView: View {
                     viewModel.ttsService.setEngine(e)
                 }
 
-                if ttsEngine == .minimax {
+                if ttsEngine == .custom {
                     TextField("Endpoint", text: $ttsEndpoint)
                         .autocorrectionDisabled()
                     SecureField("API Key", text: $ttsApiKey)
                     Picker("音色", selection: $ttsVoiceId) {
-                        ForEach(MiniMaxTTSConfig.voicePresets, id: \.id) { v in
+                        ForEach(CustomTTSConfig.voicePresets, id: \.id) { v in
                             Text(v.name).tag(v.id)
                         }
                     }
@@ -106,13 +119,13 @@ struct SettingsView: View {
                     Button("保存") {
                         let trimmed = ttsEndpoint.trimmingCharacters(in: .whitespaces)
                             .trimmingCharacters(in: CharacterSet(charactersIn: "/"))
-                        var cfg = MiniMaxTTSConfig.load()
+                        var cfg = CustomTTSConfig.load()
                         cfg.endpoint = trimmed
                         cfg.apiKey = ttsApiKey
                         cfg.voiceId = ttsVoiceId
                         cfg.speed = ttsSpeed
                         cfg.save()
-                        viewModel.ttsService.setEngine(.minimax)
+                        viewModel.ttsService.setEngine(.custom)
                     }
                 }
             }
@@ -140,10 +153,7 @@ struct SettingsView: View {
         }
         .navigationTitle("设置")
         .onAppear {
-            provider = viewModel.aiService.config.provider
-            endpoint = viewModel.aiService.config.endpoint
-            model = viewModel.aiService.config.model
-            let ttsCfg = MiniMaxTTSConfig.load()
+            let ttsCfg = CustomTTSConfig.load()
             ttsEngine = ttsCfg.engine
             ttsEndpoint = ttsCfg.endpoint
             ttsApiKey = ttsCfg.apiKey

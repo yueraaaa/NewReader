@@ -9,7 +9,7 @@ struct NewReaderiOSApp: App {
     @StateObject private var viewModel: ReaderViewModel
 
     init() {
-        let schema = Schema([Feed.self, Article.self, Folder.self])
+        let schema = Schema([Feed.self, Article.self, Folder.self, WorkspaceSnapshot.self])
         let result = ModelContainerFactory.makeContainer(
             schema: schema,
             options: .init(iCloudContainerID: Self.iCloudContainerID)

@@ -13,5 +13,11 @@
     <array>
         <string>$(AppIdentifierPrefix)com.newreader.app</string>
     </array>
+    <key>com.apple.security.app-sandbox</key>
+    <true/>
+    <key>com.apple.security.network.client</key>
+    <true/>
+    <key>com.apple.security.files.user-selected.read-only</key>
+    <true/>
 </dict>
 </plist>
