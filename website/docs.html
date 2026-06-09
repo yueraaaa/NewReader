@@ -5,208 +5,183 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>使用文档 — NewReader</title>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
-    background: #faf9f6;
-    color: #2c2c2c;
-    line-height: 1.7;
-    -webkit-font-smoothing: antialiased;
-  }
-  a { color: inherit; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--ink:#16162A;--navy:#1E1E3A;--amber:#E8873A;--muted:#8E8E9A;--dim:#6A6A7A;--surface:#2A2A4A;--border:rgba(255,255,255,0.06)}
+html{scroll-behavior:smooth}
+body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",system-ui,sans-serif;background:var(--ink);color:#fff;line-height:1.7;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
 
-  /* Nav */
-  .nav {
-    padding: 24px 32px;
-    display: flex;
-    align-items: center;
-    gap: 24px;
-    border-bottom: 1px solid #e8e4dc;
-    background: rgba(250,249,246,0.9);
-    backdrop-filter: blur(12px);
-    position: sticky; top: 0; z-index: 10;
-  }
-  .nav a { text-decoration: none; }
-  .nav .logo { font-size: 1.15rem; font-weight: 700; color: #1a1a1a; }
-  .nav .back { font-size: 0.9rem; color: #999; }
-  .nav .back:hover { color: #333; }
+.topnav{position:fixed;top:0;width:100%;z-index:50;background:rgba(22,22,42,0.85);backdrop-filter:blur(16px);border-bottom:1px solid var(--border)}
+.topnav-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:64px}
+.topnav .logo{font-size:.9rem;font-weight:600;letter-spacing:.12em;color:var(--amber)}
+.topnav .back{font-size:.85rem;color:var(--muted);transition:color .2s}
+.topnav .back:hover{color:#fff}
 
-  /* Content */
-  .content {
-    max-width: 720px;
-    margin: 0 auto;
-    padding: 48px 24px 80px;
-  }
-  h1 { font-size: 2rem; font-weight: 700; margin-bottom: 8px; color: #1a1a1a; }
-  h2 {
-    font-size: 1.25rem; font-weight: 600; color: #1a1a1a;
-    margin-top: 48px; margin-bottom: 16px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid #e8e4dc;
-  }
-  h3 { font-size: 1rem; font-weight: 600; color: #333; margin-top: 28px; margin-bottom: 10px; }
-  p { font-size: 0.95rem; color: #555; margin-bottom: 14px; }
-  ul, ol { margin: 0 0 16px 20px; font-size: 0.95rem; color: #555; }
-  li { margin-bottom: 6px; }
-  code {
-    background: #f0ede6; padding: 2px 7px; border-radius: 4px;
-    font-size: 0.88rem; font-family: "SF Mono", Monaco, monospace; color: #333;
-  }
-  pre {
-    background: #1a1a1a; color: #e0dcd4; padding: 16px 20px;
-    border-radius: 8px; overflow-x: auto; font-size: 0.85rem;
-    font-family: "SF Mono", Monaco, monospace;
-    line-height: 1.55; margin-bottom: 16px;
-  }
-  .note {
-    background: #f5f2ed; border-left: 3px solid #c4b89e;
-    padding: 12px 16px; border-radius: 0 6px 6px 0;
-    margin-bottom: 16px; font-size: 0.9rem; color: #666;
-  }
-  table {
-    width: 100%; border-collapse: collapse; margin-bottom: 16px;
-    font-size: 0.9rem;
-  }
-  th, td {
-    text-align: left; padding: 10px 14px;
-    border-bottom: 1px solid #e8e4dc;
-  }
-  th { font-weight: 600; color: #1a1a1a; background: #f5f2ed; }
-  td { color: #555; }
+.content{max-width:800px;margin:0 auto;padding:120px 24px 80px}
+.content h1{font-size:2rem;font-weight:700;margin-bottom:8px}
+.content h2{font-size:1.2rem;font-weight:600;margin-top:48px;margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.content h3{font-size:1rem;font-weight:600;margin-top:28px;margin-bottom:10px}
+.content p{font-size:.92rem;color:var(--muted);margin-bottom:14px;line-height:1.7}
+.content ul,.content ol{margin:0 0 16px 20px;font-size:.92rem;color:var(--muted)}
+.content li{margin-bottom:6px}
+code{background:var(--surface);padding:2px 7px;border-radius:4px;font-size:.85rem;font-family:"SF Mono",Monaco,monospace;color:var(--amber)}
+pre{background:var(--navy);padding:16px 20px;border-radius:8px;overflow-x:auto;font-size:.85rem;line-height:1.55;margin-bottom:16px;border:1px solid var(--border)}
+.note{background:rgba(232,135,58,0.06);border-left:3px solid var(--amber);padding:12px 16px;border-radius:0 8px 8px 0;margin-bottom:16px;font-size:.88rem;color:var(--muted)}
+table{width:100%;border-collapse:collapse;margin-bottom:16px;font-size:.88rem}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--border)}
+th{font-weight:600;color:#fff;background:var(--navy)}
+td{color:var(--muted)}
+.subtitle{color:var(--dim);margin-bottom:40px}
 
-  .sidebar-toc {
-    display: none;
-    position: fixed; left: calc(50% + 400px); top: 120px;
-    font-size: 0.82rem; line-height: 2;
-  }
-  .sidebar-toc a { text-decoration: none; color: #999; }
-  .sidebar-toc a:hover { color: #1a1a1a; }
+/* TOC nav */
+.toc-nav{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:40px}
+.toc-nav a{font-size:.82rem;color:var(--dim);background:var(--navy);padding:6px 14px;border-radius:8px;transition:all .2s}
+.toc-nav a:hover{color:var(--amber)}
+.shortcut-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.shortcut-card{background:var(--navy);border-radius:10px;padding:14px 18px;display:flex;align-items:center;gap:12px;border:1px solid var(--border)}
+.shortcut-card kbd{background:var(--ink);color:var(--amber);font-size:.8rem;font-family:"SF Mono",Monaco,monospace;padding:4px 10px;border-radius:6px;min-width:44px;text-align:center}
+.shortcut-card span{color:var(--muted);font-size:.85rem}
 
-  @media (min-width: 1200px) {
-    .sidebar-toc { display: block; }
-  }
-  @media (max-width: 640px) {
-    .content { padding: 32px 20px 60px; }
-    h1 { font-size: 1.5rem; }
-  }
+footer{border-top:1px solid var(--border);padding:40px 24px;text-align:center}
+footer p{color:var(--dim);font-size:.82rem}
+footer a{color:var(--muted);transition:color .2s}
+footer a:hover{color:#fff}
+
+@media(max-width:768px){
+  .content{padding:100px 20px 60px}
+  .content h1{font-size:1.5rem}
+  .shortcut-grid{grid-template-columns:1fr 1fr}
+}
 </style>
 </head>
 <body>
 
-<nav class="nav">
-  <a href="index.html" class="back">← 首页</a>
-  <a href="index.html" class="logo">NewReader</a>
+<nav class="topnav">
+  <div class="topnav-inner">
+    <a href="index.html" class="back">← 首页</a>
+    <a href="index.html" class="logo">NEWREADER</a>
+  </div>
 </nav>
 
 <div class="content">
 
 <h1>使用文档</h1>
-<p>NewReader 是一款精致、安全的 RSS 阅读器，覆盖 macOS 与 iOS。本文档介绍从安装到高级配置的全部步骤。</p>
+<p class="subtitle">从安装配置到效率技巧，快速上手 NewReader 的全部功能。</p>
 
-<h2>安装</h2>
+<nav class="toc-nav">
+  <a href="#install">安装</a>
+  <a href="#subscribe">添加订阅源</a>
+  <a href="#manage">订阅源管理</a>
+  <a href="#ai">AI 摘要与翻译</a>
+  <a href="#tts">语音朗读</a>
+  <a href="#fulltext">全文提取</a>
+  <a href="#icloud">iCloud 同步</a>
+  <a href="#cache">离线缓存</a>
+  <a href="#shortcuts">快捷键</a>
+  <a href="#security">安全设计</a>
+</nav>
 
+<!-- 安装 -->
+<h2 id="install">📥 安装</h2>
 <h3>macOS</h3>
 <ol>
-  <li>前往 <a href="https://github.com/yueraaaa/NewReader/releases/latest" style="color:#555;">GitHub Releases</a> 下载最新 <code>NewReader-macOS.zip</code></li>
-  <li>解压后将 <strong>NewReader.app</strong> 拖入 <code>/Applications</code></li>
-  <li>首次运行时，系统提示「无法验证开发者」，请在 <strong>系统设置 → 隐私与安全性</strong> 中点击「仍要打开」</li>
+  <li>前往 <a href="https://github.com/yueraaaa/NewReader/releases/latest" style="color:var(--amber)">GitHub Releases</a> 下载最新 <code>NewReader.dmg</code></li>
+  <li>打开 DMG，将 <strong>NewReader.app</strong> 拖入 <code>/Applications</code></li>
+  <li>首次运行提示「无法验证开发者」，在 <strong>系统设置 → 隐私与安全性</strong> 中点击「仍要打开」</li>
 </ol>
-
 <h3>iOS</h3>
-<p>通过 Xcode 编译安装到设备。在 Xcode 中打开 <code>Package.swift</code>，选择 <strong>NewReaderiOS</strong> target，连接 iPhone 后运行。</p>
+<p>通过 Xcode 编译安装到设备。打开 <code>Package.swift</code>，选择 <strong>NewReaderiOS</strong> target，连接 iPhone 后运行。</p>
 
-<h2>添加订阅源</h2>
+<!-- 添加订阅源 -->
+<h2 id="subscribe">📡 添加订阅源</h2>
 <ol>
   <li>按 <code>⌘N</code> 或点工具栏 <strong>+</strong> 按钮</li>
   <li>输入 RSS / Atom / JSON Feed 地址</li>
-  <li>点击「订阅」，Feed 标题和文章将自动出现在侧栏</li>
+  <li>点击「订阅」，Feed 标题和文章自动出现在侧栏</li>
 </ol>
-<p>支持导入 OPML 文件：点侧栏 <strong>⋯</strong> → 导入 OPML，选择你的 <code>.opml</code> 文件。</p>
+<p>支持导入 OPML 文件：侧栏 <strong>⋯</strong> → 导入 OPML，选择 <code>.opml</code> 文件。</p>
 
-<h2>订阅源管理</h2>
+<!-- 订阅源管理 -->
+<h2 id="manage">📁 订阅源管理</h2>
 <ul>
   <li><strong>刷新</strong>：右键 Feed → 刷新，或工具栏刷新按钮刷新全部</li>
-  <li><strong>重命名</strong>：右键 Feed → 重命名，在弹窗中输入新名称即可</li>
-  <li><strong>标为已读</strong>：右键 Feed → 标为已读，将当前 Feed 所有文章标记已读</li>
-  <li><strong>删除</strong>：右键 Feed → 删除，移除订阅源及其所有文章</li>
+  <li><strong>重命名</strong>：右键 Feed → 重命名，输入新名称即可</li>
+  <li><strong>标为已读</strong>：右键 Feed → 标为已读</li>
+  <li><strong>删除</strong>：右键 Feed → 删除</li>
+  <li><strong>分类管理</strong>：新建分类收纳订阅源，可折叠、重命名、删除</li>
 </ul>
 
-<h2>配置 AI 摘要与翻译</h2>
-<p>NewReader 支持 OpenAI 兼容 API（适用于 OpenAI、DeepSeek、通义千问等）和 Anthropic Claude。</p>
+<!-- AI -->
+<h2 id="ai">🤖 AI 摘要与翻译</h2>
+<p>支持 OpenAI 兼容 API（适用于 OpenAI、DeepSeek、通义千问等）。</p>
 <ol>
   <li>打开设置（<code>⌘,</code>）→ <strong>AI</strong> 标签</li>
-  <li>选择 AI 服务商</li>
-  <li>填写 API 端点、API Key、模型名称</li>
-  <li>可选：点击「测试连接」验证配置</li>
-  <li>点击「保存」</li>
+  <li>选择模型（DeepSeek-V3 / DeepSeek-R1）</li>
+  <li>在文章中使用：工具栏 <strong>✨</strong> 生成摘要，<strong>🌐</strong> 翻译内容</li>
 </ol>
+<div class="note">AI 摘要和翻译由 NewReader 后端统一提供，无需自行配置 API Key。</div>
 
-<div class="note">
-  API Key 加密存储在系统 Keychain 中，明文不会写入磁盘。端点必须使用 HTTPS。
-</div>
-
-<h3>在文章中使用 AI</h3>
-<ul>
-  <li><strong>AI 摘要</strong>：阅读文章时点工具栏 <strong>✨</strong> 按钮，自动生成 3-5 句中文摘要</li>
-  <li><strong>批量摘要</strong>：侧栏 <strong>⋯</strong> → 批量 AI 摘要，为所有未读文章生成摘要</li>
-  <li><strong>翻译</strong>：工具栏 <strong>🌐</strong> 按钮展开语言菜单，选择目标语言即可翻译</li>
-</ul>
-
-<h2>语音朗读 (TTS)</h2>
-<p>双引擎支持，可随时切换：</p>
+<!-- TTS -->
+<h2 id="tts">🔊 语音朗读 (TTS)</h2>
 <table>
   <tr><th>引擎</th><th>说明</th><th>网络要求</th></tr>
   <tr><td>Apple 系统语音</td><td>macOS / iOS 内置引擎，支持中文普通话、英日韩</td><td>离线可用</td></tr>
   <tr><td>自定义 TTS API</td><td>接入任意 TTS 服务商，音质自然流畅</td><td>需要网络</td></tr>
 </table>
-<p>在阅读文章时，点工具栏 <strong>🔊</strong> 按钮即可朗读（支持断点续播）。设置 → 语音 标签可切换引擎并配置自定义 TTS 的 Endpoint 和 API Key。</p>
+<p>阅读文章时点工具栏 <strong>🔊</strong> 即可朗读，支持断点续播。设置 → 语音 标签可切换引擎并配置自定义 Endpoint 和 API Key。</p>
 
-<h2>全文提取</h2>
-<p>部分 RSS Feed 只提供摘要而非正文。点工具栏 <strong>📄</strong> 按钮，NewReader 自动从原文链接拉取完整正文。</p>
+<!-- 全文提取 -->
+<h2 id="fulltext">📄 全文提取</h2>
+<p>部分 RSS Feed 只提供摘要。点工具栏 <strong>📄</strong> 按钮，自动从原文链接拉取完整正文。</p>
 
-<h2>iCloud 跨设备同步</h2>
+<!-- iCloud -->
+<h2 id="icloud">☁️ iCloud 跨设备同步</h2>
 <p>同一 Apple ID 设备间自动同步订阅源、文章和阅读状态。</p>
-
-<h3>前提条件</h3>
-<ul>
-  <li>macOS 系统设置中登录 iCloud</li>
-  <li>使用正式签名的 App（通过 GitHub Release 下载）</li>
-</ul>
-
-<h3>查看同步状态</h3>
-<p>设置 → <strong>存储</strong> 标签中查看 iCloud 同步状态：</p>
-<ul>
-  <li><strong>🟢 已激活</strong> — 同步正常，数据自动跨设备传输</li>
-  <li><strong>⚫ 未激活</strong> — 未登录 iCloud 或签名缺失，使用本地存储</li>
-</ul>
-
-<h2>离线缓存</h2>
-<p>文章内容自动本地缓存，断网也能阅读。设置 → 存储 中可查看缓存大小并一键清除。</p>
-
-<h2>快捷键 (macOS)</h2>
 <table>
-  <tr><th>快捷键</th><th>功能</th></tr>
-  <tr><td><code>⌘N</code></td><td>添加订阅</td></tr>
-  <tr><td><code>⌘,</code></td><td>打开设置</td></tr>
-  <tr><td><code>⌘R</code></td><td>刷新当前订阅源</td></tr>
+  <tr><th>同步内容</th><th>说明</th></tr>
+  <tr><td>订阅源及分类</td><td>列表结构自动同步</td></tr>
+  <tr><td>阅读状态</td><td>已读 / 未读状态同步</td></tr>
+  <tr><td>偏好设置</td><td>主题、语言等偏好同步</td></tr>
+  <tr><td>API Key</td><td>出于安全考虑不同步</td></tr>
 </table>
 
-<h2>安全设计</h2>
+<!-- 离线缓存 -->
+<h2 id="cache">💾 离线缓存</h2>
+<p>文章内容自动本地缓存，断网也能阅读。设置 → 存储 查看缓存大小并一键清除。</p>
+
+<!-- 快捷键 -->
+<h2 id="shortcuts">⌨️ 键盘快捷键</h2>
+<div class="shortcut-grid">
+  <div class="shortcut-card"><kbd>⌘N</kbd><span>添加订阅</span></div>
+  <div class="shortcut-card"><kbd>⌘,</kbd><span>打开设置</span></div>
+  <div class="shortcut-card"><kbd>⌘R</kbd><span>刷新订阅源</span></div>
+  <div class="shortcut-card"><kbd>⌘F</kbd><span>搜索文章</span></div>
+  <div class="shortcut-card"><kbd>J / ↓</kbd><span>下一篇文章</span></div>
+  <div class="shortcut-card"><kbd>K / ↑</kbd><span>上一篇文章</span></div>
+  <div class="shortcut-card"><kbd>Space</kbd><span>向下滚动</span></div>
+  <div class="shortcut-card"><kbd>⌘W</kbd><span>阅读工作台</span></div>
+</div>
+
+<!-- 安全 -->
+<h2 id="security">🔐 安全设计</h2>
 <ul>
   <li>API Key 使用系统 Keychain 加密存储，不落盘明文</li>
   <li>WKWebView 禁用 JavaScript + CSP 策略，阻止脚本注入</li>
   <li>URL 仅允许 http/https 协议，拦截私有 IP / localhost 防 SSRF</li>
-  <li>HTML 消毒移除 script / iframe / 事件处理器 / javascript: 链接</li>
-  <li>OPML 导入文件大小上限 5MB，防内存耗尽</li>
+  <li>HTML 消毒移除 script / iframe / 事件处理器</li>
+  <li>OPML 导入文件大小上限 5MB</li>
+  <li>macOS App Sandbox 进程级隔离</li>
 </ul>
 
 </div>
 
-<footer style="padding:40px 24px; text-align:center; font-size:0.8rem; color:#aaa; border-top:1px solid #e8e4dc;">
+<footer>
   <p>
-    <a href="index.html" style="color:#999;">首页</a>
-    &nbsp;·&nbsp;
-    <a href="https://github.com/yueraaaa/NewReader" target="_blank" rel="noopener" style="color:#999;">GitHub</a>
+    <a href="index.html">首页</a>
+    <span style="margin:0 10px;color:var(--border)">·</span>
+    <a href="https://github.com/yueraaaa/NewReader">GitHub</a>
+    <span style="margin:0 10px;color:var(--border)">·</span>
+    v1.1.1
   </p>
 </footer>
 

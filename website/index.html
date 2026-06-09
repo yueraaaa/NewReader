@@ -3,473 +3,219 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>NewReader — 精致安全的 RSS 阅读器</title>
+<title>NewReader — 精致、安全的 AI RSS 阅读器</title>
+<meta name="description" content="NewReader 是一款 Swift 6 原生构建的 AI RSS 阅读器，支持 AI 摘要、多语翻译、TTS 语音朗读。macOS 15+ / iOS 18+ 可用。">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  html { scroll-behavior: smooth; }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
-    background: #faf9f6;
-    color: #2c2c2c;
-    line-height: 1.6;
-    -webkit-font-smoothing: antialiased;
-  }
-  a { color: inherit; text-decoration: none; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--ink:#16162A;--navy:#1E1E3A;--amber:#E8873A;--muted:#8E8E9A;--dim:#6A6A7A;--surface:#2A2A4A;--border:rgba(255,255,255,0.06)}
+html{scroll-behavior:smooth}
+body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",system-ui,sans-serif;background:var(--ink);color:#fff;line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+.accent{color:var(--amber)}
 
-  /* Hero */
-  .hero {
-    position: relative;
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    background: linear-gradient(180deg, #f0ede6 0%, #faf9f6 100%);
-  }
-  .hero canvas {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 0;
-    opacity: 0.55;
-  }
-  .hero-content {
-    position: relative;
-    z-index: 2;
-    text-align: center;
-    max-width: 680px;
-    padding: 0 24px;
-  }
-  .hero h1 {
-    font-size: clamp(3rem, 8vw, 5.5rem);
-    font-weight: 700;
-    letter-spacing: -0.035em;
-    color: #1a1a1a;
-    line-height: 1.08;
-    margin-bottom: 20px;
-  }
-  .hero .subtitle {
-    font-size: 1.2rem;
-    color: #666;
-    max-width: 480px;
-    margin: 0 auto 36px;
-    line-height: 1.55;
-  }
-  .hero .actions {
-    display: flex;
-    gap: 14px;
-    justify-content: center;
-    flex-wrap: wrap;
-  }
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 13px 30px;
-    border-radius: 8px;
-    font-size: 0.95rem;
-    font-weight: 600;
-    transition: background 0.2s, transform 0.15s, border-color 0.2s;
-    cursor: pointer;
-    border: none;
-  }
-  .btn:active { transform: scale(0.97); }
-  .btn-primary {
-    background: #1a1a1a;
-    color: #fff;
-  }
-  .btn-primary:hover { background: #333; }
-  .btn-ghost {
-    background: transparent;
-    color: #555;
-    border: 1px solid #d4d4d4;
-  }
-  .btn-ghost:hover { border-color: #999; color: #1a1a1a; }
+/* Nav */
+.topnav{position:fixed;top:0;width:100%;z-index:50;background:rgba(22,22,42,0.85);backdrop-filter:blur(16px);border-bottom:1px solid var(--border)}
+.topnav-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:64px}
+.topnav .logo{font-size:.9rem;font-weight:600;letter-spacing:.12em;color:var(--amber)}
+.topnav .links{display:flex;gap:28px}
+.topnav .links a,.topnav .links button{font-size:.85rem;color:var(--muted);background:none;border:none;cursor:pointer;font-family:inherit;transition:color .2s}
+.topnav .links a:hover,.topnav .links button:hover{color:#fff}
+.topnav .links .active{color:var(--amber)}
+.btn-dl{background:var(--amber);color:var(--ink);font-size:.85rem;font-weight:600;padding:10px 22px;border-radius:8px;transition:background .2s;display:inline-block;border:none;cursor:pointer}
+.btn-dl:hover{background:#d47830}
 
-  /* Scroll hint */
-  .scroll-hint {
-    position: absolute;
-    bottom: 36px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 2;
-    animation: bob 2.2s ease-in-out infinite;
-  }
-  .scroll-hint svg { width: 22px; height: 22px; opacity: 0.25; stroke: #999; }
-  /* Top Nav */
-  .topnav {
-    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-    padding: 16px 32px;
-    display: flex; align-items: center; justify-content: space-between;
-    background: rgba(250,249,246,0.85);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid rgba(0,0,0,0.06);
-  }
-  .topnav .logo { font-size: 1.1rem; font-weight: 700; color: #1a1a1a; }
-  .topnav .links { display: flex; gap: 20px; align-items: center; }
-  .topnav .links a {
-    font-size: 0.9rem; color: #666; text-decoration: none;
-    transition: color 0.2s;
-  }
-  .topnav .links a:hover { color: #1a1a1a; }
-  @keyframes bob {
-    0%, 100% { transform: translateX(-50%) translateY(0); }
-    50% { transform: translateX(-50%) translateY(8px); }
-  }
+/* Hero */
+.hero{text-align:center;padding:160px 24px 100px}
+.hero .eyebrow{color:var(--amber);font-size:.8rem;letter-spacing:.12em;margin-bottom:24px;font-weight:500}
+.hero h1{font-size:clamp(2.8rem,7vw,5rem);font-weight:800;line-height:1.08;margin-bottom:24px;letter-spacing:-.02em}
+.hero .sub{font-size:1.1rem;color:var(--muted);max-width:540px;margin:0 auto 40px;line-height:1.65}
+.hero .actions{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.btn-ghost{border:1px solid rgba(255,255,255,0.12);color:#fff;padding:12px 30px;border-radius:8px;font-size:.95rem;font-weight:500;transition:background .2s;display:inline-block}
+.btn-ghost:hover{background:rgba(255,255,255,0.04)}
+.hero .meta{color:var(--dim);font-size:.82rem;margin-top:32px}
 
-  /* Features */
-  .features {
-    padding: 100px 24px;
-    max-width: 960px;
-    margin: 0 auto;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 40px 36px;
-  }
-  .feature-icon {
-    width: 40px;
-    height: 40px;
-    margin-bottom: 18px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 8px;
-    background: #f0ede6;
-  }
-  .feature-icon svg { width: 20px; height: 20px; stroke: #777; }
-  .feature h3 {
-    font-size: 1.05rem;
-    font-weight: 600;
-    color: #1a1a1a;
-    margin-bottom: 8px;
-  }
-  .feature p {
-    font-size: 0.9rem;
-    color: #777;
-    line-height: 1.65;
-  }
+/* Sections */
+.section{padding:100px 24px;max-width:1100px;margin:0 auto}
+.section-label{color:var(--amber);font-size:.78rem;letter-spacing:.12em;font-weight:500;margin-bottom:12px}
+.section h2{font-size:2.4rem;font-weight:700;margin-bottom:48px;letter-spacing:-.01em}
 
-  /* Platform */
-  .platforms {
-    padding: 0 24px 80px;
-    text-align: center;
-  }
-  .platforms h2 {
-    font-size: 1.4rem;
-    font-weight: 600;
-    color: #1a1a1a;
-    margin-bottom: 8px;
-  }
-  .platforms .tags {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-    flex-wrap: wrap;
-    margin-top: 16px;
-  }
-  .platforms .tag {
-    padding: 6px 16px;
-    border-radius: 20px;
-    font-size: 0.85rem;
-    color: #666;
-    background: #f0ede6;
-    border: 1px solid #e0dcd4;
-  }
+/* Features Grid */
+.features-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1px;background:var(--border);border-radius:12px;overflow:hidden}
+.feature-card{background:var(--ink);padding:32px 28px;transition:background .2s}
+.feature-card:hover{background:var(--navy)}
+.feature-card .icon{font-size:1.5rem;margin-bottom:14px}
+.feature-card h3{font-size:1rem;font-weight:600;margin-bottom:6px}
+.feature-card p{font-size:.88rem;color:var(--muted);line-height:1.55}
 
-  /* Tech */
-  .tech {
-    padding: 80px 24px;
-    background: #f5f2ed;
-    text-align: center;
-  }
-  .tech h2 {
-    font-size: 1.1rem;
-    font-weight: 500;
-    color: #999;
-    margin-bottom: 24px;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-  }
-  .tech .stack {
-    display: flex;
-    gap: 20px;
-    justify-content: center;
-    flex-wrap: wrap;
-    font-size: 0.9rem;
-    color: #666;
-  }
-  .tech .stack span {
-    padding: 6px 14px;
-    border-radius: 6px;
-    background: #e8e4dc;
-  }
+/* Security */
+.security-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.security-card{background:var(--navy);border-radius:12px;padding:28px 24px;border:1px solid var(--border)}
+.security-card h3{font-size:.95rem;font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.security-card p{font-size:.85rem;color:var(--muted);line-height:1.55}
 
-  /* Footer */
-  footer {
-    padding: 40px 24px;
-    text-align: center;
-    font-size: 0.8rem;
-    color: #aaa;
-    border-top: 1px solid #e8e4dc;
-  }
-  footer a { color: #999; }
-  footer a:hover { color: #333; }
+/* Platforms */
+.platforms{display:flex;gap:24px;justify-content:center;flex-wrap:wrap}
+.platform-card{background:var(--navy);border:1px solid var(--border);border-radius:12px;padding:36px 48px;text-align:center;min-width:220px}
+.platform-card .icon{font-size:2rem;margin-bottom:12px}
+.platform-card h3{font-size:1.1rem;font-weight:600;margin-bottom:4px}
+.platform-card p{font-size:.82rem;color:var(--dim)}
 
-  @media (max-width: 640px) {
-    .features { gap: 32px 20px; padding: 60px 20px; }
-    .hero-content { padding: 0 16px; }
-  }
+/* CTA */
+.cta{background:rgba(232,135,58,0.06);text-align:center;padding:100px 24px}
+.cta h2{font-size:2.4rem;font-weight:700;margin-bottom:10px}
+.cta p{color:var(--muted);margin-bottom:36px}
+.cta .actions{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+
+/* Footer */
+footer{border-top:1px solid var(--border);padding:40px 24px;text-align:center}
+footer p{color:var(--dim);font-size:.82rem}
+footer a{color:var(--muted);transition:color .2s}
+footer a:hover{color:#fff}
+
+/* Stack tags */
+.stack{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:24px}
+.stack span{background:var(--surface);color:var(--muted);font-size:.78rem;padding:6px 14px;border-radius:20px}
+
+@media(max-width:768px){
+  .topnav .links{display:none}
+  .hero{padding:120px 24px 80px}
+  .section{padding:64px 24px}
+  .section h2{font-size:1.8rem}
+  .features-grid{grid-template-columns:1fr}
+  .security-grid{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
+
 <nav class="topnav">
-  <a href="index.html" class="logo">NewReader</a>
-  <div class="links">
-    <a href="docs.html">文档</a>
-    <a href="https://github.com/yueraaaa/NewReader" target="_blank" rel="noopener">GitHub</a>
+  <div class="topnav-inner">
+    <a href="index.html" class="logo">NEWREADER</a>
+    <div class="links">
+      <a href="index.html" class="active">首页</a>
+      <a href="#features">功能</a>
+      <a href="#security">安全</a>
+      <a href="#platforms">平台</a>
+      <a href="docs.html">文档</a>
+    </div>
+    <a href="https://github.com/yueraaaa/NewReader/releases/latest" class="btn-dl">立即下载</a>
   </div>
 </nav>
 
-
+<!-- Hero -->
 <section class="hero">
-  <canvas id="hero-bg"></canvas>
-  <div class="hero-content">
-    <h1>NewReader</h1>
-    <p class="subtitle">
-      精致、安全的 RSS 阅读器，内置 AI 摘要与翻译、TTS 语音朗读、iCloud 同步、全文提取，支持 macOS 与 iOS。
-    </p>
-    <div class="actions">
-      <a href="https://github.com/yueraaaa/NewReader" class="btn btn-primary" target="_blank" rel="noopener">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
-        GitHub 下载
-      </a>
-      <a href="#features" class="btn btn-ghost">了解更多</a>
-    </div>
+  <p class="eyebrow">NEWREADER</p>
+  <h1>精致、安全的<br>AI RSS 阅读器</h1>
+  <p class="sub">Swift 6 原生构建，集成 AI 摘要、多语翻译与语音朗读。<br>让信息筛选从小时缩短至秒级。</p>
+  <div class="actions">
+    <a href="https://github.com/yueraaaa/NewReader/releases/latest" class="btn-dl">下载 NewReader</a>
+    <a href="docs.html" class="btn-ghost">了解更多 →</a>
   </div>
-  <div class="scroll-hint">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 5v14m-5-5l5 5 5-5"/></svg>
+  <p class="meta">macOS 15+ · iOS 18+ · Swift 6 · MIT License</p>
+</section>
+
+<!-- Features -->
+<section id="features" class="section">
+  <p class="section-label">CAPABILITIES</p>
+  <h2>16 项核心功能</h2>
+  <div class="features-grid">
+    <div class="feature-card"><div class="icon">📡</div><h3>多格式订阅</h3><p>RSS 2.0、Atom、JSON Feed 全支持，自动解析</p></div>
+    <div class="feature-card"><div class="icon">🤖</div><h3>AI 摘要</h3><p>OpenAI 兼容 API，一键生成文章摘要</p></div>
+    <div class="feature-card"><div class="icon">🌐</div><h3>多语翻译</h3><p>中/英/日/韩互译，跨越语言障碍</p></div>
+    <div class="feature-card"><div class="icon">🔊</div><h3>TTS 朗读</h3><p>系统语音 + 自定义 TTS API 双引擎，断点续播</p></div>
+    <div class="feature-card"><div class="icon">📄</div><h3>全文提取</h3><p>从摘要 Feed 自动拉取完整正文</p></div>
+    <div class="feature-card"><div class="icon">💾</div><h3>离线缓存</h3><p>文章本地缓存，断网也能读</p></div>
+    <div class="feature-card"><div class="icon">📤</div><h3>OPML 导入导出</h3><p>订阅源一键迁移，无缝切换阅读器</p></div>
+    <div class="feature-card"><div class="icon">💥</div><h3>崩溃上报</h3><p>崩溃自动上传 Supabase，邮件实时通知</p></div>
+    <div class="feature-card"><div class="icon">☁️</div><h3>iCloud 同步</h3><p>SwiftData + CloudKit，跨设备自动同步</p></div>
+    <div class="feature-card"><div class="icon">✏️</div><h3>订阅源改名</h3><p>右键即可重命名，iOS 左滑操作</p></div>
+    <div class="feature-card"><div class="icon">📁</div><h3>分类管理</h3><p>新建分类收纳订阅源，折叠/重命名/删除</p></div>
+    <div class="feature-card"><div class="icon">🎨</div><h3>主题切换</h3><p>浅色 / 深色 / 跟随系统，即时生效</p></div>
+    <div class="feature-card"><div class="icon">⌨️</div><h3>键盘导航</h3><p>J/K 键浏览文章，全键盘操作更高效</p></div>
+    <div class="feature-card"><div class="icon">✅</div><h3>自动已读</h3><p>打开即标记已读，蓝点即时消失</p></div>
+    <div class="feature-card"><div class="icon">💬</div><h3>即显提示</h3><p>工具栏悬停即显说明，无需等待</p></div>
+    <div class="feature-card"><div class="icon">🔒</div><h3>安全优先</h3><p>Keychain 加密、内容消毒、SSRF 防护</p></div>
   </div>
 </section>
 
-<section id="features" class="features">
-  <div class="feature">
-    <div class="feature-icon">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+<!-- Security -->
+<section id="security" class="section">
+  <p class="section-label">SECURITY</p>
+  <h2>内置安全设计</h2>
+  <div class="security-grid">
+    <div class="security-card">
+      <h3>🔐 Keychain 加密存储</h3>
+      <p>API Key 使用 macOS / iOS 系统 Keychain 加密，明文不落磁盘。</p>
     </div>
-    <h3>多格式订阅</h3>
-    <p>支持 RSS 2.0、Atom、JSON Feed 三种主流格式，自动发现并解析 Feed 内容。</p>
-  </div>
-  <div class="feature">
-    <div class="feature-icon">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+    <div class="security-card">
+      <h3>🛡 WKWebView 沙箱</h3>
+      <p>禁用 JavaScript + Content-Security-Policy，阻止脚本注入攻击。</p>
     </div>
-    <h3>AI 摘要与翻译</h3>
-    <p>接入 OpenAI 兼容 API，一键生成文章摘要，支持中英日韩多语翻译。</p>
-  </div>
-  <div class="feature">
-    <div class="feature-icon">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/></svg>
+    <div class="security-card">
+      <h3>🌍 SSRF 防护</h3>
+      <p>URL 协议白名单（仅 http/https）+ 私有 IP / localhost 拦截。</p>
     </div>
-    <h3>TTS 语音朗读</h3>
-    <p>利用系统语音引擎朗读文章内容，可调语速，支持中文普通话、英语、日语、韩语。</p>
-  </div>
-  <div class="feature">
-    <div class="feature-icon">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
+    <div class="security-card">
+      <h3>🧹 HTML 消毒</h3>
+      <p>移除 script / iframe / 事件处理器 / javascript: 链接，净化内容。</p>
     </div>
-    <h3>离线缓存</h3>
-    <p>文章内容可在本地缓存，断网也能随时阅读，自动管理缓存空间。</p>
-  </div>
-  <div class="feature">
-    <div class="feature-icon">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+    <div class="security-card">
+      <h3>📦 OPML 限制</h3>
+      <p>导入文件大小上限 5MB，防止内存耗尽攻击。</p>
     </div>
-    <h3>全文提取</h3>
-    <p>从摘要 Feed 自动提取完整文章正文，告别「点击阅读全文」的割裂体验。</p>
-  </div>
-  <div class="feature">
-    <div class="feature-icon">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+    <div class="security-card">
+      <h3>🔒 App Sandbox</h3>
+      <p>macOS App Sandbox 启用，进程级隔离，网络 + 文件访问最小化。</p>
     </div>
-    <h3>iCloud 同步</h3>
-    <p>SwiftData + CloudKit 跨设备自动同步订阅源、文章和阅读状态。同一 Apple ID 登录即用，无需额外配置。</p>
-  </div>
-  <div class="feature">
-    <div class="feature-icon">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-    </div>
-    <h3>分类管理</h3>
-    <p>新建分类收纳订阅源，点击折叠展开、右键重命名或删除，拖动管理订阅源归属。</p>
-  </div>
-  <div class="feature">
-    <div class="feature-icon">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
-    </div>
-    <h3>主题切换</h3>
-    <p>浅色、深色、跟随系统三种外观，即时生效，夜间阅读更舒适。</p>
-  </div>
-  <div class="feature">
-    <div class="feature-icon">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-    </div>
-    <h3>订阅源改名</h3>
-    <p>macOS 右键菜单或 iOS 左滑即可重命名订阅源，整理信息流更顺手。</p>
-  </div>
-  <div class="feature">
-    <div class="feature-icon">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-    </div>
-    <h3>安全优先</h3>
-    <p>API Key Keychain 加密存储、WKWebView 禁用 JavaScript、HTML 消毒、URL 白名单防护。</p>
   </div>
 </section>
 
-<section class="platforms">
-  <h2>支持平台</h2>
-  <div class="tags">
-    <span class="tag">macOS 15+</span>
-    <span class="tag">iOS 18+</span>
-    <span class="tag">Apple Silicon</span>
+<!-- Platforms -->
+<section id="platforms" class="section">
+  <p class="section-label">PLATFORMS</p>
+  <h2>跨平台支持</h2>
+  <div class="platforms">
+    <div class="platform-card">
+      <div class="icon">🖥</div>
+      <h3>macOS</h3>
+      <p>15.0+ · Apple Silicon</p>
+    </div>
+    <div class="platform-card">
+      <div class="icon">📱</div>
+      <h3>iOS</h3>
+      <p>18.0+ · iPhone / iPad</p>
+    </div>
   </div>
-</section>
-
-<section class="tech">
-  <h2>技术栈</h2>
   <div class="stack">
-    <span>Swift 6</span>
-    <span>SwiftUI</span>
-    <span>SwiftData</span>
-    <span>FeedKit</span>
-    <span>WKWebView</span>
-    <span>AVFoundation</span>
-    <span>OpenAI API</span>
+    <span>Swift 6</span><span>SwiftUI</span><span>SwiftData</span>
+    <span>FeedKit</span><span>WKWebView</span><span>AVFoundation</span>
+    <span>Supabase</span><span>CloudKit</span><span>Resend</span>
   </div>
 </section>
 
+<!-- CTA -->
+<section class="cta">
+  <p class="section-label">GET STARTED</p>
+  <h2>开启 AI 增强阅读之旅</h2>
+  <p>免费、开源、隐私优先。</p>
+  <div class="actions">
+    <a href="https://github.com/yueraaaa/NewReader/releases/latest" class="btn-dl">📦 下载最新版</a>
+    <a href="https://github.com/yueraaaa/NewReader" class="btn-ghost">💻 查看源代码</a>
+  </div>
+</section>
+
+<!-- Footer -->
 <footer>
   <p>
     <a href="docs.html">使用文档</a>
-    &nbsp;·&nbsp;
-    <a href="https://github.com/yueraaaa/NewReader" target="_blank" rel="noopener">GitHub</a>
-    &nbsp;·&nbsp;
-    <a href="https://github.com/yueraaaa/NewReader/releases/tag/v1.1.1" target="_blank" rel="noopener">v1.1.1</a>
-    &nbsp;·&nbsp;
-    Swift Package Manager
+    <span style="margin:0 10px;color:var(--border)">·</span>
+    <a href="https://github.com/yueraaaa/NewReader/releases/tag/v1.1.1">v1.1.1</a>
+    <span style="margin:0 10px;color:var(--border)">·</span>
+    <a href="https://github.com/yueraaaa/NewReader">GitHub</a>
+    <span style="margin:0 10px;color:var(--border)">·</span>
+    MIT License
   </p>
 </footer>
-
-<script type="importmap">
-{ "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
-</script>
-<script type="module">
-import * as THREE from 'three';
-
-const canvas = document.getElementById('hero-bg');
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(60, 1, 0.1, 100);
-camera.position.z = 12;
-
-// Soft, warm-toned floating particles
-const count = 600;
-const positions = new Float32Array(count * 3);
-const colors = new Float32Array(count * 3);
-
-for (let i = 0; i < count; i++) {
-  const i3 = i * 3;
-  const theta = Math.random() * Math.PI * 2;
-  const radius = 3 + Math.random() * 8;
-  positions[i3] = Math.cos(theta) * radius;
-  positions[i3 + 1] = (Math.random() - 0.5) * 10;
-  positions[i3 + 2] = Math.sin(theta) * radius * 0.4 - 2;
-
-  // Warm amber-brown tones
-  const r = 0.55 + Math.random() * 0.25;
-  const g = 0.4 + Math.random() * 0.2;
-  const b = 0.25 + Math.random() * 0.15;
-  colors[i3] = r;
-  colors[i3 + 1] = g;
-  colors[i3 + 2] = b;
-}
-
-const geo = new THREE.BufferGeometry();
-geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-
-const mat = new THREE.PointsMaterial({
-  size: 0.07,
-  vertexColors: true,
-  blending: THREE.NormalBlending,
-  depthWrite: false,
-  transparent: true,
-  opacity: 0.5
-});
-
-const points = new THREE.Points(geo, mat);
-scene.add(points);
-
-// Subtle floating card-like planes
-const cardGroup = new THREE.Group();
-for (let i = 0; i < 5; i++) {
-  const w = 0.7 + Math.random() * 1.4;
-  const h = 0.12 + Math.random() * 0.25;
-  const g = new THREE.PlaneGeometry(w, h);
-  const m = new THREE.MeshBasicMaterial({
-    color: new THREE.Color(
-      0.6 + Math.random() * 0.2,
-      0.45 + Math.random() * 0.2,
-      0.3 + Math.random() * 0.2
-    ),
-    transparent: true,
-    opacity: 0.08 + Math.random() * 0.1,
-    side: THREE.DoubleSide
-  });
-  const mesh = new THREE.Mesh(g, m);
-  mesh.position.set(
-    (Math.random() - 0.5) * 10,
-    (Math.random() - 0.5) * 7,
-    -1 - Math.random() * 3
-  );
-  mesh.rotation.z = (Math.random() - 0.5) * 0.3;
-  mesh.userData = {
-    speed: 0.002 + Math.random() * 0.006,
-    amplitude: 0.2 + Math.random() * 1
-  };
-  cardGroup.add(mesh);
-}
-scene.add(cardGroup);
-
-function resize() {
-  const w = canvas.clientWidth;
-  const h = canvas.clientHeight;
-  renderer.setSize(w, h, false);
-  camera.aspect = w / h;
-  camera.updateProjectionMatrix();
-}
-window.addEventListener('resize', resize);
-resize();
-
-const clock = new THREE.Clock();
-function animate() {
-  requestAnimationFrame(animate);
-  const t = clock.getElapsedTime();
-
-  points.rotation.y += 0.0003;
-  points.rotation.x = Math.sin(t * 0.12) * 0.06;
-
-  cardGroup.children.forEach(mesh => {
-    mesh.position.y += mesh.userData.speed;
-    if (mesh.position.y > 5) mesh.position.y = -5;
-    mesh.position.x += Math.sin(t * 0.5 + mesh.position.y) * 0.002;
-  });
-
-  renderer.render(scene, camera);
-}
-animate();
-</script>
 
 </body>
 </html>
