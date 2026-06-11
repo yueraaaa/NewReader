@@ -9,6 +9,8 @@
 
 [🌐 产品介绍](https://newreader.netlify.app) · [📦 下载最新版](https://github.com/yueraaaa/NewReader/releases/latest)
 
+[English](#-english) · [中文](#-特性)
+
 ---
 
 ## ✨ 特性
@@ -82,3 +84,10 @@ open Package.swift
 ## 📄 许可
 
 MIT License
+
+## 🇬🇧 English
+
+NewReader is a polished, secure RSS reader with AI summarization, multi-language translation, and TTS voice reading. Built with Swift 6 + SwiftUI, available on macOS 15+ and iOS 18+.
+
+[🌐 Website →](https://newreader.netlify.app) (Chinese · 中文)
+
