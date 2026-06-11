@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Documentation — NewReader</title>
+<link rel="stylesheet" href="docs.css">
+<script defer src="https://cloud.umami.is/script.js" data-website-id="99007509-bbef-41e1-908a-99c87621b95d"></script>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="topnav-inner">
+    <a href="index_en.html" class="back">← Home</a>
+    <div class="lang-switcher" style="display:flex;gap:4px;margin-left:auto"><a href="docs.html" style="font-size:.78rem;padding:4px 10px;border-radius:6px;color:var(--muted);transition:all .2s">中文</a><a href="docs_en.html" style="font-size:.78rem;padding:4px 10px;border-radius:6px;color:var(--amber);background:rgba(232,135,58,0.1)">EN</a></div>
+    <a href="index.html" class="logo">NEWREADER</a>
+  </div>
+</nav>
+
+<div class="content">
+
+<h1>Documentation</h1>
+<p class="subtitle">From installation to power-user tips — everything you need to get started with NewReader.</p>
+
+<nav class="toc-nav">
+  <a href="#install">Installation</a>
+  <a href="#subscribe">Add Feeds</a>
+  <a href="#manage">Feed Management</a>
+  <a href="#ai">AI &amp; Translation</a>
+  <a href="#tts">Text-to-Speech</a>
+  <a href="#fulltext">Full-text Extraction</a>
+  <a href="#icloud">iCloud Sync</a>
+  <a href="#cache">Offline Cache</a>
+  <a href="#shortcuts">Shortcuts</a>
+  <a href="#security">Security</a>
+</nav>
+
+<!-- 安装 -->
+<h2 id="install">📥 Installation</h2>
+<h3>macOS</h3>
+<ol>
+  <li>Go to <a href="https://github.com/yueraaaa/NewReader/releases/latest" style="color:var(--amber)">GitHub Releases</a> and download the latest <code>NewReader.dmg</code></li>
+  <li>Open the DMG and drag <strong>NewReader.app</strong> into <code>/Applications</code></li>
+  <li>On first launch, if you see "unable to verify developer", go to <strong>System Settings → Privacy &amp; Security</strong> and click "Open Anyway"</li>
+</ol>
+<h3>iOS</h3>
+<p>Build and install via Xcode. Open <code>Package.swift</code>, select the <strong>NewReaderiOS</strong> target, connect your iPhone, and run.</p>
+
+<!-- 添加订阅源 -->
+<h2 id="subscribe">📡 Adding Feeds</h2>
+<ol>
+  <li>Press <code>⌘N</code> or click the <strong>+</strong> button in the toolbar</li>
+  <li>Enter an RSS / Atom / JSON Feed URL</li>
+  <li>Click "Subscribe" — the feed title and articles will appear in the sidebar</li>
+</ol>
+<p>OPML import supported: sidebar <strong>⋯</strong> → Import OPML, select a <code>.opml</code> file.</p>
+
+<!-- 订阅源管理 -->
+<h2 id="manage">📁 Feed Management</h2>
+<ul>
+  <li><strong>Refresh</strong>: Right-click a feed → Refresh, or use the toolbar refresh button</li>
+  <li><strong>Rename</strong>: Right-click a feed → Rename</li>
+  <li><strong>Mark All Read</strong>: Right-click a feed → Mark all as read</li>
+  <li><strong>Delete</strong>: Right-click a feed → Delete</li>
+  <li><strong>Categories</strong>: Create categories to organize feeds; collapsible, renamable, deletable</li>
+</ul>
+
+<!-- AI -->
+<h2 id="ai">🤖 AI Summarization &amp; Translation</h2>
+<p>Supports OpenAI-compatible APIs (OpenAI, DeepSeek, Qwen, etc.).</p>
+<ol>
+  <li>Open Settings (<code>⌘,</code>) → <strong>AI</strong> tab</li>
+  <li>Select a model (DeepSeek-V3 / DeepSeek-R1)</li>
+  <li>In articles: toolbar <strong>✨</strong> to summarize, <strong>🌐</strong> to translate</li>
+</ol>
+<div class="note">AI summarization and translation are provided by the NewReader backend — no need to configure API keys yourself.</div>
+
+<!-- TTS -->
+<h2 id="tts">🔊 Text-to-Speech (TTS)</h2>
+<table>
+  <tr><th>Engine</th><th>Description</th><th>Network</th></tr>
+  <tr><td>Apple System Voice</td><td>Built-in macOS / iOS engine, supports Mandarin, English, Japanese, Korean</td><td>Offline</td></tr>
+  <tr><td>Custom TTS API</td><td>Connect any TTS provider for natural, fluid voice</td><td>Online</td></tr>
+</table>
+<p>Click the toolbar <strong>🔊</strong> button while reading — supports pause and resume. Settings → Voice tab to switch engines and configure custom endpoints and API keys.</p>
+
+<!-- 全文提取 -->
+<h2 id="fulltext">📄 Full-text Extraction</h2>
+<p>Some feeds only provide summaries. Click the toolbar <strong>📄</strong> button to auto-fetch the full article from the original link.</p>
+
+<!-- iCloud -->
+<h2 id="icloud">☁️ iCloud Cross-Device Sync</h2>
+<p>Automatically sync feeds, articles, and read status across devices with the same Apple ID.</p>
+<table>
+  <tr><th>Synced Data</th><th>Description</th></tr>
+  <tr><td>Feeds &amp; categories</td><td>List structure auto-synced</td></tr>
+  <tr><td>Read status</td><td>Read / unread synced</td></tr>
+  <tr><td>Preferences</td><td>Theme, language, etc. synced</td></tr>
+  <tr><td>API Keys</td><td>Not synced for security</td></tr>
+</table>
+
+<!-- 离线缓存 -->
+<h2 id="cache">💾 Offline Cache</h2>
+<p>Articles are automatically cached locally — read even without internet. Settings → Storage to view cache size and clear with one click.</p>
+
+<!-- 快捷键 -->
+<h2 id="shortcuts">⌨️ Keyboard Shortcuts</h2>
+<div class="shortcut-grid">
+  <div class="shortcut-card"><kbd>⌘N</kbd><span>Add Feed</span></div>
+  <div class="shortcut-card"><kbd>⌘,</kbd><span>Settings</span></div>
+  <div class="shortcut-card"><kbd>⌘R</kbd><span>Refresh Feeds</span></div>
+  <div class="shortcut-card"><kbd>⌘F</kbd><span>Search Articles</span></div>
+  <div class="shortcut-card"><kbd>J</kbd><span>Next Article</span></div>
+  <div class="shortcut-card"><kbd>K</kbd><span>Previous Article</span></div>
+  <div class="shortcut-card"><kbd>Space</kbd><span>Scroll Down</span></div>
+  <div class="shortcut-card"><kbd>⌘W</kbd><span>Reading Workspace</span></div>
+</div>
+
+<!-- 安全 -->
+<h2 id="security">🔐 Security Design</h2>
+<ul>
+  <li>API keys encrypted in system Keychain — never stored in plaintext</li>
+  <li>WKWebView with JavaScript disabled + CSP policy to block script injection</li>
+  <li>URLs restricted to http/https only, private IP / localhost blocked (SSRF prevention)</li>
+  <li>HTML sanitization: strips script, iframe, and event handlers</li>
+  <li>OPML import capped at 5 MB</li>
+  <li>macOS App Sandbox with process-level isolation</li>
+</ul>
+
+</div>
+
+<footer>
+  <p>
+    <a href="index_en.html">Home</a>
+    <span style="margin:0 10px;color:var(--border)">·</span>
+    <a href="https://github.com/yueraaaa/NewReader">GitHub</a>
+    <span style="margin:0 10px;color:var(--border)">·</span>
+    v1.1.1
+  </p>
+</footer>
+
+</body>
+</html>
