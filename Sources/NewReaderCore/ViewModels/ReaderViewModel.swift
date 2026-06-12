@@ -16,6 +16,7 @@ public final class ReaderViewModel: ObservableObject {
     @Published public var errorMessage: String?
     @Published public var searchQuery: String = ""
     @Published public var isRefreshing: Bool = false
+    @Published public var isAutoSummarizing: Bool = false
     @Published public var showSubscribe: Bool = false
     @Published public var workspace: WorkspaceSnapshot?
     @Published public var isGeneratingWorkspace = false
@@ -365,8 +366,8 @@ public final class ReaderViewModel: ObservableObject {
         let recent = feeds.flatMap { $0.allArticles }
             .filter { $0.isRead }
             .filter { ($0.publishedDate ?? .distantPast) > Date().addingTimeInterval(-7 * 24 * 3600) }
-        guard recent.count >= 5 else {
-            workspaceStatusMessage = "需要至少阅读 5 篇文章才能生成分析"
+        guard recent.count >= 3 else {
+            workspaceStatusMessage = "需要至少阅读 3 篇文章才能生成分析"
             return
         }
 
@@ -404,7 +405,7 @@ public final class ReaderViewModel: ObservableObject {
             .filter { $0.isRead }
             .filter { ($0.publishedDate ?? .distantPast) > Date().addingTimeInterval(-7 * 24 * 3600) }
             .count
-        guard recentReadCount >= 10 else { return }
+        guard recentReadCount >= 5 else { return }
         await generateWorkspace()
     }
     // MARK: - Folder
@@ -463,6 +464,8 @@ public final class ReaderViewModel: ObservableObject {
     }
 
     private func autoSummarizeNewArticles(_ articles: [Article]) async {
+        isAutoSummarizing = true
+        defer { isAutoSummarizing = false }
         for article in articles.prefix(5) where article.aiSummary == nil {
             if let summary = try? await aiService.summarize(html: article.contentHTML, title: article.title) {
                 article.aiSummary = summary

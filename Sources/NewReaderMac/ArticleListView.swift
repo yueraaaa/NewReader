@@ -118,6 +118,15 @@ struct ArticleListView: View {
                             .frame(width: 14, height: 14)
                     }
 
+                    if viewModel.isAutoSummarizing {
+                        ProgressView()
+                            .scaleEffect(0.6)
+                            .frame(width: 14, height: 14)
+                        Text("AI 摘要中…")
+                            .font(.system(size: 11))
+                            .foregroundStyle(.secondary)
+                    }
+
                     let unreadCount = viewModel.articles.filter { !$0.isRead }.count
                     if unreadCount > 0 {
                         Text("\(unreadCount) 篇未读")
