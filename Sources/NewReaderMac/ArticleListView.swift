@@ -78,7 +78,6 @@ struct ArticleListView: View {
                     }
                 }
                 .listStyle(.plain)
-                .focusable(true)
                 .onKeyPress(characters: .alphanumerics) { press in
                     guard let idx = viewModel.filteredArticles.firstIndex(where: { $0.id == viewModel.selectedArticle?.id }) else {
                         return .ignored
