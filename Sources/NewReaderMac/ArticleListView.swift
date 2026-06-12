@@ -51,10 +51,7 @@ struct ArticleListView: View {
                     ArticleRowView(
                         article: article,
                         isSelected: viewModel.selectedArticle?.id == article.id,
-                        onTap: {
-                        if !article.isRead { viewModel.toggleRead(article) }
-                        viewModel.selectedArticle = article
-                    }
+                        onTap: {}
                     )
                     .tag(article as Article?)
                     .swipeActions(edge: .leading) {
@@ -134,6 +131,11 @@ struct ArticleListView: View {
         }
         .onChange(of: searchText) { _, newValue in
             viewModel.searchQuery = newValue
+        }
+        .onChange(of: viewModel.selectedArticle) { _, newArticle in
+            if let article = newArticle, !article.isRead {
+                viewModel.toggleRead(article)
+            }
         }
     }
 }

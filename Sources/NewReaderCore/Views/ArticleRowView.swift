@@ -58,6 +58,5 @@ public struct ArticleRowView: View {
         .padding(.horizontal, 12)
         .contentShape(Rectangle())
         .background(isSelected ? Color.accentColor.opacity(0.1) : Color.clear)
-        .simultaneousGesture(TapGesture().onEnded { onTap() })
     }
 }
