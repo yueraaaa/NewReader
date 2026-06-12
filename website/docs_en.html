@@ -12,7 +12,10 @@
 <nav class="topnav">
   <div class="topnav-inner">
     <a href="index_en.html" class="back">← Home</a>
-    <div class="lang-switcher" style="display:flex;gap:24px;margin-left:auto;margin-right:16px"><a href="docs.html" style="font-size:.78rem;padding:8px 18px;border-radius:8px;color:var(--muted);transition:all .2s">中文</a><a href="docs_en.html" style="font-size:.78rem;padding:4px 10px;border-radius:6px;color:var(--amber);background:rgba(232,135,58,0.1)">EN</a></div>
+    <div class="lang-switcher">
+      <a href="docs.html">中文</a>
+      <a href="docs_en.html" class="active">EN</a>
+    </div>
     <a href="index.html" class="logo">NEWREADER</a>
   </div>
 </nav>
@@ -39,7 +42,7 @@
 <h2 id="install">📥 Installation</h2>
 <h3>macOS</h3>
 <ol>
-  <li>Go to <a href="https://github.com/yueraaaa/NewReader/releases/latest" style="color:var(--amber)">GitHub Releases</a> and download the latest <code>NewReader.dmg</code></li>
+  <li>Go to <a href="https://github.com/yueraaaa/NewReader/releases/latest" class="release-link">GitHub Releases</a> and download the latest <code>NewReader.dmg</code></li>
   <li>Open the DMG and drag <strong>NewReader.app</strong> into <code>/Applications</code></li>
   <li>On first launch, if you see "unable to verify developer", go to <strong>System Settings → Privacy &amp; Security</strong> and click "Open Anyway"</li>
 </ol>
@@ -132,9 +135,9 @@
 <footer>
   <p>
     <a href="index_en.html">Home</a>
-    <span style="margin:0 10px;color:var(--border)">·</span>
+    <span class="footer-sep">·</span>
     <a href="https://github.com/yueraaaa/NewReader">GitHub</a>
-    <span style="margin:0 10px;color:var(--border)">·</span>
+    <span class="footer-sep">·</span>
     v1.1.1
   </p>
 </footer>

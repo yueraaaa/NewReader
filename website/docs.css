@@ -45,3 +45,11 @@ footer a:hover{color:#fff}
   .content h1{font-size:1.5rem}
   .shortcut-grid{grid-template-columns:1fr 1fr}
 }
+
+/* Lang switcher (shared with index pages) */
+.lang-switcher{display:flex;gap:24px;margin-left:auto;margin-right:16px}
+.lang-switcher a{font-size:.78rem;padding:8px 18px;border-radius:8px;color:var(--muted);transition:all .2s}
+.lang-switcher a:hover{color:#fff;background:var(--surface)}
+.lang-switcher a.active{color:var(--amber);background:rgba(232,135,58,0.1)}
+.release-link{color:var(--amber)}
+.footer-sep{margin:0 10px;color:var(--border)}

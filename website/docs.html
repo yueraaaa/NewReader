@@ -12,7 +12,10 @@
 <nav class="topnav">
   <div class="topnav-inner">
     <a href="index.html" class="back">← 首页</a>
-    <div class="lang-switcher" style="display:flex;gap:24px;margin-left:auto;margin-right:16px"><a href="docs.html" style="font-size:.78rem;padding:8px 18px;border-radius:8px;color:var(--amber);background:rgba(232,135,58,0.1)">中文</a><a href="docs_en.html" style="font-size:.78rem;padding:4px 10px;border-radius:6px;color:var(--muted);transition:all .2s">EN</a></div>
+    <div class="lang-switcher">
+      <a href="docs.html" class="active">中文</a>
+      <a href="docs_en.html">EN</a>
+    </div>
     <a href="index.html" class="logo">NEWREADER</a>
   </div>
 </nav>
@@ -39,7 +42,7 @@
 <h2 id="install">📥 安装</h2>
 <h3>macOS</h3>
 <ol>
-  <li>前往 <a href="https://github.com/yueraaaa/NewReader/releases/latest" style="color:var(--amber)">GitHub Releases</a> 下载最新 <code>NewReader.dmg</code></li>
+  <li>前往 <a href="https://github.com/yueraaaa/NewReader/releases/latest" class="release-link">GitHub Releases</a> 下载最新 <code>NewReader.dmg</code></li>
   <li>打开 DMG，将 <strong>NewReader.app</strong> 拖入 <code>/Applications</code></li>
   <li>首次运行提示「无法验证开发者」，在 <strong>系统设置 → 隐私与安全性</strong> 中点击「仍要打开」</li>
 </ol>
@@ -132,9 +135,9 @@
 <footer>
   <p>
     <a href="index.html">首页</a>
-    <span style="margin:0 10px;color:var(--border)">·</span>
+    <span class="footer-sep">·</span>
     <a href="https://github.com/yueraaaa/NewReader">GitHub</a>
-    <span style="margin:0 10px;color:var(--border)">·</span>
+    <span class="footer-sep">·</span>
     v1.1.1
   </p>
 </footer>
