@@ -47,13 +47,18 @@ struct ArticleListView: View {
                     Spacer()
                 }
             } else {
-                List(viewModel.filteredArticles, selection: $viewModel.selectedArticle) { article in
-                    ArticleRowView(
-                        article: article,
-                        isSelected: viewModel.selectedArticle?.id == article.id,
-                        onTap: {}
-                    )
-                    .tag(article as Article?)
+                List(viewModel.filteredArticles) { article in
+                    Button {
+                        if !article.isRead { viewModel.toggleRead(article) }
+                        viewModel.selectedArticle = article
+                    } label: {
+                        ArticleRowView(
+                            article: article,
+                            isSelected: viewModel.selectedArticle?.id == article.id,
+                            onTap: {}
+                        )
+                    }
+                    .buttonStyle(.plain)
                     .swipeActions(edge: .leading) {
                         Button {
                             if !article.isRead { viewModel.toggleRead(article) }
@@ -78,6 +83,7 @@ struct ArticleListView: View {
                     }
                 }
                 .listStyle(.plain)
+                .focusable(true)
                 .onKeyPress(characters: .alphanumerics) { press in
                     guard let idx = viewModel.filteredArticles.firstIndex(where: { $0.id == viewModel.selectedArticle?.id }) else {
                         return .ignored
