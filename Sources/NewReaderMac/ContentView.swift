@@ -1,7 +1,9 @@
 import SwiftUI
 import NewReaderCore
+import OSLog
 
 struct ContentView: View {
+    private static let logger = Logger(subsystem: "com.newreader.app", category: "ContentView")
     @EnvironmentObject var viewModel: ReaderViewModel
     @Environment(\.openSettings) private var openSettings
 
@@ -115,7 +117,7 @@ struct ContentView: View {
                 do {
                     try await viewModel.authService.handleCallback(url: url)
                 } catch {
-                    print("Auth callback error: \(error)")
+                    Self.logger.error("Auth callback error: \(error.localizedDescription, privacy: .public)")
                 }
             }
         }

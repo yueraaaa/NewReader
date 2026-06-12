@@ -84,12 +84,16 @@ public final class AuthService: ObservableObject {
 /// Supabase project configuration — reads secrets from Secrets.plist in the app bundle.
 public enum SupabaseConfig {
     public static var url: String {
-        Bundle.main.object(forInfoDictionaryKey: "SupabaseURL") as? String
-            ?? "https://YOUR-PROJECT.supabase.co"
+        guard let url = Bundle.main.object(forInfoDictionaryKey: "SupabaseURL") as? String else {
+            fatalError("Missing SupabaseURL in Info.plist — check Secrets.plist merge")
+        }
+        return url
     }
     public static var publishableKey: String {
-        Bundle.main.object(forInfoDictionaryKey: "SupabasePublishableKey") as? String
-            ?? "sb_publishable_YOUR_KEY"
+        guard let key = Bundle.main.object(forInfoDictionaryKey: "SupabasePublishableKey") as? String else {
+            fatalError("Missing SupabasePublishableKey in Info.plist — check Secrets.plist merge")
+        }
+        return key
     }
     /// Deep link redirect URL — must match the Supabase dashboard's Redirect URLs.
     public static let redirectURL = URL(string: "newreader://auth-callback")!

@@ -1,6 +1,7 @@
 import SwiftUI
 import AuthenticationServices
 import CryptoKit
+import OSLog
 
 /// Login / registration view shared by macOS and iOS.
 public struct LoginView: View {
@@ -11,6 +12,8 @@ public struct LoginView: View {
     @State private var errorMessage: String?
     @State private var isLoading: Bool = false
     @State private var currentNonce: String?
+
+    private static let logger = Logger(subsystem: "com.newreader.app", category: "LoginView")
 
     public init() {}
 
@@ -118,7 +121,7 @@ public struct LoginView: View {
 
     private func submit() {
         guard !email.isEmpty, !password.isEmpty else { return }
-        print("[LoginView] submit: isSignUp=\(isSignUp), email=\(email)")
+        Self.logger.info("Submit: isSignUp=\(self.isSignUp)")
         isLoading = true
         errorMessage = nil
 
@@ -127,17 +130,17 @@ public struct LoginView: View {
                 if isSignUp {
                     try await viewModel.authService.signUp(email: email, password: password)
                     if viewModel.authService.isLoggedIn {
-                        print("[LoginView] signUp success")
+                        Self.logger.info("Sign up success")
                     } else {
                         errorMessage = "注册请求已发送，请查看邮箱中的确认链接"
                     }
                 } else {
                     try await viewModel.authService.signIn(email: email, password: password)
-                    print("[LoginView] signIn success, isLoggedIn=\(viewModel.authService.isLoggedIn)")
+                    Self.logger.info("Sign in success")
                 }
             } catch {
                 let msg = error.localizedDescription
-                print("[LoginView] auth error: \(msg)")
+                Self.logger.error("Auth error: \(msg, privacy: .public)")
                 errorMessage = msg
             }
             isLoading = false
@@ -159,7 +162,7 @@ public struct LoginView: View {
                 errorMessage = "Apple 登录失败：内部错误"
                 return
             }
-            print("[LoginView] Apple sign in: got idToken")
+            Self.logger.info("Apple sign in: received identity token")
             isLoading = true
             errorMessage = nil
 
@@ -169,17 +172,17 @@ public struct LoginView: View {
                         idToken: tokenString,
                         nonce: nonce
                     )
-                    print("[LoginView] Apple sign in success")
+                    Self.logger.info("Apple sign in success")
                 } catch {
                     let msg = error.localizedDescription
-                    print("[LoginView] Apple sign in error: \(msg)")
+                    Self.logger.error("Apple sign in error: \(msg, privacy: .public)")
                     errorMessage = msg
                 }
                 isLoading = false
             }
 
         case .failure(let error):
-            print("[LoginView] Apple sign in cancelled/error: \(error)")
+            Self.logger.info("Apple sign in cancelled")
             if (error as NSError).code != ASAuthorizationError.canceled.rawValue {
                 errorMessage = error.localizedDescription
             }

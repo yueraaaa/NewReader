@@ -4,6 +4,11 @@ import Supabase
 /// Scans the macOS DiagnosticReports directory for new crash reports from the
 /// previous session and uploads them to Supabase Storage, then moves processed
 /// files into a local archive so they are never uploaded twice.
+///
+/// **Security requirement**: The Supabase `crash-reports` storage bucket must
+/// have Row-Level Security enabled with an INSERT policy restricted to the
+/// `anon` role. Without RLS, anyone with the publishable key can write arbitrary
+/// files to this bucket.
 public enum CrashReportCollector {
 
     private static let bucketName = "crash-reports"
