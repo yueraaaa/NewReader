@@ -4,16 +4,11 @@ import NewReaderCore
 struct ArticleListView: View {
     @EnvironmentObject var viewModel: ReaderViewModel
     @State private var searchText: String = ""
-    @State private var showUnreadOnly: Bool = false
     @FocusState private var isSearchFocused: Bool
 
-    private var displayedArticles: [Article] {
-        let base = viewModel.filteredArticles
-        return showUnreadOnly ? base.filter { !$0.isRead } : base
-    }
 
     private var groupedArticles: [(label: String, articles: [Article])] {
-        let grouped = Dictionary(grouping: displayedArticles) { dateGroup(for: $0.publishedDate) }
+        let grouped = Dictionary(grouping: viewModel.filteredArticles) { dateGroup(for: $0.publishedDate) }
         let order = ["今天", "昨天", "本周", "更早"]
         return order.compactMap { key in
             grouped[key].map { (key, $0) }
@@ -54,16 +49,6 @@ struct ArticleListView: View {
             .padding(.horizontal, 12)
             .padding(.vertical, 7)
 
-            // Read/unread filter
-            Picker("", selection: $showUnreadOnly) {
-                Text("全部").tag(false)
-                Text("未读").tag(true)
-            }
-            .pickerStyle(.segmented)
-            .labelsHidden()
-            .padding(.horizontal, 12)
-            .padding(.vertical, 6)
-
             Divider()
 
             // Article list
@@ -77,13 +62,13 @@ struct ArticleListView: View {
                         .foregroundStyle(.secondary)
                     Spacer()
                 }
-            } else if displayedArticles.isEmpty {
+            } else if viewModel.filteredArticles.isEmpty {
                 VStack(spacing: 12) {
                     Spacer()
-                    Image(systemName: "envelope.open")
+                    Image(systemName: "tray")
                         .font(.system(size: 36))
                         .foregroundStyle(.tertiary)
-                    Text("没有未读文章")
+                    Text("暂无文章")
                         .foregroundStyle(.secondary)
                     Spacer()
                 }
@@ -137,7 +122,7 @@ struct ArticleListView: View {
                 .listStyle(.plain)
                 .focusable(true)
                 .onKeyPress(characters: .alphanumerics) { press in
-                    let articles = displayedArticles
+                    let articles = viewModel.filteredArticles
                     guard !articles.isEmpty,
                           let idx = articles.firstIndex(where: { $0.id == viewModel.selectedArticle?.id }) else {
                         return .ignored
