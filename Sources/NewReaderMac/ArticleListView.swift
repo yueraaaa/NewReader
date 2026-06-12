@@ -112,7 +112,7 @@ struct ArticleListView: View {
                                 }
                             }
                         } header: {
-                            Text(group.label)
+                            Text(group.label).frame(maxWidth: .infinity, alignment: .trailing)
                                 .font(.system(size: 12, weight: .semibold))
                                 .foregroundStyle(.secondary)
                                 .padding(.leading, -10)
