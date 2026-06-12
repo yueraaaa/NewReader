@@ -4,13 +4,32 @@ import NewReaderCore
 struct ArticleListView: View {
     @EnvironmentObject var viewModel: ReaderViewModel
     @State private var searchText: String = ""
-    
-    /// On launch, show only unread. Clears after first explicit 'show all' action.
+    @State private var showUnreadOnly: Bool = false
+    @FocusState private var isSearchFocused: Bool
 
+    private var displayedArticles: [Article] {
+        let base = viewModel.filteredArticles
+        return showUnreadOnly ? base.filter { !$0.isRead } : base
+    }
+
+    private var groupedArticles: [(label: String, articles: [Article])] {
+        let grouped = Dictionary(grouping: displayedArticles) { dateGroup(for: $0.publishedDate) }
+        let order = ["今天", "昨天", "本周", "更早"]
+        return order.compactMap { key in
+            grouped[key].map { (key, $0) }
+        }
+    }
+
+    private func dateGroup(for date: Date?) -> String {
+        guard let date = date else { return "更早" }
+        let cal = Calendar.current
+        if cal.isDateInToday(date) { return "今天" }
+        if cal.isDateInYesterday(date) { return "昨天" }
+        if let weekAgo = cal.date(byAdding: .day, value: -7, to: Date()), date > weekAgo { return "本周" }
+        return "更早"
+    }
 
     var body: some View {
-
-
         VStack(spacing: 0) {
             // Search bar
             HStack(spacing: 6) {
@@ -19,6 +38,7 @@ struct ArticleListView: View {
                 TextField("搜索文章…", text: $searchText)
                     .textFieldStyle(.plain)
                     .font(.system(size: 13))
+                    .focused($isSearchFocused)
                 if !searchText.isEmpty {
                     Button {
                         searchText = ""
@@ -28,10 +48,21 @@ struct ArticleListView: View {
                             .foregroundStyle(.tertiary)
                     }
                     .buttonStyle(.plain)
+                    .keyboardShortcut(.escape, modifiers: [])
                 }
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 7)
+
+            // Read/unread filter
+            Picker("", selection: $showUnreadOnly) {
+                Text("全部").tag(false)
+                Text("未读").tag(true)
+            }
+            .pickerStyle(.segmented)
+            .labelsHidden()
+            .padding(.horizontal, 12)
+            .padding(.vertical, 6)
 
             Divider()
 
@@ -46,60 +77,91 @@ struct ArticleListView: View {
                         .foregroundStyle(.secondary)
                     Spacer()
                 }
+            } else if displayedArticles.isEmpty {
+                VStack(spacing: 12) {
+                    Spacer()
+                    Image(systemName: "envelope.open")
+                        .font(.system(size: 36))
+                        .foregroundStyle(.tertiary)
+                    Text("没有未读文章")
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                }
             } else {
-                List(viewModel.filteredArticles) { article in
-                    Button {
-                        if !article.isRead { viewModel.toggleRead(article) }
-                        viewModel.selectedArticle = article
-                    } label: {
-                        ArticleRowView(
-                            article: article,
-                            isSelected: viewModel.selectedArticle?.id == article.id,
-                            onTap: {}
-                        )
-                    }
-                    .buttonStyle(.plain)
-                    .swipeActions(edge: .leading) {
-                        Button {
-                            if !article.isRead { viewModel.toggleRead(article) }
-                        } label: {
-                            Label(
-                                article.isRead ? "标为未读" : "标为已读",
-                                systemImage: article.isRead ? "envelope.badge" : "envelope.open"
-                            )
+                List {
+                    ForEach(groupedArticles, id: \.label) { group in
+                        Section {
+                            ForEach(group.articles) { article in
+                                Button {
+                                    if !article.isRead { viewModel.toggleRead(article) }
+                                    viewModel.selectedArticle = article
+                                } label: {
+                                    ArticleRowView(
+                                        article: article,
+                                        isSelected: viewModel.selectedArticle?.id == article.id,
+                                        onTap: {}
+                                    )
+                                }
+                                .buttonStyle(.plain)
+                                .swipeActions(edge: .leading) {
+                                    Button {
+                                        if !article.isRead { viewModel.toggleRead(article) }
+                                    } label: {
+                                        Label(
+                                            article.isRead ? "标为未读" : "标为已读",
+                                            systemImage: article.isRead ? "envelope.badge" : "envelope.open"
+                                        )
+                                    }
+                                    .tint(article.isRead ? .orange : .blue)
+                                }
+                                .swipeActions(edge: .trailing) {
+                                    Button {
+                                        viewModel.toggleStarred(article)
+                                    } label: {
+                                        Label(
+                                            article.isStarred ? "取消星标" : "星标",
+                                            systemImage: article.isStarred ? "star.slash" : "star"
+                                        )
+                                    }
+                                    .tint(.yellow)
+                                }
+                            }
+                        } header: {
+                            Text(group.label)
+                                .font(.system(size: 12, weight: .semibold))
+                                .foregroundStyle(.secondary)
+                                .padding(.leading, -10)
                         }
-                        .tint(article.isRead ? .orange : .blue)
-                    }
-                    .swipeActions(edge: .trailing) {
-                        Button {
-                            viewModel.toggleStarred(article)
-                        } label: {
-                            Label(
-                                article.isStarred ? "取消星标" : "星标",
-                                systemImage: article.isStarred ? "star.slash" : "star"
-                            )
-                        }
-                        .tint(.yellow)
                     }
                 }
                 .listStyle(.plain)
                 .focusable(true)
                 .onKeyPress(characters: .alphanumerics) { press in
-                    guard let idx = viewModel.filteredArticles.firstIndex(where: { $0.id == viewModel.selectedArticle?.id }) else {
+                    let articles = displayedArticles
+                    guard !articles.isEmpty,
+                          let idx = articles.firstIndex(where: { $0.id == viewModel.selectedArticle?.id }) else {
                         return .ignored
                     }
                     switch press.characters {
                     case "j":
-                        let next = min(idx + 1, viewModel.filteredArticles.count - 1)
-                        let article = viewModel.filteredArticles[next]
-                        if !article.isRead { viewModel.toggleRead(article) }
-                        viewModel.selectedArticle = article
+                        let next = idx + 1
+                        if next < articles.count {
+                            let article = articles[next]
+                            if !article.isRead { viewModel.toggleRead(article) }
+                            viewModel.selectedArticle = article
+                        } else {
+                            NSHapticFeedbackManager.defaultPerformer.perform(.alignment, performanceTime: .now)
+                        }
                         return .handled
                     case "k":
-                        let prev = max(idx - 1, 0)
-                        let article = viewModel.filteredArticles[prev]
-                        if !article.isRead { viewModel.toggleRead(article) }
-                        viewModel.selectedArticle = article
+                        let prev = idx - 1
+                        if prev >= 0 {
+                            let article = articles[prev]
+                            if !article.isRead { viewModel.toggleRead(article) }
+                            viewModel.selectedArticle = article
+                        } else {
+                            NSHapticFeedbackManager.defaultPerformer.perform(.alignment, performanceTime: .now)
+                        }
                         return .handled
                     default:
                         return .ignored
@@ -149,6 +211,15 @@ struct ArticleListView: View {
         .onChange(of: viewModel.selectedArticle) { _, newArticle in
             if let article = newArticle, !article.isRead {
                 viewModel.toggleRead(article)
+            }
+        }
+        .onAppear {
+            NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
+                if event.modifierFlags.contains(.command) && event.charactersIgnoringModifiers == "f" {
+                    isSearchFocused = true
+                    return nil
+                }
+                return event
             }
         }
     }
