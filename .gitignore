@@ -38,3 +38,6 @@ NewReader-macOS-*.zip
 skills-lock.json
 Package.swift.bak
 supabase/.temp/
+
+# Local audit / review artifacts
+CODE_AUDIT_REPORT.md
