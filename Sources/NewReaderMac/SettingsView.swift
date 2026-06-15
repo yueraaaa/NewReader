@@ -132,6 +132,18 @@ struct SettingsView: View {
                     }
                 }
 
+                LabeledContent("人机验证") {
+                    HStack(spacing: 6) {
+                        Circle()
+                            .fill(viewModel.captchaToken != nil ? Color.green : Color.secondary)
+                            .frame(width: 8, height: 8)
+                        Text(viewModel.captchaToken != nil
+                             ? "已开启（Cloudflare Turnstile）"
+                             : "未验证")
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
                 Button(role: .destructive) {
                     Task { try? await viewModel.authService.signOut() }
                 } label: {
@@ -242,15 +254,15 @@ struct SettingsView: View {
                                 .foregroundStyle(.green)
                         } else {
                             VStack(alignment: .leading, spacing: 4) {
-                                Label("请求失败，查看原始返回：", systemImage: "xmark.circle.fill")
+                                Label("请求失败", systemImage: "xmark.circle.fill")
                                     .foregroundStyle(.red)
-                                ScrollView {
-                                    Text(err)
-                                        .font(.system(size: 10, design: .monospaced))
-                                        .textSelection(.enabled)
-                                        .foregroundStyle(.secondary)
-                                }
-                                .frame(maxHeight: 120)
+                                Text(err)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                                    .fixedSize(horizontal: false, vertical: true)
+                                Text("详细响应已写入日志：~/Library/Logs/NewReader/app.log")
+                                    .font(.caption2)
+                                    .foregroundStyle(.tertiary)
                             }
                         }
                     }

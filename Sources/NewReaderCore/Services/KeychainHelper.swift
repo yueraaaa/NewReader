@@ -4,6 +4,11 @@ import Security
 /// Secure storage for API keys and other sensitive values using the macOS/iOS Keychain.
 public enum KeychainHelper {
 
+    /// Keychain access group — must match the entry in
+    /// `*.entitlements` (`keychain-access-groups`). Single source of truth
+    /// so save / load / delete stay in sync.
+    private static let accessGroup = "com.newreader.app"
+
     /// Save a value to the Keychain for the given key.
     /// - Returns: `true` if the operation succeeded.
     @discardableResult
@@ -21,10 +26,9 @@ public enum KeychainHelper {
         let addQuery: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrAccount as String: key,
-            kSecAttrAccessGroup as String: "com.newreader.app",
+            kSecAttrAccessGroup as String: accessGroup,
             kSecAttrService as String: serviceName,
             kSecValueData as String: data,
-            kSecAttrAccessGroup as String: "com.newreader.app",
             kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlock
         ]
 
@@ -38,7 +42,7 @@ public enum KeychainHelper {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrAccount as String: key,
-            kSecAttrAccessGroup as String: "com.newreader.app",
+            kSecAttrAccessGroup as String: accessGroup,
             kSecAttrService as String: serviceName,
             kSecReturnData as String: true,
             kSecMatchLimit as String: kSecMatchLimitOne

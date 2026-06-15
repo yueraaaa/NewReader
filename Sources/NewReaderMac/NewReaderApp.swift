@@ -59,7 +59,7 @@ struct NewReaderMacApp: App {
                 .keyboardShortcut("w", modifiers: [.command, .shift])
                 Divider()
                 Button("发送反馈…") {
-                    let email = Bundle.main.object(forInfoDictionaryKey: "FeedbackEmail") as? String ?? "feedback@example.com"
+                    let email = SecretsLoader.value(for: .feedbackEmail) ?? "feedback@example.com"
                     if let url = URL(string: "mailto:\(email)?subject=NewReader%20%E5%8F%8D%E9%A6%88") {
                         NSWorkspace.shared.open(url)
                     }

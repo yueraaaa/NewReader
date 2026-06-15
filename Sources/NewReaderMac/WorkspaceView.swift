@@ -1,6 +1,9 @@
 import SwiftUI
 import NewReaderCore
 
+// macOS-only — uses .frame(width:height:) for fixed sheet sizing and
+// .background(.regularMaterial) macOS material effects.
+
 struct WorkspaceView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var viewModel: ReaderViewModel

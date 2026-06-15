@@ -5,6 +5,30 @@
   <description>精致、安全的 RSS 阅读器</description>
   <language>zh-CN</language>
   <item>
+    <title>v1.3.0</title>
+    <pubDate>Mon, 15 Jun 2026 21:48:00 +0800</pubDate>
+    <sparkle:version>19</sparkle:version>
+    <sparkle:shortVersionString>1.3.0</sparkle:shortVersionString>
+    <sparkle:minimumSystemVersion>15.0</sparkle:minimumSystemVersion>
+    <enclosure url="https://github.com/yueraaaa/NewReader/releases/download/v1.3.0/NewReader-macOS-v1.3.0.zip"
+              length="2740011" type="application/octet-stream"
+              sparkle:edSignature=""/>
+    <description><![CDATA[
+      <h2>安全加固：Turnstile + 设备限额 + 账单告警</h2>
+      <ul>
+        <li>Cloudflare Turnstile 隐形人机验证（登录 + AI 调用）</li>
+        <li>每设备每天 5 次 AI 调用限额（防止刷账号）</li>
+        <li>每账号每天 50 次 AI 调用限额（保留）</li>
+        <li>billing-watchdog Edge Function 监控 Supabase 免费额度（80% 警告 / 95% 硬停止）</li>
+        <li>ai-proxy 自动暂停 + 自动恢复</li>
+        <li>UI：设置 → 账户页加"人机验证"状态指示</li>
+        <li>修复：stripThinking 残留 </think> 尾巴（pre-existing bug）</li>
+        <li>修复：KeychainHelper 重复键、try? 静默失败、TTS 错误泄露、CoreData 死 import</li>
+        <li>新文档：docs/SECURITY_SETUP.md（维护者部署指南）</li>
+      </ul>
+    ]]></description>
+  </item>
+  <item>
     <title>v1.2.0</title>
     <pubDate>Thu, 04 Jun 2026 00:00:00 +0800 00:00:00 +0800</pubDate>
     <sparkle:version>1.2.0</sparkle:version>

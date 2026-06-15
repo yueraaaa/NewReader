@@ -81,19 +81,31 @@ public final class AuthService: ObservableObject {
     }
 }
 
-/// Supabase project configuration — reads secrets from Secrets.plist in the app bundle.
+/// Supabase project configuration — resolves secrets via `SecretsLoader`,
+/// which checks `Bundle.main.Info.plist` first (release builds merge
+/// `Secrets.plist` into the bundle Info.plist) and falls back to
+/// `~/Library/Application Support/NewReader/secrets.plist` for development.
 public enum SupabaseConfig {
     public static var url: String {
-        guard let url = Bundle.main.object(forInfoDictionaryKey: "SupabaseURL") as? String else {
-            fatalError("Missing SupabaseURL in Info.plist — check Secrets.plist merge")
+        if let value = SecretsLoader.value(for: .supabaseURL) {
+            return value
         }
-        return url
+        fatalError("""
+        Missing SupabaseURL.
+
+        For local development: copy Sources/NewReaderMac/Secrets.plist to \
+        \(SecretsLoader.userSecretsURL.path) (the template at \
+        Sources/NewReaderMac/Secrets.plist.template shows the required keys).
+
+        For release builds: scripts/package-macos.sh merges \
+        Sources/NewReaderMac/Secrets.plist into the app bundle's Info.plist.
+        """)
     }
     public static var publishableKey: String {
-        guard let key = Bundle.main.object(forInfoDictionaryKey: "SupabasePublishableKey") as? String else {
-            fatalError("Missing SupabasePublishableKey in Info.plist — check Secrets.plist merge")
+        if let value = SecretsLoader.value(for: .supabasePublishableKey) {
+            return value
         }
-        return key
+        fatalError("Missing SupabasePublishableKey. See SupabaseConfig.url error message for resolution steps.")
     }
     /// Deep link redirect URL — must match the Supabase dashboard's Redirect URLs.
     public static let redirectURL = URL(string: "newreader://auth-callback")!

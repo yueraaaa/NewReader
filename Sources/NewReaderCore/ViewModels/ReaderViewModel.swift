@@ -1,11 +1,28 @@
 import Foundation
 import SwiftData
 import Combine
+// CoreData is only needed here for the `NSPersistentCloudKitContainer` event
+// notification type (used to react to CloudKit import events). The rest of
+// the project uses SwiftData.
 import CoreData
 
 /// Central ViewModel shared across macOS and iOS
 @MainActor
 public final class ReaderViewModel: ObservableObject {
+    // MARK: - Tunables
+
+    /// How many read articles in the last 7 days are needed before the
+    /// user is allowed to manually generate the workspace analysis.
+    public static let workspaceMinimumArticles = 3
+
+    /// How many read articles in the last 7 days are needed before the
+    /// app auto-generates the workspace on background refresh.
+    public static let workspaceAutoTriggerArticles = 5
+
+    /// The "recent" window for workspace analysis: read articles published
+    /// within this many seconds are considered.
+    public static let workspaceRecentWindowSeconds: TimeInterval = 7 * 24 * 3600
+
     // MARK: - Published state
     @Published public var feeds: [Feed] = []
     @Published public var folders: [Folder] = []
@@ -21,6 +38,11 @@ public final class ReaderViewModel: ObservableObject {
     @Published public var workspace: WorkspaceSnapshot?
     @Published public var isGeneratingWorkspace = false
     @Published public var workspaceStatusMessage: String?
+
+    /// Most recent Cloudflare Turnstile token. Set by `LoginView` on
+    /// successful verification, consumed by `AIService` calls. `nil`
+    /// means "no fresh token; the proxy will reject the request".
+    @Published public var captchaToken: String?
 
     // Services
     public let aiService: AIService
@@ -140,7 +162,7 @@ public final class ReaderViewModel: ObservableObject {
         do {
             let feed = try await feedService.subscribe(urlString: url)
             feed.folder = folder
-            try? modelContext.save()
+            save()
             feeds.append(feed)
             feeds.sort { $0.addedDate < $1.addedDate }
             await autoSummarizeNewArticles(feed.allArticles)
@@ -190,7 +212,7 @@ public final class ReaderViewModel: ObservableObject {
     public func deleteFeed(_ feed: Feed) {
         let snapshot = feed
         modelContext.delete(feed)
-        try? modelContext.save()
+        save()
         feeds.removeAll { $0.id == feed.id }
         invalidateCache()
         if selectedFeed?.id == feed.id { selectAllArticles() }
@@ -205,7 +227,7 @@ public final class ReaderViewModel: ObservableObject {
     public func undoDeleteFeed() {
         guard let feed = lastDeletedFeed else { return }
         modelContext.insert(feed)
-        try? modelContext.save()
+        save()
         feeds.append(feed)
         feeds.sort { $0.addedDate < $1.addedDate }
         lastDeletedFeed = nil
@@ -216,23 +238,23 @@ public final class ReaderViewModel: ObservableObject {
 
     public func toggleRead(_ article: Article) {
         article.isRead.toggle()
-        try? modelContext.save()
+        save()
     }
 
     public func toggleStarred(_ article: Article) {
         article.isStarred.toggle()
-        try? modelContext.save()
+        save()
     }
 
     public func markAllAsRead(in feed: Feed) {
         feed.allArticles.forEach { $0.isRead = true }
-        try? modelContext.save()
+        save()
     }
 
     /// Batch mark all visible articles as read
     public func markAllVisibleAsRead() {
         articles.filter { !$0.isRead }.forEach { $0.isRead = true }
-        try? modelContext.save()
+        save()
     }
 
     // MARK: - AI
@@ -240,9 +262,18 @@ public final class ReaderViewModel: ObservableObject {
     public func summarize(_ article: Article) async -> String {
         if let cached = article.aiSummary { return cached }
         do {
-            let summary = try await aiService.summarize(html: article.contentHTML, title: article.title)
+            let summary = try await aiService.summarize(
+                html: article.contentHTML,
+                title: article.title,
+                captcha: { [weak self] in
+                    guard let token = self?.captchaToken, !token.isEmpty else {
+                        throw AIServiceError.captchaFailed
+                    }
+                    return token
+                }
+            )
             article.aiSummary = summary
-            try? modelContext.save()
+            save()
             return summary
         } catch {
             errorMessage = error.localizedDescription
@@ -255,17 +286,35 @@ public final class ReaderViewModel: ObservableObject {
         isLoading = true
         defer { isLoading = false }
         for article in articles where article.aiSummary == nil {
-            _ = try? await aiService.summarize(html: article.contentHTML, title: article.title)
+            _ = try? await aiService.summarize(
+                html: article.contentHTML,
+                title: article.title,
+                captcha: { [weak self] in
+                    guard let token = self?.captchaToken, !token.isEmpty else {
+                        throw AIServiceError.captchaFailed
+                    }
+                    return token
+                }
+            )
         }
-        try? modelContext.save()
+        save()
     }
 
     public func translate(_ article: Article, to language: TranslationLanguage) async -> String {
         if let cached = getTranslation(for: article, language: language.rawValue) { return cached }
         do {
-            let text = try await aiService.translate(html: article.contentHTML, to: language)
+            let text = try await aiService.translate(
+                html: article.contentHTML,
+                to: language,
+                captcha: { [weak self] in
+                    guard let token = self?.captchaToken, !token.isEmpty else {
+                        throw AIServiceError.captchaFailed
+                    }
+                    return token
+                }
+            )
             setTranslation(for: article, language: language.rawValue, text: text)
-            try? modelContext.save()
+            save()
             return text
         } catch {
             errorMessage = error.localizedDescription
@@ -300,7 +349,7 @@ public final class ReaderViewModel: ObservableObject {
         do {
             let html = try await readabilityService.extractArticle(from: article.url)
             article.contentHTML = html
-            try? modelContext.save()
+            save()
             cacheArticle(article)
             return html
         } catch {
@@ -365,9 +414,9 @@ public final class ReaderViewModel: ObservableObject {
         defer { isGeneratingWorkspace = false }
         let recent = feeds.flatMap { $0.allArticles }
             .filter { $0.isRead }
-            .filter { ($0.publishedDate ?? .distantPast) > Date().addingTimeInterval(-7 * 24 * 3600) }
-        guard recent.count >= 3 else {
-            workspaceStatusMessage = "需要至少阅读 3 篇文章才能生成分析"
+            .filter { ($0.publishedDate ?? .distantPast) > Date().addingTimeInterval(-Self.workspaceRecentWindowSeconds) }
+        guard recent.count >= Self.workspaceMinimumArticles else {
+            workspaceStatusMessage = "需要至少阅读 \(Self.workspaceMinimumArticles) 篇文章才能生成分析"
             return
         }
 
@@ -379,7 +428,15 @@ public final class ReaderViewModel: ObservableObject {
             for old in oldSnapshots { modelContext.delete(old) }
         }
 
-        if let result = try? await aiService.analyzeReadingPatterns(titles: titles) {
+        if let result = try? await aiService.analyzeReadingPatterns(
+            titles: titles,
+            captcha: { [weak self] in
+                guard let token = self?.captchaToken, !token.isEmpty else {
+                    throw AIServiceError.captchaFailed
+                }
+                return token
+            }
+        ) {
             workspaceStatusMessage = nil
             let kwData = try? JSONEncoder().encode(result.keywords)
             let relData = try? JSONEncoder().encode(result.relations)
@@ -392,7 +449,7 @@ public final class ReaderViewModel: ObservableObject {
                 articleCount: recent.count
             )
             modelContext.insert(snap)
-            try? modelContext.save()
+            save()
             workspace = snap
         } else {
             workspaceStatusMessage = "AI 分析失败，请稍后重试"
@@ -403,9 +460,9 @@ public final class ReaderViewModel: ObservableObject {
     private func maybeGenerateWorkspace() async {
         let recentReadCount = feeds.flatMap { $0.allArticles }
             .filter { $0.isRead }
-            .filter { ($0.publishedDate ?? .distantPast) > Date().addingTimeInterval(-7 * 24 * 3600) }
+            .filter { ($0.publishedDate ?? .distantPast) > Date().addingTimeInterval(-Self.workspaceRecentWindowSeconds) }
             .count
-        guard recentReadCount >= 5 else { return }
+        guard recentReadCount >= Self.workspaceAutoTriggerArticles else { return }
         await generateWorkspace()
     }
     // MARK: - Folder
@@ -413,7 +470,7 @@ public final class ReaderViewModel: ObservableObject {
     public func createFolder(name: String) {
         let folder = Folder(name: name)
         modelContext.insert(folder)
-        try? modelContext.save()
+        save()
         folders.append(folder)
     }
 
@@ -421,14 +478,14 @@ public final class ReaderViewModel: ObservableObject {
         let trimmed = newTitle.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
         feed.title = trimmed
-        try? modelContext.save()
+        save()
     }
 
     public func renameFolder(_ folder: Folder, to newName: String) {
         let trimmed = newName.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
         folder.name = trimmed
-        try? modelContext.save()
+        save()
     }
 
     public func deleteFolder(_ folder: Folder) {
@@ -437,16 +494,30 @@ public final class ReaderViewModel: ObservableObject {
             feed.folder = nil
         }
         modelContext.delete(folder)
-        try? modelContext.save()
+        save()
         folders.removeAll { $0.id == folder.id }
     }
 
     public func moveFeed(_ feed: Feed, to folder: Folder?) {
         feed.folder = folder
-        try? modelContext.save()
+        save()
     }
 
     // MARK: - Private
+
+    /// Centralized SwiftData save that surfaces failures instead of silently
+    /// swallowing them. Use this in place of bare `try? modelContext.save()`
+    /// so a corrupt store or schema mismatch shows up in `errorMessage` and
+    /// the app log instead of disappearing.
+    private func save(_ context: String = "") {
+        do {
+            try modelContext.save()
+        } catch {
+            let label = context.isEmpty ? "" : " [\(context)]"
+            errorMessage = "保存失败\(label): \(error.localizedDescription)"
+            CrashReporter.log("modelContext.save() failed\(label): \(error)")
+        }
+    }
 
     private func notifyNewArticles(_ articles: [Article], feed: Feed) {
         let items = articles.map { ($0.title, feed.title) }
@@ -467,10 +538,19 @@ public final class ReaderViewModel: ObservableObject {
         isAutoSummarizing = true
         defer { isAutoSummarizing = false }
         for article in articles.prefix(5) where article.aiSummary == nil {
-            if let summary = try? await aiService.summarize(html: article.contentHTML, title: article.title) {
+            if let summary = try? await aiService.summarize(
+                html: article.contentHTML,
+                title: article.title,
+                captcha: { [weak self] in
+                    guard let token = self?.captchaToken, !token.isEmpty else {
+                        throw AIServiceError.captchaFailed
+                    }
+                    return token
+                }
+            ) {
                 article.aiSummary = summary
             }
         }
-        try? modelContext.save()
+        save("autoSummarizeNewArticles")
     }
 }

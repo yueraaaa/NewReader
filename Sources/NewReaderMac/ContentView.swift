@@ -2,6 +2,10 @@ import SwiftUI
 import NewReaderCore
 import OSLog
 
+// macOS-only: relies on NavigationSplitView, .toolbar, .onOpenURL deep link,
+// and macOS-specific key handling. See NewReaderiOS/ContentView.swift for the
+// iOS counterpart (TabView-based).
+
 struct ContentView: View {
     private static let logger = Logger(subsystem: "com.newreader.app", category: "ContentView")
     @EnvironmentObject var viewModel: ReaderViewModel

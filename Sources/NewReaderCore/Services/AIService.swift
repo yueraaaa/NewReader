@@ -39,15 +39,21 @@ public enum AIServiceError: LocalizedError {
     case noContent
     case dailyLimitReached
     case paymentRequired
+    case captchaFailed
+    case deviceQuotaExceeded
+    case servicePaused
 
     public var errorDescription: String? {
         switch self {
-        case .notLoggedIn: return "请先登录"
-        case .requestFailed: return "请求失败，请稍后重试"
-        case .invalidResponse: return "AI 返回异常"
-        case .noContent: return "没有可处理的内容"
-        case .dailyLimitReached: return "今日 AI 额度已用完，明天再来"
-        case .paymentRequired: return "请先购买"
+        case .notLoggedIn:          return "请先登录"
+        case .requestFailed:        return "请求失败，请稍后重试"
+        case .invalidResponse:      return "AI 返回异常"
+        case .noContent:            return "没有可处理的内容"
+        case .dailyLimitReached:    return "今日账号 AI 额度已用完，明天再来"
+        case .paymentRequired:      return "请先购买"
+        case .captchaFailed:        return "人机验证失败，请重试"
+        case .deviceQuotaExceeded:  return "今日设备额度已用完，明天再来"
+        case .servicePaused:        return "AI 服务暂时维护中，请稍后再试"
         }
     }
 }
@@ -90,8 +96,17 @@ public final class AIService: ObservableObject {
         self.authService = authService
     }
 
-    /// Generate a concise AI summary of the given HTML content
-    public func summarize(html: String, title: String) async throws -> String {
+    /// Captcha token returned by Turnstile. Optional because the login
+    /// flow can decide to skip when the user is already in a long-lived
+    /// authenticated session (token may be cached client-side).
+    public typealias CaptchaTokenProvider = () async throws -> String
+
+    /// Generate a concise AI summary of the given HTML content.
+    /// `captcha` is invoked lazily by the Edge Function — pass a closure
+    /// that returns a fresh Turnstile token, or `nil` to fall back to
+    /// whatever's cached (callers should usually pass `nil` and let the
+    /// proxy surface a 403 on stale tokens, prompting the user to re-verify).
+    public func summarize(html: String, title: String, captcha: CaptchaTokenProvider? = nil) async throws -> String {
         guard authService.isLoggedIn, let token = authService.accessToken else {
             throw AIServiceError.notLoggedIn
         }
@@ -115,12 +130,13 @@ public final class AIService: ObservableObject {
             token: token,
             action: "summarize",
             systemPrompt: systemPrompt,
-            userPrompt: userPrompt
+            userPrompt: userPrompt,
+            captcha: captcha
         )
     }
 
-    /// Translate HTML content to the target language
-    public func translate(html: String, to language: TranslationLanguage) async throws -> String {
+    /// Translate HTML content to the target language.
+    public func translate(html: String, to language: TranslationLanguage, captcha: CaptchaTokenProvider? = nil) async throws -> String {
         guard authService.isLoggedIn, let token = authService.accessToken else {
             throw AIServiceError.notLoggedIn
         }
@@ -141,7 +157,8 @@ public final class AIService: ObservableObject {
             token: token,
             action: "translate",
             systemPrompt: systemPrompt,
-            userPrompt: userPrompt
+            userPrompt: userPrompt,
+            captcha: captcha
         )
     }
 
@@ -177,13 +194,11 @@ public final class AIService: ObservableObject {
         }
     }
 
-    // MARK: - Private
     // MARK: - Workspace analysis
 
     /// Analyze reading patterns: extract keywords and relationships from recent article titles.
-    /// Analyze reading patterns: extract keywords and relationships from recent article titles.
     /// Returns JSON dict with "keywords", "relations", "summary" keys.
-    public func analyzeReadingPatterns(titles: [String]) async throws -> WorkspaceAnalysisResult {
+    public func analyzeReadingPatterns(titles: [String], captcha: CaptchaTokenProvider? = nil) async throws -> WorkspaceAnalysisResult {
         guard authService.isLoggedIn, let token = authService.accessToken else {
             throw AIServiceError.notLoggedIn
         }
@@ -210,7 +225,8 @@ public final class AIService: ObservableObject {
             token: token,
             action: "analyze",
             systemPrompt: systemPrompt,
-            userPrompt: userPrompt
+            userPrompt: userPrompt,
+            captcha: captcha
         )
         return try parseAnalysisResult(raw)
     }
@@ -247,7 +263,13 @@ public final class AIService: ObservableObject {
         }
     }
 
-    private func proxyRequest(token: String, action: String, systemPrompt: String, userPrompt: String) async throws -> String {
+    private func proxyRequest(
+        token: String,
+        action: String,
+        systemPrompt: String,
+        userPrompt: String,
+        captcha: CaptchaTokenProvider?
+    ) async throws -> String {
         let body: [String: Any] = [
             "provider": config.provider.rawValue,
             "action": action,
@@ -262,10 +284,19 @@ public final class AIService: ObservableObject {
             ]
         ]
 
+        // Resolve captcha once. If the caller's provider returns nil or
+        // throws, we send no token; the server responds with 403 captcha_required
+        // and the UI prompts the user to re-verify.
+        let captchaToken: String? = try? await captcha?()
+
         var request = URLRequest(url: proxyURL)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        request.setValue(DeviceIdentity.id, forHTTPHeaderField: "X-Device-ID")
+        if let captchaToken, !captchaToken.isEmpty {
+            request.setValue(captchaToken, forHTTPHeaderField: "X-Captcha-Token")
+        }
         request.httpBody = try JSONSerialization.data(withJSONObject: body)
 
         let (data, response) = try await session.data(for: request)
@@ -288,18 +319,34 @@ public final class AIService: ObservableObject {
             throw AIServiceError.notLoggedIn
         case 402:
             throw AIServiceError.paymentRequired
+        case 403:
+            // Body should contain a `error` field — captcha_invalid vs other.
+            if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+               let err = json["error"] as? String, err.contains("captcha") {
+                throw AIServiceError.captchaFailed
+            }
+            throw AIServiceError.captchaFailed
         case 429:
+            // Distinguish device-quota from user-quota by error code in body.
+            if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+               let err = json["error"] as? String, err.contains("device") {
+                throw AIServiceError.deviceQuotaExceeded
+            }
             throw AIServiceError.dailyLimitReached
+        case 503:
+            throw AIServiceError.servicePaused
         default:
             throw AIServiceError.requestFailed
         }
     }
 
     /// Strip `<think>...</think>` blocks from model output (DeepSeek-R1, Claude, etc.)
-    public static func stripThinking(_ text: String) -> String {
+    public nonisolated static func stripThinking(_ text: String) -> String {
         var result = text
         while let start = result.range(of: "<think>"),
               let end = result.range(of: "</think>", range: start.upperBound..<result.endIndex) {
+            // end is the range of the literal "</think>" tag. Remove from
+            // the start of "<think>" up to and including the closing tag.
             result.removeSubrange(start.lowerBound..<end.upperBound)
         }
         return result.trimmingCharacters(in: .whitespacesAndNewlines)

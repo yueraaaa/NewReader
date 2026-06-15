@@ -218,8 +218,12 @@ public final class CustomTTSProvider: NSObject, ObservableObject, AVAudioPlayerD
                 return false
             }
             guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
-                let raw = String(data: data, encoding: .utf8) ?? "nil"
-                errorMessage = "TTS 响应解析失败: \(raw.prefix(200))"
+                // Don't echo the raw response body in the UI — it can carry the
+                // user's API key (in echoed headers / debug fields) or PII. Log
+                // it for debugging and surface a generic message instead.
+                let raw = String(data: data, encoding: .utf8) ?? "<non-utf8>"
+                CrashReporter.log("TTS 响应解析失败: HTTP \(http.statusCode), body (first 200 chars): \(raw.prefix(200))")
+                errorMessage = "TTS 响应解析失败（HTTP \(http.statusCode)）。原始响应已写入日志：~/Library/Logs/NewReader/app.log"
                 return false
             }
 

@@ -126,6 +126,21 @@ public struct LoginView: View {
         errorMessage = nil
 
         Task {
+            // 1) Verify captcha first. Even if the auth call doesn't need it,
+            // the user is one step away from the first AI summary so we
+            // warm up the Turnstile token now.
+            do {
+                let token = try await TurnstileChallenge.fetchToken()
+                viewModel.captchaToken = token
+                Self.logger.info("Captcha token obtained (len=\(token.count))")
+            } catch {
+                let msg = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+                errorMessage = "人机验证失败：\(msg)。请刷新后重试。"
+                Self.logger.error("Captcha failed: \(msg, privacy: .public)")
+                isLoading = false
+                return
+            }
+
             do {
                 if isSignUp {
                     try await viewModel.authService.signUp(email: email, password: password)
@@ -167,6 +182,18 @@ public struct LoginView: View {
             errorMessage = nil
 
             Task {
+                // Same Turnstile warmup as the email path.
+                do {
+                    let token = try await TurnstileChallenge.fetchToken()
+                    viewModel.captchaToken = token
+                } catch {
+                    let msg = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+                    errorMessage = "人机验证失败：\(msg)。请刷新后重试。"
+                    Self.logger.error("Captcha (Apple) failed: \(msg, privacy: .public)")
+                    isLoading = false
+                    return
+                }
+
                 do {
                     try await viewModel.authService.signInWithApple(
                         idToken: tokenString,

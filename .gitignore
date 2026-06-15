@@ -32,4 +32,9 @@ Sources/NewReaderMac/Secrets.plist
 # Crash logs (user-specific)
 ~/Library/Logs/NewReader/
 NewReader.dmg
+NewReader-macOS-*.zip
 .agents/
+.cache/
+skills-lock.json
+Package.swift.bak
+supabase/.temp/

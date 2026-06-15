@@ -42,6 +42,18 @@ A polished, secure RSS reader with AI summarization, multi-language translation,
 - **OPML Limit**: 5 MB max file size on import
 - **App Sandbox**: macOS App Sandbox enabled, process-level isolation
 
+## 🆕 What's new in v1.3.0
+
+- 🛡️ **Cloudflare Turnstile** invisible CAPTCHA (login + every AI call)
+- 📱 **Per-device rate limit**: 5 AI calls/day/device (Keychain UUID)
+- 👤 **Per-user rate limit**: 50 AI calls/day (existing)
+- 📊 **billing-watchdog** Edge Function: monitors Supabase free tier (80% warn / 95% hard-stop)
+- 🔄 **ai-proxy auto-resume** when usage drops below threshold
+- 🐛 Fix `stripThinking` leaking `</think>`, KeychainHelper duplicate key, `try?` silent failure, TTS error body leak
+- 📖 New doc [`docs/SECURITY_SETUP.md`](docs/SECURITY_SETUP.md) — operator deployment guide
+
+Full audit trail in [`CODE_AUDIT_REPORT.md`](CODE_AUDIT_REPORT.md).
+
 ## 🛠 Tech Stack
 
 Swift 6 \u00b7 SwiftUI \u00b7 SwiftData \u00b7 FeedKit \u00b7 WKWebView \u00b7 AVFoundation \u00b7 Supabase \u00b7 CloudKit

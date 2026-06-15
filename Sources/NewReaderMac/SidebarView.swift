@@ -2,6 +2,11 @@ import SwiftUI
 import NewReaderCore
 import UniformTypeIdentifiers
 
+// MARK: - macOS-only
+// This view is compiled into the NewReaderMac target only. `.keyboardShortcut`
+// modifiers on Buttons below are macOS menu bar / focus shortcuts and are
+// intentionally absent from the iOS counterparts in NewReaderiOS/.
+
 struct SidebarView: View {
     @EnvironmentObject var viewModel: ReaderViewModel
     @State private var showImportOPML: Bool = false
