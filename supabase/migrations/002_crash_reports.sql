@@ -62,7 +62,7 @@ begin
       '<p><strong>存储路径:</strong> %s</p>'
       '<p><strong>上传时间:</strong> %s</p>'
       '<hr>'
-      '<p>前往 <a href="https://supabase.com/dashboard/project/krqcjyqxcfupjeweyhuj/storage/buckets/crash-reports">Supabase Storage</a> 查看详情。</p>',
+      '<p>前往 <a href="https://supabase.com/dashboard/project/YOUR_PROJECT_REF/storage/buckets/crash-reports">Supabase Storage</a> 查看详情。</p>',
       file_name,
       new.name,
       new.created_at

@@ -119,7 +119,7 @@ billing-watchdog 里**不直接读**（PostgREST 拿不到 vault 表），需要
 ### 4.2 找项目 ref
 
 `Supabase Dashboard → Project Settings → General → Reference ID`
-（例如 `krqcjyqxcfupjeweyhuj`）
+（例如 `YOUR_PROJECT_REF`）
 
 ### 4.3 应用 SQL 迁移
 

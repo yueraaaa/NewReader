@@ -27,7 +27,7 @@
 //   - MGMT_API_TOKEN     (currently unused; reserved for future
 //                          Management API calls once usage endpoints
 //                          are available; can be any non-empty string)
-//   - PROJECT_REF        (project slug, e.g. "krqcjyqxcfupjeweyhuj")
+//   - PROJECT_REF        (project slug, e.g. "YOUR_PROJECT_REF")
 //   - RESEND_API_KEY, RESEND_FROM
 //
 // Optional env vars (defaults shown):
