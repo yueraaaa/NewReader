@@ -1,0 +1,63 @@
+#!/bin/bash
+# NewReader pre-commit hook — 禁止提交敏感数据
+
+RED='\033[0;31m'
+NC='\033[0m'
+
+BLOCKED=0
+STAGED=$(git diff --cached --name-only --diff-filter=ACM | grep -v 'scripts/pre-commit')
+
+if [ -z "$STAGED" ]; then
+    exit 0
+fi
+
+echo ""
+echo "🔍 扫描暂存区敏感数据..."
+
+check_pattern() {
+    local label="$1"
+    local pattern="$2"
+    local hits
+    hits=$(echo "$STAGED" | xargs grep -nHE "$pattern" 2>/dev/null) || true
+    if [ -n "$hits" ]; then
+        echo -e "${RED}❌ 拦截：$label${NC}"
+        echo "$hits" | while IFS= read -r line; do
+            echo "   $line"
+        done
+        BLOCKED=1
+    fi
+}
+
+check_pattern "API Key (sk-...)"                    'sk-[a-zA-Z0-9]{20,}'
+check_pattern "Supabase Token (sbp_...)"             'sbp_[a-zA-Z0-9]{20,}'
+check_pattern "Resend API Key (re_...)"              're_[a-zA-Z0-9]{20,}'
+check_pattern "Cloudflare Turnstile Secret"          '0x4AAAAA[0-9A-Za-z_-]{20,}'
+check_pattern "个人邮箱"                              'daobaa@live\.cn'
+check_pattern "Supabase 项目 ref"                    'krqcjyqxcfupjeweyhuj'
+check_pattern "Supabase Anon Key"                    'eyJhb[a-zA-Z0-9_-]{100,}'
+check_pattern "JWT Token"                            'eyJ[a-zA-Z0-9_-]{50,}'
+check_pattern "AWS Access Key"                       'AKIA[0-9A-Z]{16}'
+check_pattern "硬编码密码"                            $'password[[:space:]]*[:=][[:space:]]*["\x27][^"\x27]{8,}'
+check_pattern "硬编码密钥(secret=)"                   $'secret[[:space:]]*[:=][[:space:]]*["\x27][^"\x27]{8,}'
+
+if echo "$STAGED" | grep -qE '(Secrets\.plist|\.env$|\.env\.)'; then
+    echo -e "${RED}❌ 拦截：禁止提交 Secrets.plist / .env 文件${NC}"
+    BLOCKED=1
+fi
+
+echo ""
+if [ "$BLOCKED" -eq 1 ]; then
+    echo -e "${RED}══════════════════════════════════════${NC}"
+    echo -e "${RED}  提交已阻止：发现敏感数据${NC}"
+    echo -e "${RED}══════════════════════════════════════${NC}"
+    echo ""
+    echo "💡 解决方法："
+    echo "   1. 改为环境变量引用（如 \$MY_API_KEY）"
+    echo "   2. 确保敏感文件在 .gitignore 中"
+    echo "   3. 误报时用 git commit --no-verify（不推荐）"
+    echo ""
+    exit 1
+fi
+
+echo "✅ 未发现敏感数据，允许提交。"
+echo ""
