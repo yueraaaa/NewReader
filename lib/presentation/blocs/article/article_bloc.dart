@@ -1,13 +1,19 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../data/datasources/local/article_local_datasource.dart';
+import '../../../data/datasources/remote/supabase_datasource.dart';
+import '../../../data/models/article_model.dart';
 import 'article_event.dart';
 import 'article_state.dart';
 
 class ArticleBloc extends Bloc<ArticleEvent, ArticleState> {
   final ArticleLocalDatasource _articleDatasource;
+  final SupabaseDatasource? _supabaseDatasource;
 
-  ArticleBloc({ArticleLocalDatasource? articleDatasource})
-      : _articleDatasource = articleDatasource ?? ArticleLocalDatasource(),
+  ArticleBloc({
+    ArticleLocalDatasource? articleDatasource,
+    SupabaseDatasource? supabaseDatasource,
+  })  : _articleDatasource = articleDatasource ?? ArticleLocalDatasource(),
+        _supabaseDatasource = supabaseDatasource,
         super(ArticleInitial()) {
     on<LoadArticles>(_onLoadArticles);
     on<LoadAllArticles>(_onLoadAllArticles);
@@ -16,6 +22,20 @@ class ArticleBloc extends Bloc<ArticleEvent, ArticleState> {
     on<MarkArticleFavorite>(_onMarkArticleFavorite);
     on<UpdateReadProgress>(_onUpdateReadProgress);
     on<SearchArticles>(_onSearchArticles);
+    on<LoadUnreadCount>(_onLoadUnreadCount);
+    on<LoadArticleById>(_onLoadArticleById);
+    on<DeleteArticlesByFeedId>(_onDeleteArticlesByFeedId);
+  }
+
+  bool get _isLoggedIn => _supabaseDatasource != null;
+
+  Future<void> _syncArticleToCloud(ArticleModel article) async {
+    if (!_isLoggedIn) return;
+    try {
+      await _supabaseDatasource!.upsertArticle(article.toMap());
+    } catch (e) {
+      // Silently fail - local operations should not be blocked by sync failures
+    }
   }
 
   Future<void> _onLoadArticles(
@@ -70,13 +90,19 @@ class ArticleBloc extends Bloc<ArticleEvent, ArticleState> {
       // Refresh current list
       if (state is ArticlesLoaded) {
         final currentArticles = (state as ArticlesLoaded).articles;
+        ArticleModel? updatedArticle;
         final updatedArticles = currentArticles.map((a) {
           if (a.id == event.articleId) {
-            return a.copyWith(isRead: event.isRead);
+            updatedArticle = a.copyWith(isRead: event.isRead);
+            return updatedArticle!;
           }
           return a;
         }).toList();
         emit(ArticlesLoaded(updatedArticles));
+        // Sync to cloud
+        if (updatedArticle != null) {
+          _syncArticleToCloud(updatedArticle!);
+        }
       }
     } catch (e) {
       emit(ArticleError(e.toString()));
@@ -92,13 +118,19 @@ class ArticleBloc extends Bloc<ArticleEvent, ArticleState> {
       // Refresh current list
       if (state is ArticlesLoaded) {
         final currentArticles = (state as ArticlesLoaded).articles;
+        ArticleModel? updatedArticle;
         final updatedArticles = currentArticles.map((a) {
           if (a.id == event.articleId) {
-            return a.copyWith(isFavorite: event.isFavorite);
+            updatedArticle = a.copyWith(isFavorite: event.isFavorite);
+            return updatedArticle!;
           }
           return a;
         }).toList();
         emit(ArticlesLoaded(updatedArticles));
+        // Sync to cloud
+        if (updatedArticle != null) {
+          _syncArticleToCloud(updatedArticle!);
+        }
       }
     } catch (e) {
       emit(ArticleError(e.toString()));
@@ -114,13 +146,19 @@ class ArticleBloc extends Bloc<ArticleEvent, ArticleState> {
       // Refresh current list
       if (state is ArticlesLoaded) {
         final currentArticles = (state as ArticlesLoaded).articles;
+        ArticleModel? updatedArticle;
         final updatedArticles = currentArticles.map((a) {
           if (a.id == event.articleId) {
-            return a.copyWith(readProgress: event.progress);
+            updatedArticle = a.copyWith(readProgress: event.progress);
+            return updatedArticle!;
           }
           return a;
         }).toList();
         emit(ArticlesLoaded(updatedArticles));
+        // Sync to cloud
+        if (updatedArticle != null) {
+          _syncArticleToCloud(updatedArticle!);
+        }
       }
     } catch (e) {
       emit(ArticleError(e.toString()));
@@ -137,6 +175,69 @@ class ArticleBloc extends Bloc<ArticleEvent, ArticleState> {
       emit(ArticlesLoaded(articles));
     } catch (e) {
       emit(ArticleError(e.toString()));
+    }
+  }
+
+  Future<void> _onLoadUnreadCount(
+    LoadUnreadCount event,
+    Emitter<ArticleState> emit,
+  ) async {
+    try {
+      final count = event.feedId != null
+          ? await _articleDatasource.getUnreadCountByFeed(event.feedId!)
+          : await _articleDatasource.getTotalUnreadCount();
+
+      if (state is ArticlesLoaded) {
+        emit((state as ArticlesLoaded).copyWith(unreadCount: count));
+      } else {
+        emit(ArticlesLoaded(const [], unreadCount: count));
+      }
+    } catch (e) {
+      // Silently fail for unread count
+    }
+  }
+
+  Future<void> _onLoadArticleById(
+    LoadArticleById event,
+    Emitter<ArticleState> emit,
+  ) async {
+    try {
+      final article = await _articleDatasource.getArticleById(event.articleId);
+      if (article != null) {
+        // If we have existing articles, add this one; otherwise create new list
+        if (state is ArticlesLoaded) {
+          final currentArticles = (state as ArticlesLoaded).articles;
+          // Check if article already exists
+          final exists = currentArticles.any((a) => a.id == article.id);
+          if (exists) {
+            emit(ArticlesLoaded(currentArticles));
+          } else {
+            emit(ArticlesLoaded([article, ...currentArticles]));
+          }
+        } else {
+          emit(ArticlesLoaded([article]));
+        }
+      }
+    } catch (e) {
+      // Silently fail
+    }
+  }
+
+  Future<void> _onDeleteArticlesByFeedId(
+    DeleteArticlesByFeedId event,
+    Emitter<ArticleState> emit,
+  ) async {
+    try {
+      await _articleDatasource.deleteArticlesByFeed(event.feedId);
+      // Refresh current list by removing articles from this feed
+      if (state is ArticlesLoaded) {
+        final updatedArticles = (state as ArticlesLoaded).articles
+            .where((a) => a.feedId != event.feedId)
+            .toList();
+        emit(ArticlesLoaded(updatedArticles));
+      }
+    } catch (e) {
+      // Silently fail
     }
   }
 }

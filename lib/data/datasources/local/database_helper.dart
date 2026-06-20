@@ -76,8 +76,10 @@ class DatabaseHelper {
 
     await db.execute('''
       CREATE TABLE settings (
-        key TEXT PRIMARY KEY,
-        value TEXT NOT NULL
+        key TEXT NOT NULL,
+        value TEXT NOT NULL,
+        user_id TEXT DEFAULT '',
+        PRIMARY KEY (key, user_id)
       )
     ''');
 
@@ -106,13 +108,32 @@ class DatabaseHelper {
 
   static Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
     if (oldVersion < 2) {
-      // Migration from v1 to v2: add user_id column
-      await db.execute('ALTER TABLE feeds ADD COLUMN user_id TEXT DEFAULT ""');
-      await db.execute('ALTER TABLE articles ADD COLUMN user_id TEXT DEFAULT ""');
-      await db.execute('ALTER TABLE categories ADD COLUMN user_id TEXT DEFAULT ""');
+      // Migration from v1 to v2: add user_id column (idempotent)
+      await _addColumnIfNotExists(db, 'feeds', 'user_id', 'TEXT DEFAULT ""');
+      await _addColumnIfNotExists(db, 'articles', 'user_id', 'TEXT DEFAULT ""');
+      await _addColumnIfNotExists(db, 'categories', 'user_id', 'TEXT DEFAULT ""');
+      await _addColumnIfNotExists(db, 'settings', 'user_id', 'TEXT DEFAULT ""');
+
       await db.execute('CREATE INDEX IF NOT EXISTS idx_feeds_user_id ON feeds(user_id)');
       await db.execute('CREATE INDEX IF NOT EXISTS idx_articles_user_id ON articles(user_id)');
       await db.execute('CREATE INDEX IF NOT EXISTS idx_categories_user_id ON categories(user_id)');
+    }
+  }
+
+  /// Helper to add column only if it doesn't exist (idempotent migration)
+  static Future<void> _addColumnIfNotExists(
+    Database db,
+    String table,
+    String column,
+    String typeAndDefault,
+  ) async {
+    try {
+      await db.execute('ALTER TABLE $table ADD COLUMN $column $typeAndDefault');
+    } on DatabaseException catch (e) {
+      // Column already exists - ignore error
+      if (!e.toString().contains('duplicate column name')) {
+        rethrow;
+      }
     }
   }
 

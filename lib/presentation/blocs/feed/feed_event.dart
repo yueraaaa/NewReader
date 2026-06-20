@@ -45,3 +45,22 @@ class DeleteCategory extends FeedEvent {
   @override
   List<Object?> get props => [categoryId];
 }
+
+class UpdateFeed extends FeedEvent {
+  final String feedId;
+  final String? title;
+  final String? categoryId;
+  UpdateFeed(this.feedId, {this.title, this.categoryId});
+  @override
+  List<Object?> get props => [feedId, title, categoryId];
+}
+
+class UpdateCategory extends FeedEvent {
+  final String categoryId;
+  final String name;
+  UpdateCategory(this.categoryId, this.name);
+  @override
+  List<Object?> get props => [categoryId, name];
+}
+
+class EnsureUncategorized extends FeedEvent {}

@@ -19,6 +19,9 @@ class BookmarksPage extends StatefulWidget {
 }
 
 class _BookmarksPageState extends State<BookmarksPage> {
+  final _searchController = TextEditingController();
+  String _searchQuery = '';
+
   @override
   void initState() {
     super.initState();
@@ -26,10 +29,23 @@ class _BookmarksPageState extends State<BookmarksPage> {
   }
 
   @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _onSearchChanged(String query) {
+    setState(() {
+      _searchQuery = query.trim().toLowerCase();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final textColor = isDark ? AppColors.darkOnSurface : AppColors.onSurface;
     final secondaryColor = isDark ? AppColors.darkOnSurfaceVariant : AppColors.onSurfaceVariant;
+    final surfaceColor = isDark ? AppColors.darkSurfaceContainerLow : AppColors.surfaceContainerLow;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -55,6 +71,27 @@ class _BookmarksPageState extends State<BookmarksPage> {
                   fontSize: 14,
                 ),
               ),
+              const SizedBox(height: AppSpacing.md),
+              // Search bar
+              Container(
+                height: 36,
+                decoration: BoxDecoration(
+                  color: surfaceColor,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: TextField(
+                  controller: _searchController,
+                  onChanged: _onSearchChanged,
+                  style: TextStyle(color: textColor, fontSize: 14),
+                  decoration: InputDecoration(
+                    hintText: '搜索收藏...',
+                    hintStyle: TextStyle(color: secondaryColor, fontSize: 14),
+                    prefixIcon: Icon(Icons.search, color: secondaryColor, size: 20),
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  ),
+                ),
+              ),
             ],
           ),
         ),
@@ -64,7 +101,15 @@ class _BookmarksPageState extends State<BookmarksPage> {
           child: BlocBuilder<ArticleBloc, ArticleState>(
             builder: (context, articleState) {
               if (articleState is ArticlesLoaded) {
-                if (articleState.articles.isEmpty) {
+                // Filter articles based on search query
+                var filteredArticles = articleState.articles;
+                if (_searchQuery.isNotEmpty) {
+                  filteredArticles = filteredArticles.where((article) {
+                    return article.title.toLowerCase().contains(_searchQuery) ||
+                        (article.description?.toLowerCase().contains(_searchQuery) ?? false);
+                  }).toList();
+                }
+                if (filteredArticles.isEmpty) {
                   return _EmptyState();
                 }
 
@@ -76,10 +121,10 @@ class _BookmarksPageState extends State<BookmarksPage> {
 
                     return ListView.separated(
                       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
-                      itemCount: articleState.articles.length,
+                      itemCount: filteredArticles.length,
                       separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.md),
                       itemBuilder: (context, index) {
-                        final article = articleState.articles[index];
+                        final article = filteredArticles[index];
                         final category = categories.where((c) => c.id == article.feedId).firstOrNull;
 
                         return ArticleCard(

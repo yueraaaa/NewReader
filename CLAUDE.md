@@ -76,3 +76,22 @@ flutter build windows
 - **Repository 实现** 位于 BLoCs 和 datasources 之间
 - **OPML 导入/导出** 由 `lib/data/services/opml_service.dart` 中的 `OpmlService` 处理
 - **AI 功能**（翻译/摘要）相互独立 — 各自分别调用 Minimax，结果存于 BLoC state，不覆盖原文
+
+## 设置优先级模式
+
+设置存储采用 **数据库优先 + 环境变量兜底**：
+1. 应用启动时从 SQLite `settings` 表加载
+2. 若数据库为空，回退到 `--dart-define` 环境变量
+3. 用户在设置页修改后立即持久化到数据库
+
+## 同步架构
+
+- **单向推送**：本地写入 SQLite 后，异步推送到 Supabase（fire-and-forget）
+- **静默失败**：网络错误不影响本地使用
+- `sync_metadata` 表记录最后同步时间戳
+
+## AI 功能
+
+- `MinimaxDatasource` — 翻译/摘要（需 Group ID）
+- `LlmDatasource` — 自定义 LLM API 连接测试（API Key + Base URL + Model ID）
+- `AiBloc` 协调 TTS（FlutterTts）和 AI 服务

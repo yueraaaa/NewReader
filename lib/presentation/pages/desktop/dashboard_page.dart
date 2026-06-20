@@ -20,10 +20,13 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> {
+  String _readFilter = 'all'; // 'all', 'unread', 'read'
+
   @override
   void initState() {
     super.initState();
     context.read<ArticleBloc>().add(LoadAllArticles());
+    context.read<ArticleBloc>().add(LoadUnreadCount());
   }
 
   @override
@@ -36,23 +39,23 @@ class _DashboardPageState extends State<DashboardPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header
-          Text(
-            '仪表盘',
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-              color: textColor,
-              fontStyle: FontStyle.italic,
-            ),
-          ),
           const SizedBox(height: AppSpacing.lg),
 
           // Feeds section
           BlocBuilder<FeedBloc, FeedState>(
             builder: (context, feedState) {
               if (feedState is FeedsLoaded) {
-                return _FeedsSection(
-                  feeds: feedState.feeds,
-                  categories: feedState.categories,
+                return BlocBuilder<ArticleBloc, ArticleState>(
+                  builder: (context, articleState) {
+                    final unreadCount = articleState is ArticlesLoaded
+                        ? articleState.unreadCount
+                        : 0;
+                    return _FeedsSection(
+                      feeds: feedState.feeds,
+                      categories: feedState.categories,
+                      totalUnreadCount: unreadCount,
+                    );
+                  },
                 );
               }
               return const Center(child: CircularProgressIndicator());
@@ -62,12 +65,34 @@ class _DashboardPageState extends State<DashboardPage> {
           const SizedBox(height: AppSpacing.xl),
 
           // Recent articles section
-          Text(
-            '最近文章',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              color: textColor,
-              fontWeight: FontWeight.w600,
-            ),
+          Row(
+            children: [
+              Text(
+                '最近文章',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  color: textColor,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const Spacer(),
+              _FilterChip(
+                label: '全部',
+                isSelected: _readFilter == 'all',
+                onTap: () => setState(() => _readFilter = 'all'),
+              ),
+              const SizedBox(width: 8),
+              _FilterChip(
+                label: '未读',
+                isSelected: _readFilter == 'unread',
+                onTap: () => setState(() => _readFilter = 'unread'),
+              ),
+              const SizedBox(width: 8),
+              _FilterChip(
+                label: '已读',
+                isSelected: _readFilter == 'read',
+                onTap: () => setState(() => _readFilter = 'read'),
+              ),
+            ],
           ),
           const SizedBox(height: AppSpacing.lg),
 
@@ -87,10 +112,19 @@ class _DashboardPageState extends State<DashboardPage> {
                     return ListView.separated(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      itemCount: articleState.articles.length.clamp(0, 20),
+                      itemCount: articleState.articles.where((a) {
+                        if (_readFilter == 'unread') return !a.isRead;
+                        if (_readFilter == 'read') return a.isRead;
+                        return true;
+                      }).length.clamp(0, 20),
                       separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.md),
                       itemBuilder: (context, index) {
-                        final article = articleState.articles[index];
+                        final filteredArticles = articleState.articles.where((a) {
+                          if (_readFilter == 'unread') return !a.isRead;
+                          if (_readFilter == 'read') return a.isRead;
+                          return true;
+                        }).toList();
+                        final article = filteredArticles[index];
                         final category = categories.where((c) => c.id == article.feedId).firstOrNull;
 
                         return ArticleCard(
@@ -99,7 +133,12 @@ class _DashboardPageState extends State<DashboardPage> {
                           categoryColor: category != null
                               ? Color(int.parse(category.color.replaceFirst('#', '0xFF')))
                               : null,
-                          onTap: () => context.go('/article/${article.id}'),
+                          onTap: () {
+                            if (!article.isRead) {
+                              context.read<ArticleBloc>().add(MarkArticleRead(article.id, true));
+                            }
+                            context.go('/article/${article.id}');
+                          },
                           onBookmarkTap: () {
                             context.read<ArticleBloc>().add(
                               MarkArticleFavorite(article.id, !article.isFavorite),
@@ -128,10 +167,12 @@ class _DashboardPageState extends State<DashboardPage> {
 class _FeedsSection extends StatelessWidget {
   final List<FeedModel> feeds;
   final List<CategoryModel> categories;
+  final int totalUnreadCount;
 
   const _FeedsSection({
     required this.feeds,
     required this.categories,
+    required this.totalUnreadCount,
   });
 
   @override
@@ -176,12 +217,34 @@ class _FeedsSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          '我的订阅',
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            color: textColor,
-            fontWeight: FontWeight.w600,
-          ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              '我的订阅',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                color: textColor,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            if (totalUnreadCount > 0)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: (isDark ? AppColors.darkPrimary : AppColors.primary)
+                      .withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+                ),
+                child: Text(
+                  '$totalUnreadCount 未读',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: isDark ? AppColors.darkPrimary : AppColors.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+          ],
         ),
         const SizedBox(height: AppSpacing.md),
         Wrap(
@@ -269,6 +332,49 @@ class _FeedChip extends StatelessWidget {
                 ),
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _FilterChip extends StatelessWidget {
+  final String label;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _FilterChip({
+    required this.label,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = isDark ? AppColors.darkPrimary : AppColors.primary;
+    final bgColor = isDark ? AppColors.darkSurfaceContainerHigh : AppColors.surfaceContainerHigh;
+    final textColor = isDark ? AppColors.darkOnSurface : AppColors.onSurface;
+
+    return Material(
+      color: isSelected ? primaryColor.withValues(alpha: 0.2) : bgColor,
+      borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 6,
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              color: isSelected ? primaryColor : textColor,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
       ),

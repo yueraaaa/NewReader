@@ -29,48 +29,52 @@ class ArticleCard extends StatelessWidget {
     final secondaryColor = isDark ? AppColors.darkOnSurfaceVariant : AppColors.onSurfaceVariant;
     final tertiaryColor = isDark ? AppColors.darkTertiary : AppColors.tertiary;
 
-    return Material(
-      color: bgColor,
-      borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-      child: InkWell(
-        onTap: onTap,
+    // 已读文章降低透明度
+    final opacity = article.isRead ? 0.5 : 1.0;
+
+    return Opacity(
+      opacity: opacity,
+      child: Material(
+        color: bgColor,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Metadata row
-              Row(
-                children: [
-                  if (categoryName != null && categoryColor != null) ...[
-                    Container(
-                      width: 8,
-                      height: 8,
-                      decoration: BoxDecoration(
-                        color: categoryColor,
-                        shape: BoxShape.circle,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Metadata row
+                Row(
+                  children: [
+                    if (categoryName != null && categoryColor != null) ...[
+                      Container(
+                        width: 8,
+                        height: 8,
+                        decoration: BoxDecoration(
+                          color: categoryColor,
+                          shape: BoxShape.circle,
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      categoryName!,
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: secondaryColor,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 1.0,
+                      const SizedBox(width: 6),
+                      Text(
+                        categoryName!,
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: secondaryColor,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 1.0,
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 12),
-                  ],
-                  if (article.publishedAt != null)
+                      const SizedBox(width: 12),
+                    ],
                     Text(
-                      _formatDate(article.publishedAt!),
+                      _formatDate(article.publishedAt ?? article.createdAt),
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
                         color: secondaryColor,
                         letterSpacing: 0.5,
                       ),
-                    ),
+                  ),
                   const Spacer(),
                   Text(
                     '${article.readingTimeMinutes} min',
@@ -163,6 +167,7 @@ class ArticleCard extends StatelessWidget {
             ],
           ),
         ),
+      ),
       ),
     );
   }

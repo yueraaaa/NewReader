@@ -1,6 +1,13 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 
+enum LlmConnectionStatus {
+  idle,
+  testing,
+  success,
+  failure,
+}
+
 class SettingsState extends Equatable {
   final ThemeMode themeMode;
   final double fontSize; // 14-24
@@ -9,6 +16,11 @@ class SettingsState extends Equatable {
   final String supabaseAnonKey;
   final String minimaxApiKey;
   final String minimaxGroupId;
+  final String llmApiKey;
+  final String llmBaseUrl;
+  final String llmModelId;
+  final LlmConnectionStatus llmConnectionStatus;
+  final String llmConnectionMessage;
   final bool isConfigValid;
 
   const SettingsState({
@@ -19,6 +31,11 @@ class SettingsState extends Equatable {
     this.supabaseAnonKey = '',
     this.minimaxApiKey = '',
     this.minimaxGroupId = '',
+    this.llmApiKey = '',
+    this.llmBaseUrl = '',
+    this.llmModelId = '',
+    this.llmConnectionStatus = LlmConnectionStatus.idle,
+    this.llmConnectionMessage = '',
     this.isConfigValid = false,
   });
 
@@ -33,6 +50,11 @@ class SettingsState extends Equatable {
     String? supabaseAnonKey,
     String? minimaxApiKey,
     String? minimaxGroupId,
+    String? llmApiKey,
+    String? llmBaseUrl,
+    String? llmModelId,
+    LlmConnectionStatus? llmConnectionStatus,
+    String? llmConnectionMessage,
     bool? isConfigValid,
   }) {
     return SettingsState(
@@ -43,6 +65,11 @@ class SettingsState extends Equatable {
       supabaseAnonKey: supabaseAnonKey ?? this.supabaseAnonKey,
       minimaxApiKey: minimaxApiKey ?? this.minimaxApiKey,
       minimaxGroupId: minimaxGroupId ?? this.minimaxGroupId,
+      llmApiKey: llmApiKey ?? this.llmApiKey,
+      llmBaseUrl: llmBaseUrl ?? this.llmBaseUrl,
+      llmModelId: llmModelId ?? this.llmModelId,
+      llmConnectionStatus: llmConnectionStatus ?? this.llmConnectionStatus,
+      llmConnectionMessage: llmConnectionMessage ?? this.llmConnectionMessage,
       isConfigValid: isConfigValid ?? this.isConfigValid,
     );
   }
@@ -56,6 +83,11 @@ class SettingsState extends Equatable {
         supabaseAnonKey,
         minimaxApiKey,
         minimaxGroupId,
+        llmApiKey,
+        llmBaseUrl,
+        llmModelId,
+        llmConnectionStatus,
+        llmConnectionMessage,
         isConfigValid,
       ];
 }

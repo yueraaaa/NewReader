@@ -15,14 +15,26 @@ class SyncService {
       whereArgs: [table],
     );
     if (result.isEmpty) return null;
-    return DateTime.parse(result.first['last_sync'] as String);
+    return DateTime.parse(result.first['last_synced_at'] as String);
   }
+
+  String? _userId;
+
+  void setUserId(String? userId) {
+    _userId = userId;
+  }
+
+  // Filter conditions for multi-tenant queries
+  String _userIdWhere(String column) =>
+      _userId != null ? ' AND $column = ?' : '';
+  List<dynamic> _userIdArgs() =>
+      _userId != null ? [_userId!] : [];
 
   // Update last sync time for a table
   Future<void> _updateLastSyncTime(String table, DateTime syncTime) async {
     await _localDb.insert(
       'sync_metadata',
-      {'table_name': table, 'last_sync': syncTime.toIso8601String()},
+      {'table_name': table, 'last_synced_at': syncTime.toIso8601String()},
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
@@ -66,6 +78,7 @@ class SyncService {
   }
 
   // Apply remote changes to local DB with last-write-wins conflict resolution
+  // Remote changes are already filtered by user_id from SupabaseDatasource
   Future<void> _applyRemoteChanges(
     String table,
     List<Map<String, dynamic>> remoteChanges,
@@ -73,11 +86,13 @@ class SyncService {
     for (final remoteChange in remoteChanges) {
       final remoteUpdatedAt = DateTime.parse(remoteChange['updated_at'] as String);
 
-      // Check if local record exists
+      // Check if local record exists (filtered by user_id)
+      final userWhere = _userIdWhere('user_id');
+      final userArgs = _userIdArgs();
       final localRecords = await _localDb.query(
         table,
-        where: 'id = ?',
-        whereArgs: [remoteChange['id']],
+        where: 'id = ?$userWhere',
+        whereArgs: [remoteChange['id'], ...userArgs],
       );
 
       if (localRecords.isEmpty) {
@@ -91,26 +106,33 @@ class SyncService {
           await _localDb.update(
             table,
             remoteChange,
-            where: 'id = ?',
-            whereArgs: [remoteChange['id']],
+            where: 'id = ?$userWhere',
+            whereArgs: [remoteChange['id'], ...userArgs],
           );
         }
       }
     }
   }
 
-  // Get local changes since last sync
+  // Get local changes since last sync (filtered by user_id for multi-tenant isolation)
   Future<List<Map<String, dynamic>>> _getLocalChangesSince(
     String table,
     DateTime? lastSync,
   ) async {
+    final userWhere = _userIdWhere('user_id');
+    final userArgs = _userIdArgs();
+
     if (lastSync == null) {
-      return await _localDb.query(table);
+      return await _localDb.query(
+        table,
+        where: 'is_deleted = 0$userWhere',
+        whereArgs: userArgs,
+      );
     }
     return await _localDb.query(
       table,
-      where: 'updated_at > ?',
-      whereArgs: [lastSync.toIso8601String()],
+      where: 'updated_at > ? AND is_deleted = 0$userWhere',
+      whereArgs: [lastSync.toIso8601String(), ...userArgs],
     );
   }
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../data/datasources/local/settings_local_datasource.dart';
+import '../../../data/datasources/ai/llm_datasource.dart';
 import 'settings_event.dart';
 import 'settings_state.dart';
 
@@ -18,6 +19,10 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     on<UpdateSupabaseAnonKey>(_onUpdateSupabaseAnonKey);
     on<UpdateMinimaxApiKey>(_onUpdateMinimaxApiKey);
     on<UpdateMinimaxGroupId>(_onUpdateMinimaxGroupId);
+    on<UpdateLlmApiKey>(_onUpdateLlmApiKey);
+    on<UpdateLlmBaseUrl>(_onUpdateLlmBaseUrl);
+    on<UpdateLlmModelId>(_onUpdateLlmModelId);
+    on<TestLlmConnection>(_onTestLlmConnection);
   }
 
   Future<void> _onLoadSettings(
@@ -33,6 +38,9 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
       final supabaseAnonKey = await _settingsDatasource.getSetting('supabase_anon_key');
       final minimaxApiKey = await _settingsDatasource.getSetting('minimax_api_key');
       final minimaxGroupId = await _settingsDatasource.getSetting('minimax_group_id');
+      final llmApiKey = await _settingsDatasource.getSetting('llm_api_key');
+      final llmBaseUrl = await _settingsDatasource.getSetting('llm_base_url');
+      final llmModelId = await _settingsDatasource.getSetting('llm_model_id');
 
       ThemeMode themeMode = ThemeMode.system;
       if (themeModeStr != null) {
@@ -60,6 +68,9 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
         supabaseAnonKey: supabaseAnonKey ?? '',
         minimaxApiKey: minimaxApiKey ?? '',
         minimaxGroupId: minimaxGroupId ?? '',
+        llmApiKey: llmApiKey ?? '',
+        llmBaseUrl: llmBaseUrl ?? '',
+        llmModelId: llmModelId ?? '',
         isConfigValid: (supabaseUrl?.isNotEmpty ?? false) &&
                        (supabaseAnonKey?.isNotEmpty ?? false),
       ));
@@ -173,6 +184,74 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
       ));
     } catch (e) {
       // Ignore error
+    }
+  }
+
+  Future<void> _onUpdateLlmApiKey(
+    UpdateLlmApiKey event,
+    Emitter<SettingsState> emit,
+  ) async {
+    try {
+      await _settingsDatasource.setSetting('llm_api_key', event.llmApiKey);
+      emit(state.copyWith(llmApiKey: event.llmApiKey));
+    } catch (e) {
+      // Ignore error
+    }
+  }
+
+  Future<void> _onUpdateLlmBaseUrl(
+    UpdateLlmBaseUrl event,
+    Emitter<SettingsState> emit,
+  ) async {
+    try {
+      await _settingsDatasource.setSetting('llm_base_url', event.llmBaseUrl);
+      emit(state.copyWith(llmBaseUrl: event.llmBaseUrl));
+    } catch (e) {
+      // Ignore error
+    }
+  }
+
+  Future<void> _onUpdateLlmModelId(
+    UpdateLlmModelId event,
+    Emitter<SettingsState> emit,
+  ) async {
+    try {
+      await _settingsDatasource.setSetting('llm_model_id', event.llmModelId);
+      emit(state.copyWith(llmModelId: event.llmModelId));
+    } catch (e) {
+      // Ignore error
+    }
+  }
+
+  Future<void> _onTestLlmConnection(
+    TestLlmConnection event,
+    Emitter<SettingsState> emit,
+  ) async {
+    emit(state.copyWith(
+      llmConnectionStatus: LlmConnectionStatus.testing,
+      llmConnectionMessage: '正在测试连接...',
+    ));
+
+    try {
+      final datasource = LlmDatasource(
+        apiKey: state.llmApiKey,
+        baseUrl: state.llmBaseUrl,
+        modelId: state.llmModelId,
+      );
+
+      final result = await datasource.testConnection();
+
+      emit(state.copyWith(
+        llmConnectionStatus: result.success
+            ? LlmConnectionStatus.success
+            : LlmConnectionStatus.failure,
+        llmConnectionMessage: result.message,
+      ));
+    } catch (e) {
+      emit(state.copyWith(
+        llmConnectionStatus: LlmConnectionStatus.failure,
+        llmConnectionMessage: '连接错误: $e',
+      ));
     }
   }
 }

@@ -9,6 +9,9 @@ import '../../presentation/pages/desktop/feed_list_page.dart';
 import '../../presentation/pages/desktop/article_detail_page.dart';
 import '../../presentation/pages/desktop/explore_page.dart' as desktop_explore;
 import '../../presentation/pages/desktop/bookmarks_page.dart' as desktop_bookmarks;
+import '../../presentation/pages/desktop/search_page.dart';
+import '../../presentation/pages/desktop/help_page.dart';
+import '../../presentation/pages/desktop/webview_page.dart';
 
 final router = GoRouter(
   initialLocation: '/',
@@ -50,6 +53,18 @@ final router = GoRouter(
           ),
         ),
         GoRoute(
+          path: '/search',
+          pageBuilder: (context, state) => const NoTransitionPage(
+            child: SearchPage(),
+          ),
+        ),
+        GoRoute(
+          path: '/help',
+          pageBuilder: (context, state) => const NoTransitionPage(
+            child: HelpPage(),
+          ),
+        ),
+        GoRoute(
           path: '/category/:id',
           pageBuilder: (context, state) => NoTransitionPage(
             child: FeedListPage(
@@ -77,6 +92,16 @@ final router = GoRouter(
           ),
         ),
       ],
+    ),
+    GoRoute(
+      path: '/webview',
+      pageBuilder: (context, state) {
+        final url = state.uri.queryParameters['url'] ?? '';
+        final title = state.uri.queryParameters['title'] ?? '原文';
+        return MaterialPage(
+          child: WebViewPage(url: url, title: title),
+        );
+      },
     ),
   ],
 );

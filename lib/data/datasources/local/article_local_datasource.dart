@@ -161,4 +161,21 @@ class ArticleLocalDatasource {
       whereArgs: [feedId],
     );
   }
+
+  Future<int> getUnreadCountByFeed(String feedId) async {
+    final db = await _db;
+    final result = await db.rawQuery(
+      'SELECT COUNT(*) as count FROM articles WHERE feed_id = ? AND is_read = 0 AND is_deleted = 0',
+      [feedId],
+    );
+    return Sqflite.firstIntValue(result) ?? 0;
+  }
+
+  Future<int> getTotalUnreadCount() async {
+    final db = await _db;
+    final result = await db.rawQuery(
+      'SELECT COUNT(*) as count FROM articles WHERE is_read = 0 AND is_deleted = 0',
+    );
+    return Sqflite.firstIntValue(result) ?? 0;
+  }
 }

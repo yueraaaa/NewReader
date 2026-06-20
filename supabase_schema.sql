@@ -49,7 +49,8 @@ CREATE TABLE IF NOT EXISTS articles (
 );
 
 CREATE TABLE IF NOT EXISTS settings (
-  key TEXT PRIMARY KEY,
+  key TEXT,
+  user_id TEXT DEFAULT '',
   value TEXT NOT NULL
 );
 
@@ -145,3 +146,11 @@ CREATE POLICY "Users can update own settings" ON settings
 
 CREATE POLICY "Users can delete own settings" ON settings
   FOR DELETE USING (auth.uid()::text = user_id);
+
+-- ============================================
+-- MIGRATION: Add user_id to settings table
+-- ============================================
+-- For existing Supabase instances, run these to migrate:
+-- ALTER TABLE settings ADD COLUMN IF NOT EXISTS user_id TEXT DEFAULT '';
+-- ALTER TABLE settings DROP CONSTRAINT IF EXISTS settings_pkey;
+-- ALTER TABLE settings ADD PRIMARY KEY (key, user_id);

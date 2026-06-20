@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
+import '../../../core/utils/html_utils.dart';
 import '../../../data/models/article_model.dart';
 import '../../blocs/article/article_bloc.dart';
 import '../../blocs/article/article_event.dart';
@@ -35,6 +37,8 @@ class _ArticleDetailPageState extends State<ArticleDetailPage> {
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
+    // Load article by ID to ensure it's available for offline reading
+    context.read<ArticleBloc>().add(LoadArticleById(widget.articleId));
   }
 
   @override
@@ -127,7 +131,10 @@ class _ArticleDetailPageState extends State<ArticleDetailPage> {
                         icon: Icons.share,
                         tooltip: '分享',
                         onTap: () {
-                          // TODO: Implement share
+                          Share.share(
+                            '${currentArticle.title}\n${currentArticle.link}',
+                            subject: currentArticle.title,
+                          );
                         },
                       ),
                       BlocBuilder<SettingsBloc, SettingsState>(
@@ -166,39 +173,32 @@ class _ArticleDetailPageState extends State<ArticleDetailPage> {
                     ],
                   ),
                   Expanded(
-                    child: SingleChildScrollView(
-                      controller: _scrollController,
-                      padding: const EdgeInsets.all(AppSpacing.xl),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Article content
-                          Expanded(
-                            flex: 8,
-                            child: _ArticleContent(
-                              article: currentArticle,
-                              textColor: textColor,
-                              secondaryColor: secondaryColor,
-                              primaryColor: primaryColor,
+                    child: Stack(
+                      children: [
+                        SingleChildScrollView(
+                          controller: _scrollController,
+                          padding: const EdgeInsets.all(AppSpacing.xl),
+                          child: _ArticleContent(
+                            article: currentArticle,
+                            textColor: textColor,
+                            secondaryColor: secondaryColor,
+                            primaryColor: primaryColor,
+                          ),
+                        ),
+                        // Floating AI Toolkit panel
+                        Positioned(
+                          right: 0,
+                          bottom: 0,
+                          child: BlocProvider.value(
+                            value: context.read<AiBloc>(),
+                            child: BlocBuilder<AiBloc, AiState>(
+                              builder: (context, aiState) {
+                                return AiToolkitPanel(article: currentArticle);
+                              },
                             ),
                           ),
-
-                          const SizedBox(width: AppSpacing.xl),
-
-                          // AI Toolkit sidebar
-                          Expanded(
-                            flex: 4,
-                            child: BlocProvider.value(
-                              value: context.read<AiBloc>(),
-                              child: BlocBuilder<AiBloc, AiState>(
-                                builder: (context, aiState) {
-                                  return AiToolkitPanel(article: currentArticle);
-                                },
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -207,7 +207,7 @@ class _ArticleDetailPageState extends State<ArticleDetailPage> {
               // Reading progress bar
               Positioned(
                 top: 0,
-                left: 256,
+                left: AppSpacing.sideNavWidth,
                 right: 0,
                 height: 2,
                 child: Container(
@@ -336,8 +336,8 @@ class _ArticleContent extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    // Parse HTML content
-    final htmlContent = _parseHtml(content);
+    // Use shared HtmlUtils
+    final htmlContent = HtmlUtils.stripHtml(content);
 
     return SelectableText(
       htmlContent,
@@ -346,23 +346,6 @@ class _ArticleContent extends StatelessWidget {
         color: textColor,
       ),
     );
-  }
-
-  String _parseHtml(String html) {
-    // Simple HTML to plain text conversion
-    return html
-        .replaceAll(RegExp(r'<br\s*/?>'), '\n')
-        .replaceAll(RegExp(r'</p>'), '\n\n')
-        .replaceAll(RegExp(r'</div>'), '\n')
-        .replaceAll(RegExp(r'<[^>]*>'), '')
-        .replaceAll('&nbsp;', ' ')
-        .replaceAll('&amp;', '&')
-        .replaceAll('&lt;', '<')
-        .replaceAll('&gt;', '>')
-        .replaceAll('&quot;', '"')
-        .replaceAll('&#39;', "'")
-        .replaceAll(RegExp(r'\n{3,}'), '\n\n')
-        .trim();
   }
 
   String _formatDate(DateTime date) {

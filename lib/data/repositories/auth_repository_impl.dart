@@ -4,9 +4,11 @@ import '../../domain/repositories/auth_repository.dart';
 import '../datasources/remote/supabase_datasource.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
-  final SupabaseDatasource _datasource;
+  final SupabaseDatasource? _datasource;
 
   AuthRepositoryImpl(this._datasource);
+
+  bool get _isLoggedIn => _datasource != null;
 
   User _mapToUser(supabase.User user) {
     final provider = user.appMetadata.containsKey('provider')
@@ -23,38 +25,47 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<User?> getCurrentUser() async {
-    final user = await _datasource.getCurrentUser();
+    if (!_isLoggedIn) return null;
+    final user = await _datasource!.getCurrentUser();
     return user != null ? _mapToUser(user) : null;
   }
 
   @override
-  Stream<User?> get authStateChanges =>
-      _datasource.authStateChanges.map((user) => user != null ? _mapToUser(user) : null);
+  Stream<User?> get authStateChanges {
+    if (!_isLoggedIn) return const Stream.empty();
+    return _datasource!.authStateChanges.map((user) => user != null ? _mapToUser(user) : null);
+  }
 
   @override
   Future<User> signInWithApple() async {
-    final user = await _datasource.signInWithApple();
+    if (!_isLoggedIn) throw Exception('Supabase not configured');
+    final user = await _datasource!.signInWithApple();
     return _mapToUser(user);
   }
 
   @override
   Future<User> signInWithGithub() async {
-    final user = await _datasource.signInWithGithub();
+    if (!_isLoggedIn) throw Exception('Supabase not configured');
+    final user = await _datasource!.signInWithGithub();
     return _mapToUser(user);
   }
 
   @override
   Future<User> signInWithEmail(String email, String password) async {
-    final user = await _datasource.signInWithEmail(email, password);
+    if (!_isLoggedIn) throw Exception('Supabase not configured');
+    final user = await _datasource!.signInWithEmail(email, password);
     return _mapToUser(user);
   }
 
   @override
   Future<User> signUpWithEmail(String email, String password) async {
-    final user = await _datasource.signUpWithEmail(email, password);
+    if (!_isLoggedIn) throw Exception('Supabase not configured');
+    final user = await _datasource!.signUpWithEmail(email, password);
     return _mapToUser(user);
   }
 
   @override
-  Future<void> signOut() async => await _datasource.signOut();
+  Future<void> signOut() async {
+    if (_isLoggedIn) await _datasource!.signOut();
+  }
 }

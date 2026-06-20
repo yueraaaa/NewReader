@@ -56,3 +56,26 @@ class UpdateMinimaxGroupId extends SettingsEvent {
   @override
   List<Object?> get props => [minimaxGroupId];
 }
+
+class UpdateLlmApiKey extends SettingsEvent {
+  final String llmApiKey;
+  UpdateLlmApiKey(this.llmApiKey);
+  @override
+  List<Object?> get props => [llmApiKey];
+}
+
+class UpdateLlmBaseUrl extends SettingsEvent {
+  final String llmBaseUrl;
+  UpdateLlmBaseUrl(this.llmBaseUrl);
+  @override
+  List<Object?> get props => [llmBaseUrl];
+}
+
+class UpdateLlmModelId extends SettingsEvent {
+  final String llmModelId;
+  UpdateLlmModelId(this.llmModelId);
+  @override
+  List<Object?> get props => [llmModelId];
+}
+
+class TestLlmConnection extends SettingsEvent {}

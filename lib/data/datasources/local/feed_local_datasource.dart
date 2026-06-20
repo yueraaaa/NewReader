@@ -7,13 +7,21 @@ import 'database_helper.dart';
 class FeedLocalDatasource {
   Future<Database> get _db => DatabaseHelper.database;
 
+  String? _userId;
+
+  void setUserId(String? userId) {
+    _userId = userId;
+  }
+
+  String _getUserIdOrEmpty() => _userId ?? '';
+
   // Feed methods
   Future<List<FeedModel>> getAllFeeds() async {
     final db = await _db;
     final maps = await db.query(
       'feeds',
-      where: 'is_deleted = ?',
-      whereArgs: [0],
+      where: 'is_deleted = ? AND user_id = ?',
+      whereArgs: [0, _getUserIdOrEmpty()],
       orderBy: 'title ASC',
     );
     return maps.map((m) => FeedModel.fromMap(m)).toList();
@@ -23,8 +31,8 @@ class FeedLocalDatasource {
     final db = await _db;
     final maps = await db.query(
       'feeds',
-      where: 'category_id = ? AND is_deleted = ?',
-      whereArgs: [categoryId, 0],
+      where: 'category_id = ? AND is_deleted = ? AND user_id = ?',
+      whereArgs: [categoryId, 0, _getUserIdOrEmpty()],
       orderBy: 'title ASC',
     );
     return maps.map((m) => FeedModel.fromMap(m)).toList();
@@ -75,8 +83,8 @@ class FeedLocalDatasource {
     final db = await _db;
     final maps = await db.query(
       'categories',
-      where: 'is_deleted = ?',
-      whereArgs: [0],
+      where: 'is_deleted = ? AND user_id = ?',
+      whereArgs: [0, _getUserIdOrEmpty()],
       orderBy: 'sort_order ASC, name ASC',
     );
     return maps.map((m) => CategoryModel.fromMap(m)).toList();
@@ -136,8 +144,8 @@ class FeedLocalDatasource {
     final db = await _db;
     final maps = await db.query(
       'articles',
-      where: 'feed_id = ? AND is_deleted = ?',
-      whereArgs: [feedId, 0],
+      where: 'feed_id = ? AND is_deleted = ? AND user_id = ?',
+      whereArgs: [feedId, 0, _getUserIdOrEmpty()],
       orderBy: 'published_at DESC',
     );
     return maps.map((m) => ArticleModel.fromMap(m)).toList();

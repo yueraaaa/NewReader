@@ -18,6 +18,7 @@ import 'data/datasources/local/settings_local_datasource.dart';
 import 'data/datasources/local/feed_local_datasource.dart';
 import 'data/datasources/local/article_local_datasource.dart';
 import 'data/datasources/remote/supabase_datasource.dart';
+import 'data/services/sync_service.dart';
 import 'domain/repositories/auth_repository.dart';
 import 'data/repositories/auth_repository_impl.dart';
 import 'data/repositories/feed_repository_impl.dart';
@@ -27,7 +28,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Initialize database
-  await DatabaseHelper.database;
+  final db = await DatabaseHelper.database;
 
   // Read API keys from database (falls back to environment variables)
   final settingsDatasource = SettingsLocalDatasource();
@@ -58,35 +59,63 @@ void main() async {
     DeviceOrientation.landscapeRight,
   ]);
 
-  runApp(RealReaderApp(settingsDatasource: settingsDatasource));
+  runApp(RealReaderApp(
+    settingsDatasource: settingsDatasource,
+    supabaseUrl: supabaseUrl,
+    supabaseAnonKey: supabaseAnonKey,
+    database: db,
+  ));
 }
 
 class RealReaderApp extends StatelessWidget {
   final SettingsLocalDatasource settingsDatasource;
+  final String supabaseUrl;
+  final String supabaseAnonKey;
+  final dynamic database;
 
-  const RealReaderApp({super.key, required this.settingsDatasource});
+  const RealReaderApp({
+    super.key,
+    required this.settingsDatasource,
+    required this.supabaseUrl,
+    required this.supabaseAnonKey,
+    required this.database,
+  });
 
   @override
   Widget build(BuildContext context) {
     // Create datasources
     final feedLocalDatasource = FeedLocalDatasource();
     final articleDatasource = ArticleLocalDatasource();
-    final supabaseClient = supabase.Supabase.instance.client;
-    final supabaseDatasource = SupabaseDatasource(supabaseClient);
+    SupabaseDatasource? supabaseDatasource;
+    SyncService? syncService;
+
+    // Only create Supabase datasource if credentials are available
+    if (supabaseUrl.isNotEmpty && supabaseAnonKey.isNotEmpty) {
+      final supabaseClient = supabase.Supabase.instance.client;
+      supabaseDatasource = SupabaseDatasource(supabaseClient);
+      syncService = SyncService(supabaseDatasource!, database);
+    }
 
     // Create repositories
     final AuthRepository authRepository = AuthRepositoryImpl(supabaseDatasource);
     final feedRepository = FeedRepositoryImpl(
       localDatasource: feedLocalDatasource,
-      remoteDatasource: null,
+      supabaseDatasource: supabaseDatasource,
+      syncService: syncService,
     );
 
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (_) => AuthBloc(authRepository)..add(AuthCheckRequested())),
         BlocProvider(create: (_) => SettingsBloc(settingsDatasource: settingsDatasource)..add(LoadSettings())),
-        BlocProvider(create: (_) => FeedBloc(feedRepository: feedRepository)..add(LoadFeeds())),
-        BlocProvider(create: (_) => ArticleBloc(articleDatasource: articleDatasource)),
+        BlocProvider(create: (context) => FeedBloc(
+          feedRepository: feedRepository,
+          authBloc: context.read<AuthBloc>(),
+        )..add(LoadFeeds())),
+        BlocProvider(create: (_) => ArticleBloc(
+          articleDatasource: articleDatasource,
+          supabaseDatasource: supabaseDatasource,
+        )),
         BlocProvider(create: (_) => AiBloc()),
       ],
       child: BlocBuilder<SettingsBloc, SettingsState>(

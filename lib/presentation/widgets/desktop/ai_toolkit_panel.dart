@@ -26,10 +26,18 @@ class AiToolkitPanel extends StatelessWidget {
     final primaryColor = isDark ? AppColors.darkPrimary : AppColors.primary;
 
     return Container(
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      width: 160,
+      padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
         color: bgColor,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -39,21 +47,21 @@ class AiToolkitPanel extends StatelessWidget {
           Row(
             children: [
               Icon(
-                Icons.bolt, // Auto-awesome equivalent
-                size: 20,
+                Icons.bolt,
+                size: 16,
                 color: primaryColor,
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 6),
               Text(
-                'AI 智能辅助',
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                'AI 助手',
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
                   color: textColor,
                   fontWeight: FontWeight.w600,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: AppSpacing.lg),
+          const SizedBox(height: AppSpacing.md),
 
           // AI Buttons
           BlocBuilder<AiBloc, AiState>(
@@ -68,7 +76,7 @@ class AiToolkitPanel extends StatelessWidget {
                       context.read<AiBloc>().add(SummarizeArticle(article));
                     },
                   ),
-                  const SizedBox(height: AppSpacing.sm),
+                  const SizedBox(height: 6),
                   _AiButton(
                     icon: Icons.translate,
                     label: '翻译',
@@ -77,7 +85,7 @@ class AiToolkitPanel extends StatelessWidget {
                       context.read<AiBloc>().add(TranslateArticle(article));
                     },
                   ),
-                  const SizedBox(height: AppSpacing.sm),
+                  const SizedBox(height: 6),
                   _AiButton(
                     icon: Icons.volume_up,
                     label: '朗读',
@@ -176,29 +184,29 @@ class _AiButton extends StatelessWidget {
         child: Container(
           width: double.infinity,
           padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.md,
-            vertical: AppSpacing.md,
+            horizontal: 10,
+            vertical: 8,
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               if (isLoading)
                 SizedBox(
-                  width: 18,
-                  height: 18,
+                  width: 14,
+                  height: 14,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
                     color: primaryColor,
                   ),
                 )
               else
-                Icon(icon, size: 18, color: primaryColor),
-              const SizedBox(width: 8),
+                Icon(icon, size: 14, color: primaryColor),
+              const SizedBox(width: 6),
               Text(
                 label,
                 style: TextStyle(
                   color: primaryColor,
-                  fontSize: 14,
+                  fontSize: 12,
                   fontWeight: FontWeight.w500,
                 ),
               ),

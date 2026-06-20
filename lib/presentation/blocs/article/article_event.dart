@@ -47,3 +47,24 @@ class SearchArticles extends ArticleEvent {
   @override
   List<Object?> get props => [query];
 }
+
+class LoadUnreadCount extends ArticleEvent {
+  final String? feedId;
+  LoadUnreadCount({this.feedId});
+  @override
+  List<Object?> get props => [feedId];
+}
+
+class LoadArticleById extends ArticleEvent {
+  final String articleId;
+  LoadArticleById(this.articleId);
+  @override
+  List<Object?> get props => [articleId];
+}
+
+class DeleteArticlesByFeedId extends ArticleEvent {
+  final String feedId;
+  DeleteArticlesByFeedId(this.feedId);
+  @override
+  List<Object?> get props => [feedId];
+}

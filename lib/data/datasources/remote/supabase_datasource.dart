@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SupabaseDatasource {
@@ -7,7 +8,11 @@ class SupabaseDatasource {
 
   String? get _userId => _client.auth.currentUser?.id;
 
+  String? getCurrentUserId() => _userId;
+
   // Auth methods
+  static const _oauthTimeout = Duration(seconds: 120);
+
   Future<User?> getCurrentUser() async => _client.auth.currentUser;
 
   Stream<User?> get authStateChanges =>
@@ -18,7 +23,20 @@ class SupabaseDatasource {
       OAuthProvider.apple,
       redirectTo: 'realreader://login-callback',
     );
-    // OAuth sign-in is asynchronous - the user is returned via auth state change
+
+    try {
+      // Wait for the auth state to change to signed in
+      final stream = _client.auth.onAuthStateChange.timeout(_oauthTimeout);
+      await for (final authState in stream) {
+        if (authState.session?.user != null) {
+          return authState.session!.user;
+        }
+      }
+    } on TimeoutException {
+      // OAuth timed out, user likely closed the browser
+    }
+
+    // Fallback: check current user after OAuth flow completes
     final user = _client.auth.currentUser;
     if (user == null) {
       throw Exception('Apple sign in failed');
@@ -31,7 +49,20 @@ class SupabaseDatasource {
       OAuthProvider.github,
       redirectTo: 'realreader://login-callback',
     );
-    // OAuth sign-in is asynchronous - the user is returned via auth state change
+
+    try {
+      // Wait for the auth state to change to signed in
+      final stream = _client.auth.onAuthStateChange.timeout(_oauthTimeout);
+      await for (final authState in stream) {
+        if (authState.session?.user != null) {
+          return authState.session!.user;
+        }
+      }
+    } on TimeoutException {
+      // OAuth timed out, user likely closed the browser
+    }
+
+    // Fallback: check current user after OAuth flow completes
     final user = _client.auth.currentUser;
     if (user == null) {
       throw Exception('GitHub sign in failed');
@@ -44,6 +75,9 @@ class SupabaseDatasource {
       email: email,
       password: password,
     );
+    if (response.user == null) {
+      throw Exception('Email sign in failed');
+    }
     return response.user!;
   }
 
@@ -110,15 +144,24 @@ class SupabaseDatasource {
   }
 
   Future<Map<String, dynamic>?> getSetting(String key) async {
+    final userId = _userId;
+    if (userId == null) return null;
     final result = await _client
         .from('settings')
         .select()
+        .eq('user_id', userId)
         .eq('key', key)
         .maybeSingle();
     return result;
   }
 
   Future<void> setSetting(String key, String value) async {
-    await _client.from('settings').upsert({'key': key, 'value': value});
+    final userId = _userId;
+    if (userId == null) return;
+    await _client.from('settings').upsert({
+      'key': key,
+      'value': value,
+      'user_id': userId,
+    });
   }
 }

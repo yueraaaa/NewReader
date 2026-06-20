@@ -26,6 +26,8 @@ class FeedListPage extends StatefulWidget {
 }
 
 class _FeedListPageState extends State<FeedListPage> {
+  String _readFilter = 'all'; // 'all', 'unread', 'read'
+
   @override
   void initState() {
     super.initState();
@@ -117,6 +119,35 @@ class _FeedListPageState extends State<FeedListPage> {
 
         const SizedBox(height: AppSpacing.md),
 
+        // Read status filter chips
+        Container(
+          height: 36,
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
+          child: Row(
+            children: [
+              _FilterChip(
+                label: '全部',
+                isSelected: _readFilter == 'all',
+                onTap: () => setState(() => _readFilter = 'all'),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              _FilterChip(
+                label: '未读',
+                isSelected: _readFilter == 'unread',
+                onTap: () => setState(() => _readFilter = 'unread'),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              _FilterChip(
+                label: '已读',
+                isSelected: _readFilter == 'read',
+                onTap: () => setState(() => _readFilter = 'read'),
+              ),
+            ],
+          ),
+        ),
+
+        const SizedBox(height: AppSpacing.md),
+
         // Articles list
         Expanded(
           child: BlocBuilder<ArticleBloc, ArticleState>(
@@ -140,13 +171,29 @@ class _FeedListPageState extends State<FeedListPage> {
                         final article = articleState.articles[index];
                         final category = categories.where((c) => c.id == article.feedId).firstOrNull;
 
+                        // Filter by read status
+                        if (_readFilter == 'unread' && article.isRead) {
+                          return const SizedBox.shrink();
+                        }
+                        if (_readFilter == 'read' && !article.isRead) {
+                          return const SizedBox.shrink();
+                        }
+
                         return ArticleCard(
                           article: article,
                           categoryName: category?.name,
                           categoryColor: category != null
                               ? Color(int.parse(category.color.replaceFirst('#', '0xFF')))
                               : null,
-                          onTap: () => context.go('/article/${article.id}'),
+                          onTap: () {
+                            // Mark as read if not already
+                            if (!article.isRead) {
+                              context.read<ArticleBloc>().add(
+                                MarkArticleRead(article.id, true),
+                              );
+                            }
+                            context.go('/article/${article.id}');
+                          },
                           onBookmarkTap: () {
                             context.read<ArticleBloc>().add(
                               MarkArticleFavorite(article.id, !article.isFavorite),

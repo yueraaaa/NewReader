@@ -1,0 +1,467 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1781917942772,
+  "projectRoot": "/Users/zhuliang/code/realreader",
+  "techStack": {
+    "languages": [],
+    "frameworks": [],
+    "packageManager": null,
+    "runtime": null
+  },
+  "build": {
+    "buildCommand": null,
+    "testCommand": null,
+    "lintCommand": null,
+    "devCommand": null,
+    "scripts": {}
+  },
+  "conventions": {
+    "namingStyle": null,
+    "importStyle": null,
+    "testPattern": null,
+    "fileOrganization": null
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [
+      "assets",
+      "docs",
+      "lib",
+      "test"
+    ],
+    "gitBranches": {
+      "defaultBranch": "dev",
+      "branchingStrategy": null
+    }
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "UI": {
+      "path": "UI",
+      "purpose": null,
+      "fileCount": 1,
+      "lastAccessed": 1781917942758,
+      "keyFiles": []
+    },
+    "android": {
+      "path": "android",
+      "purpose": null,
+      "fileCount": 9,
+      "lastAccessed": 1781917942760,
+      "keyFiles": [
+        "build.gradle.kts",
+        "gradle.properties",
+        "gradlew",
+        "gradlew.bat",
+        "local.properties"
+      ]
+    },
+    "assets": {
+      "path": "assets",
+      "purpose": "Static assets",
+      "fileCount": 0,
+      "lastAccessed": 1781917942762,
+      "keyFiles": []
+    },
+    "docs": {
+      "path": "docs",
+      "purpose": "Documentation",
+      "fileCount": 1,
+      "lastAccessed": 1781917942763,
+      "keyFiles": []
+    },
+    "ios": {
+      "path": "ios",
+      "purpose": null,
+      "fileCount": 3,
+      "lastAccessed": 1781917942763,
+      "keyFiles": [
+        "Podfile"
+      ]
+    },
+    "lib": {
+      "path": "lib",
+      "purpose": "Library code",
+      "fileCount": 2,
+      "lastAccessed": 1781917942764,
+      "keyFiles": [
+        "main.dart"
+      ]
+    },
+    "linux": {
+      "path": "linux",
+      "purpose": null,
+      "fileCount": 3,
+      "lastAccessed": 1781917942764,
+      "keyFiles": [
+        "CMakeLists.txt"
+      ]
+    },
+    "macos": {
+      "path": "macos",
+      "purpose": null,
+      "fileCount": 4,
+      "lastAccessed": 1781917942764,
+      "keyFiles": [
+        "Podfile",
+        "Podfile.lock"
+      ]
+    },
+    "test": {
+      "path": "test",
+      "purpose": "Test files",
+      "fileCount": 1,
+      "lastAccessed": 1781917942765,
+      "keyFiles": [
+        "widget_test.dart"
+      ]
+    },
+    "web": {
+      "path": "web",
+      "purpose": null,
+      "fileCount": 3,
+      "lastAccessed": 1781917942766,
+      "keyFiles": [
+        "favicon.png",
+        "index.html",
+        "manifest.json"
+      ]
+    },
+    "windows": {
+      "path": "windows",
+      "purpose": null,
+      "fileCount": 3,
+      "lastAccessed": 1781917942767,
+      "keyFiles": [
+        "CMakeLists.txt"
+      ]
+    },
+    "android/app": {
+      "path": "android/app",
+      "purpose": "Application code",
+      "fileCount": 1,
+      "lastAccessed": 1781917942768,
+      "keyFiles": [
+        "build.gradle.kts"
+      ]
+    },
+    "lib/data": {
+      "path": "lib/data",
+      "purpose": "Data files",
+      "fileCount": 0,
+      "lastAccessed": 1781917942769,
+      "keyFiles": []
+    },
+    "test/data": {
+      "path": "test/data",
+      "purpose": "Data files",
+      "fileCount": 0,
+      "lastAccessed": 1781917942770,
+      "keyFiles": []
+    }
+  },
+  "hotPaths": [
+    {
+      "path": "lib/presentation/pages/desktop/desktop_shell.dart",
+      "accessCount": 225,
+      "lastAccessed": 1781920657956,
+      "type": "file"
+    },
+    {
+      "path": "lib/data/repositories/feed_repository_impl.dart",
+      "accessCount": 34,
+      "lastAccessed": 1781929753390,
+      "type": "file"
+    },
+    {
+      "path": "lib/presentation/widgets/desktop/side_nav_bar.dart",
+      "accessCount": 28,
+      "lastAccessed": 1775914517775,
+      "type": "directory"
+    },
+    {
+      "path": "lib/main.dart",
+      "accessCount": 16,
+      "lastAccessed": 1781929176053,
+      "type": "file"
+    },
+    {
+      "path": "lib/data/datasources/local/feed_local_datasource.dart",
+      "accessCount": 16,
+      "lastAccessed": 1781929709196,
+      "type": "file"
+    },
+    {
+      "path": "lib/data/datasources/remote/supabase_datasource.dart",
+      "accessCount": 16,
+      "lastAccessed": 1781929762151,
+      "type": "file"
+    },
+    {
+      "path": "lib/presentation/pages/desktop/feed_list_page.dart",
+      "accessCount": 14,
+      "lastAccessed": 1775967792588,
+      "type": "file"
+    },
+    {
+      "path": "lib/data/services/sync_service.dart",
+      "accessCount": 13,
+      "lastAccessed": 1781929899161,
+      "type": "file"
+    },
+    {
+      "path": "lib",
+      "accessCount": 12,
+      "lastAccessed": 1775970893270,
+      "type": "directory"
+    },
+    {
+      "path": "lib/core/router/app_router.dart",
+      "accessCount": 12,
+      "lastAccessed": 1775971183209,
+      "type": "file"
+    },
+    {
+      "path": "lib/data/datasources/local/database_helper.dart",
+      "accessCount": 12,
+      "lastAccessed": 1781929664170,
+      "type": "file"
+    },
+    {
+      "path": "lib/presentation/pages/desktop/settings_page.dart",
+      "accessCount": 11,
+      "lastAccessed": 1777350314814,
+      "type": "file"
+    },
+    {
+      "path": "lib/presentation/pages/mobile/article_detail_page.dart",
+      "accessCount": 10,
+      "lastAccessed": 1775870784877,
+      "type": "file"
+    },
+    {
+      "path": "pubspec.yaml",
+      "accessCount": 10,
+      "lastAccessed": 1775968451140,
+      "type": "file"
+    },
+    {
+      "path": "lib/presentation/pages/desktop/help_page.dart",
+      "accessCount": 8,
+      "lastAccessed": 1775903018818,
+      "type": "file"
+    },
+    {
+      "path": "lib/presentation/pages/desktop",
+      "accessCount": 8,
+      "lastAccessed": 1775966771998,
+      "type": "directory"
+    },
+    {
+      "path": "lib/presentation/blocs/article/article_bloc.dart",
+      "accessCount": 8,
+      "lastAccessed": 1781920708224,
+      "type": "file"
+    },
+    {
+      "path": "supabase_schema.sql",
+      "accessCount": 8,
+      "lastAccessed": 1781920780625,
+      "type": "file"
+    },
+    {
+      "path": "lib/data/repositories/auth_repository_impl.dart",
+      "accessCount": 7,
+      "lastAccessed": 1781920656799,
+      "type": "file"
+    },
+    {
+      "path": "lib/data/datasources/local/article_local_datasource.dart",
+      "accessCount": 7,
+      "lastAccessed": 1781920717929,
+      "type": "file"
+    },
+    {
+      "path": "lib/presentation/widgets/mobile/article_card.dart",
+      "accessCount": 6,
+      "lastAccessed": 1775870785242,
+      "type": "file"
+    },
+    {
+      "path": "lib/data/models/feed_model.dart",
+      "accessCount": 6,
+      "lastAccessed": 1781920764425,
+      "type": "file"
+    },
+    {
+      "path": "lib/presentation/blocs/settings/settings_bloc.dart",
+      "accessCount": 6,
+      "lastAccessed": 1781929679159,
+      "type": "file"
+    },
+    {
+      "path": "lib/presentation/pages/mobile/explore_page.dart",
+      "accessCount": 5,
+      "lastAccessed": 1775870769244,
+      "type": "file"
+    },
+    {
+      "path": "lib/data/models/article_model.dart",
+      "accessCount": 5,
+      "lastAccessed": 1781920764372,
+      "type": "file"
+    },
+    {
+      "path": "README.md",
+      "accessCount": 5,
+      "lastAccessed": 1781931061393,
+      "type": "file"
+    },
+    {
+      "path": "lib/presentation/pages/mobile/feed_page.dart",
+      "accessCount": 4,
+      "lastAccessed": 1775870757499,
+      "type": "file"
+    },
+    {
+      "path": "CLAUDE.md",
+      "accessCount": 4,
+      "lastAccessed": 1775877188314,
+      "type": "file"
+    },
+    {
+      "path": "test/widget_test.dart",
+      "accessCount": 4,
+      "lastAccessed": 1775901589385,
+      "type": "file"
+    },
+    {
+      "path": "lib/core/constants/app_colors.dart",
+      "accessCount": 4,
+      "lastAccessed": 1775901835072,
+      "type": "file"
+    },
+    {
+      "path": "lib/data/datasources/local",
+      "accessCount": 4,
+      "lastAccessed": 1775954868841,
+      "type": "directory"
+    },
+    {
+      "path": "lib/presentation/blocs/article/article_event.dart",
+      "accessCount": 4,
+      "lastAccessed": 1781920541249,
+      "type": "file"
+    },
+    {
+      "path": "lib/core/config/app_config.dart",
+      "accessCount": 4,
+      "lastAccessed": 1781920547994,
+      "type": "file"
+    },
+    {
+      "path": "lib/presentation/widgets/mobile/bottom_nav_bar.dart",
+      "accessCount": 3,
+      "lastAccessed": 1775870738279,
+      "type": "file"
+    },
+    {
+      "path": "lib/presentation/widgets/mobile/category_tabs.dart",
+      "accessCount": 3,
+      "lastAccessed": 1775870738467,
+      "type": "file"
+    },
+    {
+      "path": "lib/presentation/pages/mobile/bookmarks_page.dart",
+      "accessCount": 3,
+      "lastAccessed": 1775870785059,
+      "type": "file"
+    },
+    {
+      "path": "",
+      "accessCount": 3,
+      "lastAccessed": 1775896656511,
+      "type": "directory"
+    },
+    {
+      "path": "lib/presentation/blocs/settings/settings_state.dart",
+      "accessCount": 3,
+      "lastAccessed": 1777350290709,
+      "type": "file"
+    },
+    {
+      "path": "lib/presentation/blocs/settings/settings_event.dart",
+      "accessCount": 3,
+      "lastAccessed": 1777350290766,
+      "type": "file"
+    },
+    {
+      "path": "lib/data/models/category_model.dart",
+      "accessCount": 3,
+      "lastAccessed": 1781920528232,
+      "type": "file"
+    },
+    {
+      "path": "lib/data/services/opml_service.dart",
+      "accessCount": 3,
+      "lastAccessed": 1781920573851,
+      "type": "file"
+    },
+    {
+      "path": "lib/data/datasources/local/settings_local_datasource.dart",
+      "accessCount": 3,
+      "lastAccessed": 1781929671770,
+      "type": "file"
+    },
+    {
+      "path": "lib/presentation/pages/mobile/mobile_shell.dart",
+      "accessCount": 2,
+      "lastAccessed": 1775870374482,
+      "type": "file"
+    },
+    {
+      "path": "lib/presentation/pages/mobile/profile_page.dart",
+      "accessCount": 2,
+      "lastAccessed": 1775870798251,
+      "type": "file"
+    },
+    {
+      "path": "lib/presentation/blocs/feed",
+      "accessCount": 2,
+      "lastAccessed": 1775905191216,
+      "type": "directory"
+    },
+    {
+      "path": "lib/domain/repositories/auth_repository.dart",
+      "accessCount": 2,
+      "lastAccessed": 1775955208682,
+      "type": "file"
+    },
+    {
+      "path": "UI/mobile/stitch/slate_serif/DESIGN.md",
+      "accessCount": 1,
+      "lastAccessed": 1775870282233,
+      "type": "file"
+    },
+    {
+      "path": "lib/presentation/widgets/article_card.dart",
+      "accessCount": 1,
+      "lastAccessed": 1775870301540,
+      "type": "file"
+    },
+    {
+      "path": "lib/core/theme/app_theme.dart",
+      "accessCount": 1,
+      "lastAccessed": 1775870320491,
+      "type": "file"
+    },
+    {
+      "path": "lib/presentation/pages/desktop/search_page.dart",
+      "accessCount": 1,
+      "lastAccessed": 1775896673744,
+      "type": "file"
+    }
+  ],
+  "userDirectives": []
+}

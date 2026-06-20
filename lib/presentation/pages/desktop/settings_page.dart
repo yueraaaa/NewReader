@@ -1,10 +1,18 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:path_provider/path_provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
+import '../../../data/services/opml_service.dart';
+import '../../../data/datasources/local/feed_local_datasource.dart';
 import '../../blocs/settings/settings_bloc.dart';
 import '../../blocs/settings/settings_event.dart';
 import '../../blocs/settings/settings_state.dart';
+import '../../blocs/feed/feed_bloc.dart';
+import '../../blocs/feed/feed_event.dart';
 import '../../blocs/auth/auth_bloc.dart';
 import '../../blocs/auth/auth_event.dart';
 import '../../blocs/auth/auth_state.dart';
@@ -142,6 +150,125 @@ class SettingsPage extends StatelessWidget {
 
             const SizedBox(height: AppSpacing.xl),
 
+            // Large Model Settings section
+            _SectionHeader(title: '大模型设置', color: secondaryColor),
+            const SizedBox(height: AppSpacing.md),
+            BlocBuilder<SettingsBloc, SettingsState>(
+              builder: (context, state) {
+                return Container(
+                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? AppColors.darkSurfaceContainerLowest
+                        : AppColors.surfaceContainerLowest,
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _ApiKeyInput(
+                        label: 'API Key',
+                        value: state.llmApiKey,
+                        onChanged: (value) {
+                          context.read<SettingsBloc>().add(UpdateLlmApiKey(value));
+                        },
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                      _ApiKeyInput(
+                        label: 'Base URL',
+                        value: state.llmBaseUrl,
+                        onChanged: (value) {
+                          context.read<SettingsBloc>().add(UpdateLlmBaseUrl(value));
+                        },
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                      _ApiKeyInput(
+                        label: 'Model ID',
+                        value: state.llmModelId,
+                        onChanged: (value) {
+                          context.read<SettingsBloc>().add(UpdateLlmModelId(value));
+                        },
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+                      // Save button
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: state.llmConnectionStatus == LlmConnectionStatus.testing
+                              ? null
+                              : () {
+                                  context.read<SettingsBloc>().add(TestLlmConnection());
+                                },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                          ),
+                          child: state.llmConnectionStatus == LlmConnectionStatus.testing
+                              ? const Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    SizedBox(
+                                      width: 16,
+                                      height: 16,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    SizedBox(width: 8),
+                                    Text('测试中...'),
+                                  ],
+                                )
+                              : const Text('保存并测试连接'),
+                        ),
+                      ),
+                      // Connection status message
+                      if (state.llmConnectionStatus != LlmConnectionStatus.idle) ...[
+                        const SizedBox(height: AppSpacing.sm),
+                        Container(
+                          padding: const EdgeInsets.all(AppSpacing.sm),
+                          decoration: BoxDecoration(
+                            color: state.llmConnectionStatus == LlmConnectionStatus.success
+                                ? Colors.green.withValues(alpha: 0.1)
+                                : Colors.red.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                state.llmConnectionStatus == LlmConnectionStatus.success
+                                    ? Icons.check_circle
+                                    : Icons.error,
+                                color: state.llmConnectionStatus == LlmConnectionStatus.success
+                                    ? Colors.green
+                                    : Colors.red,
+                                size: 18,
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  state.llmConnectionMessage,
+                                  style: TextStyle(
+                                    color: state.llmConnectionStatus == LlmConnectionStatus.success
+                                        ? Colors.green
+                                        : Colors.red,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                );
+              },
+            ),
+
+            const SizedBox(height: AppSpacing.xl),
+
             // API Configuration section
             _SectionHeader(title: 'API 配置', color: secondaryColor),
             const SizedBox(height: AppSpacing.md),
@@ -232,9 +359,7 @@ class SettingsPage extends StatelessWidget {
                     title: '导入 OPML',
                     subtitle: '从其他 RSS 阅读器导入订阅',
                     trailing: OutlinedButton.icon(
-                      onPressed: () {
-                        // TODO: Implement OPML import
-                      },
+                      onPressed: () => _importOpml(context),
                       icon: const Icon(Icons.upload, size: 18),
                       label: const Text('导入'),
                     ),
@@ -244,9 +369,7 @@ class SettingsPage extends StatelessWidget {
                     title: '导出 OPML',
                     subtitle: '备份您的订阅列表',
                     trailing: OutlinedButton.icon(
-                      onPressed: () {
-                        // TODO: Implement OPML export
-                      },
+                      onPressed: () => _exportOpml(context),
                       icon: const Icon(Icons.download, size: 18),
                       label: const Text('导出'),
                     ),
@@ -368,6 +491,105 @@ class SettingsPage extends StatelessWidget {
         return '深色模式';
     }
   }
+
+  Future<void> _importOpml(BuildContext context) async {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['opml', 'xml'],
+      );
+
+      if (result == null || result.files.isEmpty) return;
+
+      final file = File(result.files.single.path!);
+      final content = await file.readAsString();
+
+      final opmlService = OpmlService();
+      final importResult = opmlService.parseOpml(content);
+
+      if (importResult.feeds.isEmpty && importResult.categories.isEmpty) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('OPML 文件为空或格式不正确')),
+          );
+        }
+        return;
+      }
+
+      // Import categories first
+      final feedLocalDatasource = FeedLocalDatasource();
+      for (final category in importResult.categories) {
+        await feedLocalDatasource.insertCategory(category);
+      }
+
+      // Import feeds
+      for (final feed in importResult.feeds) {
+        await feedLocalDatasource.insertFeed(feed);
+      }
+
+      // Refresh feed list
+      if (context.mounted) {
+        context.read<FeedBloc>().add(LoadFeeds());
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              '成功导入 ${importResult.feeds.length} 个订阅源和 ${importResult.categories.length} 个分类',
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('导入失败: $e')),
+        );
+      }
+    }
+  }
+
+  Future<void> _exportOpml(BuildContext context) async {
+    try {
+      final feedLocalDatasource = FeedLocalDatasource();
+      final feeds = await feedLocalDatasource.getAllFeeds();
+      final categories = await feedLocalDatasource.getAllCategories();
+
+      if (feeds.isEmpty) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('没有可导出的订阅源')),
+          );
+        }
+        return;
+      }
+
+      final opmlService = OpmlService();
+      final opmlContent = opmlService.exportToOpml(feeds, categories);
+
+      // Save to temporary file and share
+      final directory = await getTemporaryDirectory();
+      final timestamp = DateTime.now().toIso8601String().replaceAll(':', '-').split('.').first;
+      final file = File('${directory.path}/real_reader_export_$timestamp.opml');
+      await file.writeAsString(opmlContent);
+
+      await Share.shareXFiles(
+        [XFile(file.path)],
+        subject: 'Real Reader 订阅导出',
+      );
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('已导出 ${feeds.length} 个订阅源')),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('导出失败: $e')),
+        );
+      }
+    }
+  }
 }
 
 class _SectionHeader extends StatelessWidget {
@@ -443,13 +665,11 @@ class _ApiKeyInput extends StatefulWidget {
   final String label;
   final String value;
   final ValueChanged<String> onChanged;
-  final bool isPassword;
 
   const _ApiKeyInput({
     required this.label,
     required this.value,
     required this.onChanged,
-    this.isPassword = false,
   });
 
   @override
@@ -458,7 +678,6 @@ class _ApiKeyInput extends StatefulWidget {
 
 class _ApiKeyInputState extends State<_ApiKeyInput> {
   late TextEditingController _controller;
-  bool _obscureText = true;
 
   @override
   void initState() {
@@ -491,7 +710,6 @@ class _ApiKeyInputState extends State<_ApiKeyInput> {
       height: 40,
       child: TextField(
         controller: _controller,
-        obscureText: widget.isPassword && _obscureText,
         onChanged: widget.onChanged,
         style: TextStyle(fontSize: 13, color: textColor),
         decoration: InputDecoration(
@@ -514,20 +732,6 @@ class _ApiKeyInputState extends State<_ApiKeyInput> {
             borderRadius: BorderRadius.circular(8),
             borderSide: BorderSide(color: AppColors.primary, width: 1),
           ),
-          suffixIcon: widget.isPassword
-              ? IconButton(
-                  icon: Icon(
-                    _obscureText ? Icons.visibility_off : Icons.visibility,
-                    size: 18,
-                    color: hintColor,
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      _obscureText = !_obscureText;
-                    });
-                  },
-                )
-              : null,
         ),
       ),
     );
