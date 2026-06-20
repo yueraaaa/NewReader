@@ -301,6 +301,12 @@
       "type": "file"
     },
     {
+      "path": "README.md",
+      "accessCount": 6,
+      "lastAccessed": 1781931607511,
+      "type": "file"
+    },
+    {
       "path": "lib/presentation/pages/mobile/explore_page.dart",
       "accessCount": 5,
       "lastAccessed": 1775870769244,
@@ -310,12 +316,6 @@
       "path": "lib/data/models/article_model.dart",
       "accessCount": 5,
       "lastAccessed": 1781920764372,
-      "type": "file"
-    },
-    {
-      "path": "README.md",
-      "accessCount": 5,
-      "lastAccessed": 1781931061393,
       "type": "file"
     },
     {
