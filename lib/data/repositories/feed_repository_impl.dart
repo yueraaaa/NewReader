@@ -148,10 +148,13 @@ class FeedRepositoryImpl implements FeedRepository {
     // Fetch articles from remote
     final articles = await _rssRemoteDatasource.fetchAndParseArticles(feed.url, id);
 
+    // Load existing articles once and use Set for O(1) lookup
+    final existingArticles = await _localDatasource.getArticlesByFeedId(id);
+    final existingMap = {for (var a in existingArticles) a.id: a};
+
     // Upsert articles, preserving existing read state and userId
     for (final article in articles) {
-      final existingArticles = await _localDatasource.getArticlesByFeedId(id);
-      final existing = existingArticles.where((a) => a.id == article.id).firstOrNull;
+      final existing = existingMap[article.id];
       if (existing != null) {
         // Preserve reading state and userId
         await _localDatasource.insertArticle(
@@ -176,9 +179,7 @@ class FeedRepositoryImpl implements FeedRepository {
   @override
   Future<void> refreshAllFeeds() async {
     final feeds = await _localDatasource.getAllFeeds();
-    for (final feed in feeds) {
-      await refreshFeed(feed.id);
-    }
+    await Future.wait(feeds.map((f) => refreshFeed(f.id)));
   }
 
   @override

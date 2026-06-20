@@ -4,12 +4,20 @@ import 'database_helper.dart';
 class SettingsLocalDatasource {
   Future<Database> get _db => DatabaseHelper.database;
 
+  String? _userId;
+
+  void setUserId(String? userId) {
+    _userId = userId;
+  }
+
+  String _getUserIdOrEmpty() => _userId ?? '';
+
   Future<String?> getSetting(String key) async {
     final db = await _db;
     final maps = await db.query(
       'settings',
-      where: 'key = ?',
-      whereArgs: [key],
+      where: 'key = ? AND user_id = ?',
+      whereArgs: [key, _getUserIdOrEmpty()],
     );
     if (maps.isEmpty) return null;
     return maps.first['value'] as String;
@@ -19,7 +27,7 @@ class SettingsLocalDatasource {
     final db = await _db;
     await db.insert(
       'settings',
-      {'key': key, 'value': value},
+      {'key': key, 'value': value, 'user_id': _getUserIdOrEmpty()},
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }

@@ -1,0 +1,1374 @@
+diff --git a/README.md b/README.md
+index c4d6a80..acc098d 100644
+--- a/README.md
++++ b/README.md
+@@ -1,117 +1,142 @@
+-# NewReader
++# REAL READER
+ 
+-精致、安全的 RSS 阅读器，内置 AI 摘要与翻译、TTS 语音朗读、全文提取、阅读兴趣分析。支持 macOS 15+ 与 iOS 18+。
++一款跨平台 RSS 阅读器，基于 Flutter 构建。集成 AI 翻译/摘要（Minimax）、云端同步（Supabase），采用高端杂志风格的 UI 设计系统。
+ 
+-![Swift](https://img.shields.io/badge/Swift-6.0-FA7343?logo=swift)
+-![macOS](https://img.shields.io/badge/macOS-15%2B-000000?logo=apple)
+-![iOS](https://img.shields.io/badge/iOS-18%2B-000000?logo=apple)
+-![License](https://img.shields.io/badge/license-MIT-blue)
++## 功能特性
+ 
+-[🌐 产品介绍](https://newreader.netlify.app) · [📦 下载最新版](https://github.com/yueraaaa/NewReader/releases/latest) · [📖 使用文档](https://newreader.netlify.app/docs)
++- **RSS 订阅管理** — 添加、编辑、删除、分类管理 RSS 订阅源
++- **文章阅读** — 列表展示、已读/未读标记、收藏、阅读进度记录
++- **OPML 导入/导出** — 标准 OPML 格式，支持从其他阅读器迁移
++- **AI 增强** — 一键翻译成中文、智能摘要、语音朗读
++- **云端同步** — Supabase 实时同步，多设备无缝衔接
++- **第三方登录** — Apple / GitHub / Email 一键登录
++- **无广告 · 无注册限制 · 轻量化**
+ 
+-[English](README_EN.md) · [中文](#-特性)
++## 支持平台
+ 
+----
++- macOS
++- Windows
++- iOS
+ 
+-## ✨ 特性
++## 技术栈
+ 
+-| 特性 | 说明 |
++| 类别 | 技术 |
+ |------|------|
+-| **多格式订阅** | 支持 RSS 2.0、Atom、JSON Feed，自动解析 |
+-| **AI 摘要** | OpenAI 兼容 API，一键生成文章摘要 |
+-| **多语翻译** | 中文、英语、日语、韩语互译 |
+-| **TTS 语音朗读** | Apple 系统语音 + 自定义 TTS API 双引擎，断点续播 |
+-| **全文提取** | 从摘要 Feed 自动拉取完整正文 |
+-| **离线缓存** | 本地缓存文章，断网可读 |
+-| **OPML 导入导出** | 迁移订阅源一键完成 |
+-| **崩溃上报** | 崩溃自动上传 Supabase，邮件实时通知 |
+-| **iCloud 同步** | SwiftData + CloudKit，跨设备自动同步 |
+-| **分类管理** | 新建分类收纳订阅源，可折叠、重命名、删除 |
+-| **工作台分析** | AI 分析阅读兴趣，生成关键词关系图谱 |
+-| **主题切换** | 浅色 / 深色 / 跟随系统，即时生效 |
+-| **键盘导航** | J/K 键浏览文章，⌘F 聚焦搜索，全键盘高效操作 |
+-| **日期分组** | 文章按今天 / 昨天 / 本周自动分组，快速定位 |
+-| **安全优先** | Keychain 加密、WKWebView 沙箱、SSRF 防护、HTML 深度消毒 |
+-
+-## 🔒 安全性
+-
+-- **API Key**：使用 macOS / iOS Keychain 加密存储，明文不落磁盘
+-- **WKWebView**：禁用 JavaScript + Content-Security-Policy，阻止脚本注入
+-- **URL 校验**：协议白名单（仅 http/https）+ 全量私有 IP / IPv6 拦截，防 SSRF
+-- **HTML 消毒**：移除 script / iframe / 事件处理器 / javascript: / base / form / meta refresh
+-- **OPML 限制**：导入文件大小上限 5MB，防内存耗尽
+-- **App Sandbox**：macOS App Sandbox 启用，进程级隔离
+-
+-## 🆕 v1.3.0 更新
+-
+-- 🛡️ **Cloudflare Turnstile** 隐形人机验证（登录 + 每次 AI 调用）
+-- 📱 **每设备每天 5 次** AI 限额（Keychain UUID 标识设备）
+-- 👤 **每账号每天 50 次** AI 限额（保留原行为）
+-- 📊 **billing-watchdog** Edge Function：监控 Supabase 免费额度（80% 警告 / 95% 自动暂停）
+-- 🔄 **ai-proxy 自动恢复**：用量降回阈值后自动取消暂停
+-- 🐛 修复 `stripThinking` 残留 `</think>` 尾巴、KeychainHelper 重复键、`try?` 静默失败、TTS 错误响应泄露
+-- 📖 新文档 [`docs/SECURITY_SETUP.md`](docs/SECURITY_SETUP.md)（维护者部署指南）
+-
+-详见 [`CODE_AUDIT_REPORT.md`](CODE_AUDIT_REPORT.md) 完整审计与修复记录。
+-
+-## 🛠 技术栈
+-
+-Swift 6 · SwiftUI · SwiftData · FeedKit · WKWebView · AVFoundation · Supabase · CloudKit
+-
+-## 🚀 构建
++| 框架 | Flutter 3.x / Dart 3.x |
++| 状态管理 | flutter_bloc |
++| 本地存储 | sqflite (SQLite) |
++| 云端服务 | Supabase |
++| AI 服务 | Minimax API |
++| RSS 解析 | webfeed_revised |
++| 路由 | go_router |
++
++## 快速开始
++
++### 安装依赖
++
++```bash
++flutter pub get
++```
++
++### 运行
+ 
+ ```bash
+ # macOS
+-swift build -c release
+-cp .build/release/NewReaderMac NewReader.app/Contents/MacOS/NewReaderMac
+-open NewReader.app
++flutter run -d macos
++
++# Windows
++flutter run -d windows
++
++# iOS
++flutter run -d iphone
++```
+ 
+-# 或使用打包脚本
+-bash scripts/package-macos.sh
++### 构建
++
++```bash
++flutter build macos
++flutter build ios
++flutter build windows
+ ```
+ 
+-**依赖**：macOS 15+ / iOS 18+，Xcode 16+。
++## 配置 API
+ 
+-### 🔑 本地开发 Secret 配置
++首次使用需要在应用内配置或在环境变量中设置：
+ 
+-`SupabaseURL` / `SupabasePublishableKey` / `FeedbackEmail` 在运行时由 `SecretsLoader` 解析，顺序为：
++| 变量 | 说明 |
++|------|------|
++| `SUPABASE_URL` | Supabase 项目 URL |
++| `SUPABASE_ANON_KEY` | Supabase Anonymous Key |
++| `MINIMAX_API_KEY` | Minimax API Key |
++| `MINIMAX_GROUP_ID` | Minimax Group ID |
+ 
+-1. `Bundle.main.Info.plist`（打包脚本会把 `Sources/NewReaderMac/Secrets.plist` 合并进 bundle 的 Info.plist）
+-2. `~/Library/Application Support/NewReader/secrets.plist`（开发模式用，`swift run` / Xcode debug）
++或在应用内「设置 > API 配置」页面直接输入。
+ 
+-**首次配置**：
++## 登录与同步
+ 
+-```bash
+-# 1. 复制模板
+-cp Sources/NewReaderMac/Secrets.plist.template ~/Library/Application\ Support/NewReader/secrets.plist
++### 使用模式
++
++| 场景 | 是否需要登录 | 云端同步 |
++|------|-------------|---------|
++| 未配置 Supabase | ❌ 不需要 | ❌ 不可用 |
++| 已配置 Supabase | ✅ 需要 | ✅ 可用 |
+ 
+-# 2. 编辑填入真实值
+-open ~/Library/Application\ Support/NewReader/secrets.plist
++### 登录流程
++
++```
++应用启动
++    │
++    ▼
++检查 Supabase 配置是否完整
++    │
++    ├─ 否 → 直接进入主界面（离线模式，所有数据存储在本地）
++    │
++    └─ 是 → 显示登录页面
++              │
++              ▼
++        选择登录方式：Apple / GitHub / 邮箱
++              │
++              ▼
++           登录成功
++              │
++              ▼
++         进入主界面（启用云端同步）
+ ```
+ 
+-打包脚本 `scripts/package-macos.sh` 会在检测到 `Sources/NewReaderMac/Secrets.plist` 时自动镜像一份到用户目录，方便在两种运行方式之间切换。`Secrets.plist` 已在 `.gitignore` 中，不会被提交。
++### 第三方登录
+ 
+-## 📦 安装
++- **Apple 登录**：通过 Supabase OAuth，一键登录
++- **GitHub 登录**：通过 Supabase OAuth，一键登录
++- **邮箱登录**：输入邮箱 + 密码，或注册新账号
+ 
+-### macOS
++### 数据同步
+ 
+-从 [Releases](https://github.com/yueraaaa/NewReader/releases) 下载 `NewReader.dmg`，打开后将 **NewReader.app** 拖入 `/Applications`。
++- **本地优先**：所有操作先写入本地 SQLite，立即响应
++- **静默同步**：后台异步推送到 Supabase，网络错误不影响使用
++- **多设备同步**：登录后，所有设备数据自动保持一致
+ 
+-首次运行时，在 **系统设置 → 隐私与安全性** 中点击「仍要打开」。
++如需多设备同步功能，请在「设置 > API 配置」中配置 Supabase 并登录。
+ 
+-### iOS
++## 项目结构
+ 
+-通过 Xcode 编译安装到设备。打开 `Package.swift`，选择 **NewReaderiOS** target，连接 iPhone 后运行。
++```
++lib/
++├── core/              # 核心：主题、路由、配置
++├── data/              # 数据层：模型、数据源、仓库实现
++├── domain/           # 业务层：实体、仓库接口
++└── presentation/      # 表现层：页面、组件、BLoC
++```
+ 
+-## 🔒 维护者部署
++## 设计系统
+ 
+-如果你是项目维护者（不是终端用户），需要在 Supabase + Cloudflare 部署凭据才能让客户端正常运行：见 [`docs/SECURITY_SETUP.md`](docs/SECURITY_SETUP.md)。
++UI 设计遵循 "The Editorial Sanctuary" 理念：
++- **Newsreader** 衬线体用于文章正文
++- **Inter** 无衬线体用于界面标签
++- 浅色/深色双模式（深色不使用纯黑）
++- 无边框分隔，通过背景色阶区分层级
+ 
+-包括：
+-- Cloudflare Turnstile 凭据（防批量注册）
+-- device-id + per-user 限速（防滥用）
+-- billing-watchdog 调度（防超预算）
++详见 `UI/desktop/stitch/slate_serif/DESIGN.md`
+ 
+-## 📄 许可
++## License
+ 
+ MIT License
+diff --git a/README_EN.md b/README_EN.md
+index eb6764e..61ed09a 100644
+--- a/README_EN.md
++++ b/README_EN.md
+@@ -1,89 +1,142 @@
+-# NewReader
++# REAL READER
+ 
+-A polished, secure RSS reader with AI summarization, multi-language translation, TTS voice reading, and reading-interest analysis. Built with Swift 6 + SwiftUI. Available on macOS 15+ and iOS 18+.
++A cross-platform RSS reader built with Flutter. Integrated with AI translation/summarization (Minimax), cloud sync (Supabase), and a premium magazine-style UI design system.
+ 
+-![Swift](https://img.shields.io/badge/Swift-6.0-FA7343?logo=swift)
+-![macOS](https://img.shields.io/badge/macOS-15%2B-000000?logo=apple)
+-![iOS](https://img.shields.io/badge/iOS-18%2B-000000?logo=apple)
+-![License](https://img.shields.io/badge/license-MIT-blue)
++## Features
+ 
+-[🌐 Website](https://newreader.netlify.app) · [📦 Latest Release](https://github.com/yueraaaa/NewReader/releases/latest) · [📖 Documentation](https://newreader.netlify.app/docs_en)
++- **RSS Subscription Management** — Add, edit, delete, and categorize RSS feeds
++- **Article Reading** — List view, read/unread status, favorites, reading progress tracking
++- **OPML Import/Export** — Standard OPML format, migrate from other readers
++- **AI Enhancement** — One-click translation to Chinese, smart summarization, text-to-speech
++- **Cloud Sync** — Supabase real-time sync, seamless multi-device experience
++- **Third-party Login** — Apple / GitHub / Email one-click login
++- **Ad-free · No registration limits · Lightweight**
+ 
+-[中文 README](README.md) · [English](#-features)
++## Supported Platforms
+ 
+----
++- macOS
++- Windows
++- iOS
+ 
+-## ✨ Features
++## Tech Stack
+ 
+-| Feature | Description |
+-|---------|-------------|
+-| **Multi-format Feeds** | RSS 2.0, Atom, JSON Feed — auto-parsed |
+-| **AI Summarization** | OpenAI-compatible API, one-tap summaries |
+-| **Translation** | Chinese ↔ English / Japanese / Korean |
+-| **TTS Reading** | Apple system voice + custom TTS API, pause & resume |
+-| **Full-text Extraction** | Auto-fetch full articles from summary feeds |
+-| **Offline Cache** | Read cached articles offline |
+-| **OPML Import/Export** | One-click feed migration |
+-| **Crash Reporting** | Auto-upload to Supabase, instant email notification |
+-| **iCloud Sync** | SwiftData + CloudKit, cross-device auto-sync |
+-| **Category Management** | Organize feeds into collapsible, renamable categories |
+-| **Workspace Analysis** | AI-powered reading-interest keyword graph |
+-| **Theme Switching** | Light / Dark / System, instant |
+-| **Keyboard Navigation** | J/K to browse, \u2318F to search, full keyboard control |
+-| **Date Grouping** | Articles grouped by Today / Yesterday / This Week |
+-| **Security First** | Keychain encryption, WKWebView sandbox, SSRF prevention, HTML sanitization |
++| Category | Technology |
++|----------|------------|
++| Framework | Flutter 3.x / Dart 3.x |
++| State Management | flutter_bloc |
++| Local Storage | sqflite (SQLite) |
++| Cloud Service | Supabase |
++| AI Service | Minimax API |
++| RSS Parsing | webfeed_revised |
++| Routing | go_router |
+ 
+-## 🔒 Security
++## Quick Start
+ 
+-- **API Key**: Encrypted in macOS/iOS Keychain, never in plaintext
+-- **WKWebView**: JavaScript disabled + Content-Security-Policy
+-- **URL Validation**: HTTPS/HTTP only, full private IP / IPv6 blocking (SSRF prevention)
+-- **HTML Sanitization**: Strips script, iframe, event handlers, javascript:, base, form, meta refresh
+-- **OPML Limit**: 5 MB max file size on import
+-- **App Sandbox**: macOS App Sandbox enabled, process-level isolation
++### Install Dependencies
+ 
+-## 🆕 What's new in v1.3.0
++```bash
++flutter pub get
++```
+ 
+-- 🛡️ **Cloudflare Turnstile** invisible CAPTCHA (login + every AI call)
+-- 📱 **Per-device rate limit**: 5 AI calls/day/device (Keychain UUID)
+-- 👤 **Per-user rate limit**: 50 AI calls/day (existing)
+-- 📊 **billing-watchdog** Edge Function: monitors Supabase free tier (80% warn / 95% hard-stop)
+-- 🔄 **ai-proxy auto-resume** when usage drops below threshold
+-- 🐛 Fix `stripThinking` leaking `</think>`, KeychainHelper duplicate key, `try?` silent failure, TTS error body leak
+-- 📖 New doc [`docs/SECURITY_SETUP.md`](docs/SECURITY_SETUP.md) — operator deployment guide
++### Run
+ 
+-Full audit trail in [`CODE_AUDIT_REPORT.md`](CODE_AUDIT_REPORT.md).
++```bash
++# macOS
++flutter run -d macos
+ 
+-## 🛠 Tech Stack
++# Windows
++flutter run -d windows
+ 
+-Swift 6 \u00b7 SwiftUI \u00b7 SwiftData \u00b7 FeedKit \u00b7 WKWebView \u00b7 AVFoundation \u00b7 Supabase \u00b7 CloudKit
++# iOS
++flutter run -d iphone
++```
+ 
+-## 🚀 Build
++### Build
+ 
+ ```bash
+-# macOS
+-swift build -c release
+-cp .build/release/NewReaderMac NewReader.app/Contents/MacOS/NewReaderMac
+-open NewReader.app
++flutter build macos
++flutter build ios
++flutter build windows
++```
++
++## API Configuration
++
++Configure on first use via in-app settings or environment variables:
++
++| Variable | Description |
++|----------|-------------|
++| `SUPABASE_URL` | Supabase Project URL |
++| `SUPABASE_ANON_KEY` | Supabase Anonymous Key |
++| `MINIMAX_API_KEY` | Minimax API Key |
++| `MINIMAX_GROUP_ID` | Minimax Group ID |
++
++Or configure directly in the app at「Settings > API Configuration」.
+ 
+-# Or use the packaging script
+-bash scripts/package-macos.sh
++## Login & Sync
++
++### Usage Modes
++
++| Scenario | Login Required | Cloud Sync |
++|----------|---------------|------------|
++| Supabase not configured | ❌ No | ❌ Unavailable |
++| Supabase configured | ✅ Yes | ✅ Available |
++
++### Login Flow
++
++```
++App Launch
++    │
++    ▼
++Check if Supabase is configured
++    │
++    ├─ No → Enter main interface (offline mode, all data stored locally)
++    │
++    └─ Yes → Show login page
++              │
++              ▼
++        Choose login method: Apple / GitHub / Email
++              │
++              ▼
++           Login success
++              │
++              ▼
++         Enter main interface (cloud sync enabled)
+ ```
+ 
+-**Requirements**: macOS 15+ / iOS 18+, Xcode 16+.
++### Third-party Login
+ 
+-## 📦 Installation
++- **Apple Login**: Via Supabase OAuth, one-click sign-in
++- **GitHub Login**: Via Supabase OAuth, one-click sign-in
++- **Email Login**: Enter email + password, or register a new account
+ 
+-### macOS
++### Data Sync
+ 
+-Download `NewReader.dmg` from [Releases](https://github.com/yueraaaa/NewReader/releases), open it, and drag **NewReader.app** into `/Applications`.
++- **Local-first**: All operations write to local SQLite first, immediate response
++- **Silent sync**: Background async push to Supabase, network errors don't affect local usage
++- **Multi-device sync**: After login, data automatically stays in sync across all devices
++
++To enable multi-device sync, configure Supabase in「Settings > API Configuration」and log in.
++
++## Project Structure
++
++```
++lib/
++├── core/              # Core: theme, routing, configuration
++├── data/              # Data layer: models, datasources, repository implementations
++├── domain/           # Business layer: entities, repository interfaces
++└── presentation/      # Presentation layer: pages, widgets, BLoCs
++```
+ 
+-On first launch, go to **System Settings → Privacy & Security** and click "Open Anyway".
++## Design System
+ 
+-### iOS
++UI design follows "The Editorial Sanctuary" philosophy:
++- **Newsreader** serif font for article body text
++- **Inter** sans-serif font for UI labels
++- Light/dark dual mode (dark mode doesn't use pure black)
++- No borders, differentiate layers through background color shades
+ 
+-Build and install via Xcode. Open `Package.swift`, select the **NewReaderiOS** target, connect your iPhone, and run.
++See `UI/desktop/stitch/slate_serif/DESIGN.md` for details.
+ 
+-## 📄 License
++## License
+ 
+ MIT License
+diff --git a/lib/data/datasources/local/database_helper.dart b/lib/data/datasources/local/database_helper.dart
+new file mode 100644
+index 0000000..2b7eeea
+--- /dev/null
++++ b/lib/data/datasources/local/database_helper.dart
+@@ -0,0 +1,147 @@
++import 'package:sqflite/sqflite.dart';
++import 'package:path/path.dart';
++
++class DatabaseHelper {
++  static const _databaseName = 'real_reader.db';
++  static const _databaseVersion = 2;
++
++  static Database? _database;
++
++  static Future<Database> get database async {
++    _database ??= await _initDatabase();
++    return _database!;
++  }
++
++  static Future<Database> _initDatabase() async {
++    final dbPath = await getDatabasesPath();
++    final path = join(dbPath, _databaseName);
++
++    return await openDatabase(
++      path,
++      version: _databaseVersion,
++      onCreate: _onCreate,
++      onUpgrade: _onUpgrade,
++    );
++  }
++
++  static Future<void> _onCreate(Database db, int version) async {
++    await db.execute('''
++      CREATE TABLE categories (
++        id TEXT PRIMARY KEY,
++        name TEXT NOT NULL,
++        color TEXT NOT NULL,
++        sort_order INTEGER DEFAULT 0,
++        user_id TEXT DEFAULT '',
++        is_deleted INTEGER DEFAULT 0,
++        created_at TEXT NOT NULL,
++        updated_at TEXT NOT NULL
++      )
++    ''');
++
++    await db.execute('''
++      CREATE TABLE feeds (
++        id TEXT PRIMARY KEY,
++        title TEXT NOT NULL,
++        url TEXT NOT NULL,
++        description TEXT,
++        icon_url TEXT,
++        category_id TEXT REFERENCES categories(id),
++        user_id TEXT DEFAULT '',
++        is_deleted INTEGER DEFAULT 0,
++        created_at TEXT NOT NULL,
++        updated_at TEXT NOT NULL
++      )
++    ''');
++
++    await db.execute('''
++      CREATE TABLE articles (
++        id TEXT PRIMARY KEY,
++        feed_id TEXT NOT NULL REFERENCES feeds(id),
++        title TEXT NOT NULL,
++        link TEXT NOT NULL,
++        description TEXT,
++        content TEXT,
++        author TEXT,
++        image_url TEXT,
++        published_at TEXT,
++        is_read INTEGER DEFAULT 0,
++        is_favorite INTEGER DEFAULT 0,
++        read_progress REAL DEFAULT 0,
++        user_id TEXT DEFAULT '',
++        is_deleted INTEGER DEFAULT 0,
++        created_at TEXT NOT NULL,
++        updated_at TEXT NOT NULL
++      )
++    ''');
++
++    await db.execute('''
++      CREATE TABLE settings (
++        key TEXT NOT NULL,
++        value TEXT NOT NULL,
++        user_id TEXT DEFAULT '',
++        PRIMARY KEY (key, user_id)
++      )
++    ''');
++
++    await db.execute('''
++      CREATE TABLE sync_metadata (
++        table_name TEXT PRIMARY KEY,
++        last_synced_at TEXT
++      )
++    ''');
++
++    // Indexes for performance
++    await db.execute(
++        'CREATE INDEX idx_articles_feed_id ON articles(feed_id)');
++    await db.execute(
++        'CREATE INDEX idx_articles_published_at ON articles(published_at)');
++    await db.execute(
++        'CREATE INDEX idx_feeds_category_id ON feeds(category_id)');
++    // Index for user isolation queries
++    await db.execute(
++        'CREATE INDEX idx_feeds_user_id ON feeds(user_id)');
++    await db.execute(
++        'CREATE INDEX idx_articles_user_id ON articles(user_id)');
++    await db.execute(
++        'CREATE INDEX idx_categories_user_id ON categories(user_id)');
++  }
++
++  static Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
++    if (oldVersion < 2) {
++      // Migration from v1 to v2: add user_id column (idempotent)
++      await _addColumnIfNotExists(db, 'feeds', 'user_id', 'TEXT DEFAULT ""');
++      await _addColumnIfNotExists(db, 'articles', 'user_id', 'TEXT DEFAULT ""');
++      await _addColumnIfNotExists(db, 'categories', 'user_id', 'TEXT DEFAULT ""');
++      await _addColumnIfNotExists(db, 'settings', 'user_id', 'TEXT DEFAULT ""');
++
++      await db.execute('CREATE INDEX IF NOT EXISTS idx_feeds_user_id ON feeds(user_id)');
++      await db.execute('CREATE INDEX IF NOT EXISTS idx_articles_user_id ON articles(user_id)');
++      await db.execute('CREATE INDEX IF NOT EXISTS idx_categories_user_id ON categories(user_id)');
++    }
++  }
++
++  /// Helper to add column only if it doesn't exist (idempotent migration)
++  static Future<void> _addColumnIfNotExists(
++    Database db,
++    String table,
++    String column,
++    String typeAndDefault,
++  ) async {
++    try {
++      await db.execute('ALTER TABLE $table ADD COLUMN $column $typeAndDefault');
++    } on DatabaseException catch (e) {
++      // Column already exists - ignore error
++      if (!e.toString().contains('duplicate column name')) {
++        rethrow;
++      }
++    }
++  }
++
++  static Future<void> close() async {
++    final db = _database;
++    if (db != null) {
++      await db.close();
++      _database = null;
++    }
++  }
++}
+diff --git a/lib/data/datasources/local/feed_local_datasource.dart b/lib/data/datasources/local/feed_local_datasource.dart
+new file mode 100644
+index 0000000..4afc668
+--- /dev/null
++++ b/lib/data/datasources/local/feed_local_datasource.dart
+@@ -0,0 +1,163 @@
++import 'package:sqflite/sqflite.dart';
++import '../../models/feed_model.dart';
++import '../../models/article_model.dart';
++import '../../models/category_model.dart';
++import 'database_helper.dart';
++
++class FeedLocalDatasource {
++  Future<Database> get _db => DatabaseHelper.database;
++
++  String? _userId;
++
++  void setUserId(String? userId) {
++    _userId = userId;
++  }
++
++  String _getUserIdOrEmpty() => _userId ?? '';
++
++  // Feed methods
++  Future<List<FeedModel>> getAllFeeds() async {
++    final db = await _db;
++    final maps = await db.query(
++      'feeds',
++      where: 'is_deleted = ? AND user_id = ?',
++      whereArgs: [0, _getUserIdOrEmpty()],
++      orderBy: 'title ASC',
++    );
++    return maps.map((m) => FeedModel.fromMap(m)).toList();
++  }
++
++  Future<List<FeedModel>> getFeedsByCategory(String categoryId) async {
++    final db = await _db;
++    final maps = await db.query(
++      'feeds',
++      where: 'category_id = ? AND is_deleted = ? AND user_id = ?',
++      whereArgs: [categoryId, 0, _getUserIdOrEmpty()],
++      orderBy: 'title ASC',
++    );
++    return maps.map((m) => FeedModel.fromMap(m)).toList();
++  }
++
++  Future<FeedModel?> getFeedById(String id) async {
++    final db = await _db;
++    final maps = await db.query(
++      'feeds',
++      where: 'id = ?',
++      whereArgs: [id],
++    );
++    if (maps.isEmpty) return null;
++    return FeedModel.fromMap(maps.first);
++  }
++
++  Future<void> insertFeed(FeedModel feed) async {
++    final db = await _db;
++    await db.insert(
++      'feeds',
++      feed.toMap(),
++      conflictAlgorithm: ConflictAlgorithm.replace,
++    );
++  }
++
++  Future<void> updateFeed(FeedModel feed) async {
++    final db = await _db;
++    await db.update(
++      'feeds',
++      feed.toMap(),
++      where: 'id = ?',
++      whereArgs: [feed.id],
++    );
++  }
++
++  Future<void> deleteFeed(String id) async {
++    final db = await _db;
++    await db.update(
++      'feeds',
++      {'is_deleted': 1, 'updated_at': DateTime.now().toIso8601String()},
++      where: 'id = ?',
++      whereArgs: [id],
++    );
++  }
++
++  // Category methods
++  Future<List<CategoryModel>> getAllCategories() async {
++    final db = await _db;
++    final maps = await db.query(
++      'categories',
++      where: 'is_deleted = ? AND user_id = ?',
++      whereArgs: [0, _getUserIdOrEmpty()],
++      orderBy: 'sort_order ASC, name ASC',
++    );
++    return maps.map((m) => CategoryModel.fromMap(m)).toList();
++  }
++
++  Future<CategoryModel?> getCategoryById(String id) async {
++    final db = await _db;
++    final maps = await db.query(
++      'categories',
++      where: 'id = ?',
++      whereArgs: [id],
++    );
++    if (maps.isEmpty) return null;
++    return CategoryModel.fromMap(maps.first);
++  }
++
++  Future<void> insertCategory(CategoryModel category) async {
++    final db = await _db;
++    await db.insert(
++      'categories',
++      category.toMap(),
++      conflictAlgorithm: ConflictAlgorithm.replace,
++    );
++  }
++
++  Future<void> updateCategory(CategoryModel category) async {
++    final db = await _db;
++    await db.update(
++      'categories',
++      category.toMap(),
++      where: 'id = ?',
++      whereArgs: [category.id],
++    );
++  }
++
++  Future<void> deleteCategory(String id) async {
++    final db = await _db;
++    await db.update(
++      'categories',
++      {'is_deleted': 1, 'updated_at': DateTime.now().toIso8601String()},
++      where: 'id = ?',
++      whereArgs: [id],
++    );
++  }
++
++  // Article methods
++  Future<void> insertArticle(ArticleModel article) async {
++    final db = await _db;
++    await db.insert(
++      'articles',
++      article.toMap(),
++      conflictAlgorithm: ConflictAlgorithm.replace,
++    );
++  }
++
++  Future<List<ArticleModel>> getArticlesByFeedId(String feedId) async {
++    final db = await _db;
++    final maps = await db.query(
++      'articles',
++      where: 'feed_id = ? AND is_deleted = ? AND user_id = ?',
++      whereArgs: [feedId, 0, _getUserIdOrEmpty()],
++      orderBy: 'published_at DESC',
++    );
++    return maps.map((m) => ArticleModel.fromMap(m)).toList();
++  }
++
++  Future<void> softDeleteArticlesByFeedId(String feedId) async {
++    final db = await _db;
++    await db.update(
++      'articles',
++      {'is_deleted': 1, 'updated_at': DateTime.now().toIso8601String()},
++      where: 'feed_id = ?',
++      whereArgs: [feedId],
++    );
++  }
++}
+diff --git a/lib/data/datasources/remote/supabase_datasource.dart b/lib/data/datasources/remote/supabase_datasource.dart
+new file mode 100644
+index 0000000..5b1e6de
+--- /dev/null
++++ b/lib/data/datasources/remote/supabase_datasource.dart
+@@ -0,0 +1,167 @@
++import 'dart:async';
++import 'package:supabase_flutter/supabase_flutter.dart';
++
++class SupabaseDatasource {
++  final SupabaseClient _client;
++
++  SupabaseDatasource(this._client);
++
++  String? get _userId => _client.auth.currentUser?.id;
++
++  String? getCurrentUserId() => _userId;
++
++  // Auth methods
++  static const _oauthTimeout = Duration(seconds: 120);
++
++  Future<User?> getCurrentUser() async => _client.auth.currentUser;
++
++  Stream<User?> get authStateChanges =>
++      _client.auth.onAuthStateChange.map((event) => event.session?.user);
++
++  Future<User> signInWithApple() async {
++    await _client.auth.signInWithOAuth(
++      OAuthProvider.apple,
++      redirectTo: 'realreader://login-callback',
++    );
++
++    try {
++      // Wait for the auth state to change to signed in
++      final stream = _client.auth.onAuthStateChange.timeout(_oauthTimeout);
++      await for (final authState in stream) {
++        if (authState.session?.user != null) {
++          return authState.session!.user;
++        }
++      }
++    } on TimeoutException {
++      // OAuth timed out, user likely closed the browser
++    }
++
++    // Fallback: check current user after OAuth flow completes
++    final user = _client.auth.currentUser;
++    if (user == null) {
++      throw Exception('Apple sign in failed');
++    }
++    return user;
++  }
++
++  Future<User> signInWithGithub() async {
++    await _client.auth.signInWithOAuth(
++      OAuthProvider.github,
++      redirectTo: 'realreader://login-callback',
++    );
++
++    try {
++      // Wait for the auth state to change to signed in
++      final stream = _client.auth.onAuthStateChange.timeout(_oauthTimeout);
++      await for (final authState in stream) {
++        if (authState.session?.user != null) {
++          return authState.session!.user;
++        }
++      }
++    } on TimeoutException {
++      // OAuth timed out, user likely closed the browser
++    }
++
++    // Fallback: check current user after OAuth flow completes
++    final user = _client.auth.currentUser;
++    if (user == null) {
++      throw Exception('GitHub sign in failed');
++    }
++    return user;
++  }
++
++  Future<User> signInWithEmail(String email, String password) async {
++    final response = await _client.auth.signInWithPassword(
++      email: email,
++      password: password,
++    );
++    if (response.user == null) {
++      throw Exception('Email sign in failed');
++    }
++    return response.user!;
++  }
++
++  Future<User> signUpWithEmail(String email, String password) async {
++    final response = await _client.auth.signUp(
++      email: email,
++      password: password,
++    );
++    if (response.user == null) {
++      throw Exception('Sign up failed');
++    }
++    return response.user!;
++  }
++
++  Future<void> signOut() async => await _client.auth.signOut();
++
++  // Remote CRUD - filtered by authenticated user's userId
++  Future<List<Map<String, dynamic>>> getFeeds(String? since) async {
++    final userId = _userId;
++    if (userId == null) return [];
++
++    var query = _client.from('feeds').select()
++        .eq('user_id', userId);
++    if (since != null) {
++      query = query.gte('updated_at', since);
++    }
++    return await query;
++  }
++
++  Future<void> upsertFeed(Map<String, dynamic> feed) async {
++    await _client.from('feeds').upsert(feed);
++  }
++
++  Future<List<Map<String, dynamic>>> getArticles(String? since) async {
++    final userId = _userId;
++    if (userId == null) return [];
++
++    var query = _client.from('articles').select()
++        .eq('user_id', userId);
++    if (since != null) {
++      query = query.gte('updated_at', since);
++    }
++    return await query;
++  }
++
++  Future<void> upsertArticle(Map<String, dynamic> article) async {
++    await _client.from('articles').upsert(article);
++  }
++
++  Future<List<Map<String, dynamic>>> getCategories(String? since) async {
++    final userId = _userId;
++    if (userId == null) return [];
++
++    var query = _client.from('categories').select()
++        .eq('user_id', userId);
++    if (since != null) {
++      query = query.gte('updated_at', since);
++    }
++    return await query;
++  }
++
++  Future<void> upsertCategory(Map<String, dynamic> category) async {
++    await _client.from('categories').upsert(category);
++  }
++
++  Future<Map<String, dynamic>?> getSetting(String key) async {
++    final userId = _userId;
++    if (userId == null) return null;
++    final result = await _client
++        .from('settings')
++        .select()
++        .eq('user_id', userId)
++        .eq('key', key)
++        .maybeSingle();
++    return result;
++  }
++
++  Future<void> setSetting(String key, String value) async {
++    final userId = _userId;
++    if (userId == null) return;
++    await _client.from('settings').upsert({
++      'key': key,
++      'value': value,
++      'user_id': userId,
++    });
++  }
++}
+diff --git a/lib/data/repositories/feed_repository_impl.dart b/lib/data/repositories/feed_repository_impl.dart
+new file mode 100644
+index 0000000..a3877e7
+--- /dev/null
++++ b/lib/data/repositories/feed_repository_impl.dart
+@@ -0,0 +1,265 @@
++import 'package:uuid/uuid.dart';
++import '../../domain/repositories/feed_repository.dart';
++import '../datasources/local/feed_local_datasource.dart';
++import '../datasources/remote/rss_remote_datasource.dart';
++import '../datasources/remote/supabase_datasource.dart';
++import '../models/feed_model.dart';
++import '../models/category_model.dart';
++import '../services/sync_service.dart';
++
++class FeedRepositoryImpl implements FeedRepository {
++  final FeedLocalDatasource _localDatasource;
++  final RssRemoteDatasource _rssRemoteDatasource;
++  final SupabaseDatasource? _supabaseDatasource;
++  final SyncService? _syncService;
++  final Uuid _uuid;
++
++  FeedRepositoryImpl({
++    FeedLocalDatasource? localDatasource,
++    RssRemoteDatasource? rssRemoteDatasource,
++    SupabaseDatasource? supabaseDatasource,
++    SyncService? syncService,
++    Uuid? uuid,
++  })  : _localDatasource = localDatasource ?? FeedLocalDatasource(),
++        _rssRemoteDatasource = rssRemoteDatasource ?? RssRemoteDatasource(),
++        _supabaseDatasource = supabaseDatasource,
++        _syncService = syncService,
++        _uuid = uuid ?? const Uuid();
++
++  bool get _isLoggedIn =>
++      _supabaseDatasource != null && _syncService != null;
++
++  @override
++  void setUserId(String? userId) {
++    _localDatasource.setUserId(userId);
++  }
++
++  Future<void> _syncToCloud() async {
++    if (!_isLoggedIn) return;
++    try {
++      final userId = _supabaseDatasource?.getCurrentUserId();
++      _syncService!.setUserId(userId);
++      await _syncService!.syncAll();
++    } catch (e) {
++      // Silently fail - local operations should not be blocked by sync failures
++      // TODO: Use proper logging (e.g., dart:developer) in production
++    }
++  }
++
++  @override
++  Future<List<FeedModel>> getFeeds() async {
++    return _localDatasource.getAllFeeds();
++  }
++
++  @override
++  Future<List<FeedModel>> getFeedsByCategory(String categoryId) async {
++    return _localDatasource.getFeedsByCategory(categoryId);
++  }
++
++  @override
++  Future<FeedModel?> getFeedById(String id) async {
++    return _localDatasource.getFeedById(id);
++  }
++
++  @override
++  Future<void> addFeed(String url, {String? categoryId}) async {
++    final now = DateTime.now();
++    final feedId = _uuid.v4();
++    final userId = _supabaseDatasource?.getCurrentUserId() ?? '';
++
++    // First insert a placeholder feed
++    final placeholderFeed = FeedModel(
++      id: feedId,
++      title: 'Loading...',
++      url: url,
++      description: null,
++      iconUrl: null,
++      categoryId: categoryId,
++      userId: userId,
++      isDeleted: false,
++      createdAt: now,
++      updatedAt: now,
++    );
++    await _localDatasource.insertFeed(placeholderFeed);
++
++    // Fetch articles and feed info from remote
++    try {
++      final articles = await _rssRemoteDatasource.fetchAndParseArticles(url, feedId);
++      final feedInfo = await _rssRemoteDatasource.fetchRssFeed(url);
++
++      // Use RSS feed title as the feed title
++      String feedTitle = feedInfo.title ?? 'Untitled Feed';
++      if (feedTitle.isEmpty) {
++        feedTitle = 'Untitled Feed';
++      }
++
++      // Save articles with userId (skip existing to preserve read state)
++      for (final article in articles) {
++        final existing = await _localDatasource.getFeedById(article.id);
++        if (existing == null) {
++          await _localDatasource.insertArticle(article.copyWith(userId: userId));
++        }
++      }
++
++      // Update feed with actual title from RSS feed
++      await _localDatasource.updateFeed(
++        placeholderFeed.copyWith(
++          title: feedTitle,
++          description: feedInfo.description,
++          iconUrl: feedInfo.image?.url,
++          updatedAt: DateTime.now(),
++        ),
++      );
++    } catch (e) {
++      // Update placeholder to show error state
++      await _localDatasource.updateFeed(
++        placeholderFeed.copyWith(
++          title: 'Failed to load',
++          updatedAt: DateTime.now(),
++        ),
++      );
++      rethrow;
++    }
++
++    // Sync to cloud
++    await _syncToCloud();
++  }
++
++  @override
++  Future<void> updateFeed(FeedModel feed) async {
++    await _localDatasource.updateFeed(feed);
++    await _syncToCloud();
++  }
++
++  @override
++  Future<void> deleteFeed(String id) async {
++    // Soft delete the feed
++    await _localDatasource.deleteFeed(id);
++    // Soft delete all articles in the feed
++    await _localDatasource.softDeleteArticlesByFeedId(id);
++    await _syncToCloud();
++  }
++
++  @override
++  Future<void> refreshFeed(String id) async {
++    final feed = await _localDatasource.getFeedById(id);
++    if (feed == null) return;
++
++    // Fetch articles from remote
++    final articles = await _rssRemoteDatasource.fetchAndParseArticles(feed.url, id);
++
++    // Upsert articles, preserving existing read state and userId
++    for (final article in articles) {
++      final existingArticles = await _localDatasource.getArticlesByFeedId(id);
++      final existing = existingArticles.where((a) => a.id == article.id).firstOrNull;
++      if (existing != null) {
++        // Preserve reading state and userId
++        await _localDatasource.insertArticle(
++          article.copyWith(
++            isRead: existing.isRead,
++            isFavorite: existing.isFavorite,
++            readProgress: existing.readProgress,
++            userId: existing.userId,
++          ),
++        );
++      } else {
++        await _localDatasource.insertArticle(article.copyWith(userId: feed.userId));
++      }
++    }
++
++    // Update feed's updatedAt
++    await _localDatasource.updateFeed(
++      feed.copyWith(updatedAt: DateTime.now()),
++    );
++  }
++
++  @override
++  Future<void> refreshAllFeeds() async {
++    final feeds = await _localDatasource.getAllFeeds();
++    for (final feed in feeds) {
++      await refreshFeed(feed.id);
++    }
++  }
++
++  @override
++  Future<List<CategoryModel>> getCategories() async {
++    return _localDatasource.getAllCategories();
++  }
++
++  @override
++  Future<void> addCategory(String name, String color) async {
++    final now = DateTime.now();
++    final userId = _supabaseDatasource?.getCurrentUserId() ?? '';
++    final category = CategoryModel(
++      id: _uuid.v4(),
++      name: name,
++      color: color,
++      sortOrder: 0,
++      userId: userId,
++      isDeleted: false,
++      createdAt: now,
++      updatedAt: now,
++    );
++    await _localDatasource.insertCategory(category);
++    await _syncToCloud();
++  }
++
++  @override
++  Future<void> updateCategory(CategoryModel category) async {
++    await _localDatasource.updateCategory(category);
++    await _syncToCloud();
++  }
++
++  @override
++  Future<void> updateFeedFields(String feedId, {String? title, String? categoryId}) async {
++    final feed = await _localDatasource.getFeedById(feedId);
++    if (feed == null) return;
++    final updated = feed.copyWith(
++      title: title ?? feed.title,
++      categoryId: categoryId,
++      updatedAt: DateTime.now(),
++    );
++    await _localDatasource.updateFeed(updated);
++    await _syncToCloud();
++  }
++
++  @override
++  Future<void> updateCategoryFields(String categoryId, String name) async {
++    final categories = await _localDatasource.getAllCategories();
++    final category = categories.where((c) => c.id == categoryId).firstOrNull;
++    if (category == null) return;
++    final updated = category.copyWith(name: name, updatedAt: DateTime.now());
++    await _localDatasource.updateCategory(updated);
++    await _syncToCloud();
++  }
++
++  @override
++  Future<void> deleteCategory(String id) async {
++    // Move feeds in this category to uncategorized
++    final uncategorizedCategories = await _localDatasource.getAllCategories();
++    final uncategorized = uncategorizedCategories.where((c) => c.name == '未分类').firstOrNull;
++    if (uncategorized != null) {
++      final feedsInCategory = await _localDatasource.getFeedsByCategory(id);
++      for (final feed in feedsInCategory) {
++        await _localDatasource.updateFeed(
++          feed.copyWith(categoryId: uncategorized.id, updatedAt: DateTime.now()),
++        );
++      }
++    }
++    await _localDatasource.deleteCategory(id);
++    await _syncToCloud();
++  }
++
++  /// Pull remote data from cloud and merge with local
++  Future<void> pullFromCloud() async {
++    if (!_isLoggedIn) return;
++    try {
++      final userId = _supabaseDatasource?.getCurrentUserId();
++      _syncService!.setUserId(userId);
++      await _syncService!.syncAll();
++    } catch (e) {
++      // Silently fail - local operations should not be blocked by sync failures
++      // TODO: Use proper logging (e.g., dart:developer) in production
++    }
++  }
++}
+diff --git a/lib/data/services/sync_service.dart b/lib/data/services/sync_service.dart
+new file mode 100644
+index 0000000..93435bb
+--- /dev/null
++++ b/lib/data/services/sync_service.dart
+@@ -0,0 +1,165 @@
++import 'package:sqflite/sqflite.dart';
++import '../datasources/remote/supabase_datasource.dart';
++
++class SyncService {
++  final SupabaseDatasource _remoteDatasource;
++  final Database _localDb;
++
++  SyncService(this._remoteDatasource, this._localDb);
++
++  // Get last sync time for a table from sync_metadata
++  Future<DateTime?> _getLastSyncTime(String table) async {
++    final result = await _localDb.query(
++      'sync_metadata',
++      where: 'table_name = ?',
++      whereArgs: [table],
++    );
++    if (result.isEmpty) return null;
++    return DateTime.parse(result.first['last_synced_at'] as String);
++  }
++
++  String? _userId;
++
++  void setUserId(String? userId) {
++    _userId = userId;
++  }
++
++  // Filter conditions for multi-tenant queries
++  String _userIdWhere(String column) =>
++      _userId != null ? ' AND $column = ?' : '';
++  List<dynamic> _userIdArgs() =>
++      _userId != null ? [_userId!] : [];
++
++  // Update last sync time for a table
++  Future<void> _updateLastSyncTime(String table, DateTime syncTime) async {
++    await _localDb.insert(
++      'sync_metadata',
++      {'table_name': table, 'last_synced_at': syncTime.toIso8601String()},
++      conflictAlgorithm: ConflictAlgorithm.replace,
++    );
++  }
++
++  // Fetch remote changes since last sync
++  Future<List<Map<String, dynamic>>> getChangesSince(
++    String table,
++    DateTime? lastSync,
++  ) async {
++    final since = lastSync?.toIso8601String();
++    switch (table) {
++      case 'feeds':
++        return await _remoteDatasource.getFeeds(since);
++      case 'articles':
++        return await _remoteDatasource.getArticles(since);
++      case 'categories':
++        return await _remoteDatasource.getCategories(since);
++      default:
++        return [];
++    }
++  }
++
++  // Push local changes to remote
++  Future<void> pushChanges(
++    String table,
++    List<Map<String, dynamic>> localChanges,
++  ) async {
++    for (final change in localChanges) {
++      switch (table) {
++        case 'feeds':
++          await _remoteDatasource.upsertFeed(change);
++          break;
++        case 'articles':
++          await _remoteDatasource.upsertArticle(change);
++          break;
++        case 'categories':
++          await _remoteDatasource.upsertCategory(change);
++          break;
++      }
++    }
++  }
++
++  // Apply remote changes to local DB with last-write-wins conflict resolution
++  // Remote changes are already filtered by user_id from SupabaseDatasource
++  Future<void> _applyRemoteChanges(
++    String table,
++    List<Map<String, dynamic>> remoteChanges,
++  ) async {
++    for (final remoteChange in remoteChanges) {
++      final remoteUpdatedAt = DateTime.parse(remoteChange['updated_at'] as String);
++
++      // Check if local record exists (filtered by user_id)
++      final userWhere = _userIdWhere('user_id');
++      final userArgs = _userIdArgs();
++      final localRecords = await _localDb.query(
++        table,
++        where: 'id = ?$userWhere',
++        whereArgs: [remoteChange['id'], ...userArgs],
++      );
++
++      if (localRecords.isEmpty) {
++        // No local record, insert remote
++        await _localDb.insert(table, remoteChange);
++      } else {
++        // Compare updated_at timestamps - last write wins
++        final localUpdatedAt = DateTime.parse(localRecords.first['updated_at'] as String);
++        if (remoteUpdatedAt.isAfter(localUpdatedAt)) {
++          // Remote is newer, update local
++          await _localDb.update(
++            table,
++            remoteChange,
++            where: 'id = ?$userWhere',
++            whereArgs: [remoteChange['id'], ...userArgs],
++          );
++        }
++      }
++    }
++  }
++
++  // Get local changes since last sync (filtered by user_id for multi-tenant isolation)
++  Future<List<Map<String, dynamic>>> _getLocalChangesSince(
++    String table,
++    DateTime? lastSync,
++  ) async {
++    final userWhere = _userIdWhere('user_id');
++    final userArgs = _userIdArgs();
++
++    if (lastSync == null) {
++      return await _localDb.query(
++        table,
++        where: 'is_deleted = 0$userWhere',
++        whereArgs: userArgs,
++      );
++    }
++    return await _localDb.query(
++      table,
++      where: 'updated_at > ? AND is_deleted = 0$userWhere',
++      whereArgs: [lastSync.toIso8601String(), ...userArgs],
++    );
++  }
++
++  // Sync a single table
++  Future<void> _syncTable(String table) async {
++    final lastSync = await _getLastSyncTime(table);
++
++    // Step 1: Get remote changes since last sync
++    final remoteChanges = await getChangesSince(table, lastSync);
++
++    // Step 2: Apply remote changes to local (with last-write-wins)
++    await _applyRemoteChanges(table, remoteChanges);
++
++    // Step 3: Get local changes since last sync
++    final localChanges = await _getLocalChangesSince(table, lastSync);
++
++    // Step 4: Push local changes to remote
++    await pushChanges(table, localChanges);
++
++    // Step 5: Update last sync time
++    await _updateLastSyncTime(table, DateTime.now());
++  }
++
++  // Sync all tables
++  Future<void> syncAll() async {
++    await _syncTable('feeds');
++    await _syncTable('articles');
++    await _syncTable('categories');
++  }
++}

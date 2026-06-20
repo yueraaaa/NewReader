@@ -170,8 +170,8 @@
     },
     {
       "path": "lib/data/repositories/feed_repository_impl.dart",
-      "accessCount": 34,
-      "lastAccessed": 1781929753390,
+      "accessCount": 38,
+      "lastAccessed": 1781937793512,
       "type": "file"
     },
     {
@@ -182,8 +182,8 @@
     },
     {
       "path": "lib/main.dart",
-      "accessCount": 16,
-      "lastAccessed": 1781929176053,
+      "accessCount": 20,
+      "lastAccessed": 1781937817488,
       "type": "file"
     },
     {
@@ -196,6 +196,12 @@
       "path": "lib/data/datasources/remote/supabase_datasource.dart",
       "accessCount": 16,
       "lastAccessed": 1781929762151,
+      "type": "file"
+    },
+    {
+      "path": "lib/data/datasources/local/article_local_datasource.dart",
+      "accessCount": 16,
+      "lastAccessed": 1781937810042,
       "type": "file"
     },
     {
@@ -235,6 +241,12 @@
       "type": "file"
     },
     {
+      "path": "lib/presentation/blocs/article/article_bloc.dart",
+      "accessCount": 11,
+      "lastAccessed": 1781937735642,
+      "type": "file"
+    },
+    {
       "path": "lib/presentation/pages/mobile/article_detail_page.dart",
       "accessCount": 10,
       "lastAccessed": 1775870784877,
@@ -259,12 +271,6 @@
       "type": "directory"
     },
     {
-      "path": "lib/presentation/blocs/article/article_bloc.dart",
-      "accessCount": 8,
-      "lastAccessed": 1781920708224,
-      "type": "file"
-    },
-    {
       "path": "supabase_schema.sql",
       "accessCount": 8,
       "lastAccessed": 1781920780625,
@@ -274,12 +280,6 @@
       "path": "lib/data/repositories/auth_repository_impl.dart",
       "accessCount": 7,
       "lastAccessed": 1781920656799,
-      "type": "file"
-    },
-    {
-      "path": "lib/data/datasources/local/article_local_datasource.dart",
-      "accessCount": 7,
-      "lastAccessed": 1781920717929,
       "type": "file"
     },
     {
@@ -319,6 +319,18 @@
       "type": "file"
     },
     {
+      "path": "lib/presentation/blocs/article/article_event.dart",
+      "accessCount": 5,
+      "lastAccessed": 1781937702355,
+      "type": "file"
+    },
+    {
+      "path": "lib/data/datasources/local/settings_local_datasource.dart",
+      "accessCount": 5,
+      "lastAccessed": 1781937758057,
+      "type": "file"
+    },
+    {
       "path": "lib/presentation/pages/mobile/feed_page.dart",
       "accessCount": 4,
       "lastAccessed": 1775870757499,
@@ -347,12 +359,6 @@
       "accessCount": 4,
       "lastAccessed": 1775954868841,
       "type": "directory"
-    },
-    {
-      "path": "lib/presentation/blocs/article/article_event.dart",
-      "accessCount": 4,
-      "lastAccessed": 1781920541249,
-      "type": "file"
     },
     {
       "path": "lib/core/config/app_config.dart",
@@ -406,12 +412,6 @@
       "path": "lib/data/services/opml_service.dart",
       "accessCount": 3,
       "lastAccessed": 1781920573851,
-      "type": "file"
-    },
-    {
-      "path": "lib/data/datasources/local/settings_local_datasource.dart",
-      "accessCount": 3,
-      "lastAccessed": 1781929671770,
       "type": "file"
     },
     {

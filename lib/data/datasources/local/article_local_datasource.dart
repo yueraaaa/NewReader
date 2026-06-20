@@ -5,12 +5,18 @@ import 'database_helper.dart';
 class ArticleLocalDatasource {
   Future<Database> get _db => DatabaseHelper.database;
 
+  String? _userId;
+
+  void setUserId(String? userId) {
+    _userId = userId;
+  }
+
   Future<List<ArticleModel>> getArticlesByFeed(String feedId) async {
     final db = await _db;
     final maps = await db.query(
       'articles',
-      where: 'feed_id = ? AND is_deleted = ?',
-      whereArgs: [feedId, 0],
+      where: 'feed_id = ? AND is_deleted = ?${_userId != null ? " AND user_id = ?" : ""}',
+      whereArgs: _userId != null ? [feedId, 0, _userId!] : [feedId, 0],
       orderBy: 'published_at DESC',
     );
     return maps.map((m) => ArticleModel.fromMap(m)).toList();
@@ -18,12 +24,14 @@ class ArticleLocalDatasource {
 
   Future<List<ArticleModel>> getArticlesByCategory(String categoryId) async {
     final db = await _db;
+    final userIdArg = _userId != null ? "AND articles.user_id = ?" : "";
+    final args = _userId != null ? [categoryId, 0, 0, _userId!] : [categoryId, 0, 0];
     final maps = await db.rawQuery('''
       SELECT articles.* FROM articles
       INNER JOIN feeds ON articles.feed_id = feeds.id
-      WHERE feeds.category_id = ? AND articles.is_deleted = ? AND feeds.is_deleted = ?
+      WHERE feeds.category_id = ? AND articles.is_deleted = ? AND feeds.is_deleted = ? $userIdArg
       ORDER BY articles.published_at DESC
-    ''', [categoryId, 0, 0]);
+    ''', args);
     return maps.map((m) => ArticleModel.fromMap(m)).toList();
   }
 
@@ -31,8 +39,8 @@ class ArticleLocalDatasource {
     final db = await _db;
     final maps = await db.query(
       'articles',
-      where: 'is_deleted = ?',
-      whereArgs: [0],
+      where: 'is_deleted = ?${_userId != null ? " AND user_id = ?" : ""}',
+      whereArgs: _userId != null ? [0, _userId!] : [0],
       orderBy: 'published_at DESC',
     );
     return maps.map((m) => ArticleModel.fromMap(m)).toList();
@@ -42,8 +50,8 @@ class ArticleLocalDatasource {
     final db = await _db;
     final maps = await db.query(
       'articles',
-      where: 'id = ?',
-      whereArgs: [id],
+      where: 'id = ?${_userId != null ? " AND user_id = ?" : ""}',
+      whereArgs: _userId != null ? [id, _userId!] : [id],
     );
     if (maps.isEmpty) return null;
     return ArticleModel.fromMap(maps.first);
@@ -53,8 +61,8 @@ class ArticleLocalDatasource {
     final db = await _db;
     final maps = await db.query(
       'articles',
-      where: 'is_favorite = ? AND is_deleted = ?',
-      whereArgs: [1, 0],
+      where: 'is_favorite = ? AND is_deleted = ?${_userId != null ? " AND user_id = ?" : ""}',
+      whereArgs: _userId != null ? [1, 0, _userId!] : [1, 0],
       orderBy: 'published_at DESC',
     );
     return maps.map((m) => ArticleModel.fromMap(m)).toList();
@@ -64,8 +72,8 @@ class ArticleLocalDatasource {
     final db = await _db;
     final maps = await db.query(
       'articles',
-      where: '(title LIKE ? OR description LIKE ? OR content LIKE ?) AND is_deleted = ?',
-      whereArgs: ['%$query%', '%$query%', '%$query%', 0],
+      where: '(title LIKE ? OR description LIKE ? OR content LIKE ?) AND is_deleted = ?${_userId != null ? " AND user_id = ?" : ""}',
+      whereArgs: _userId != null ? ['%$query%', '%$query%', '%$query%', 0, _userId!] : ['%$query%', '%$query%', '%$query%', 0],
       orderBy: 'published_at DESC',
     );
     return maps.map((m) => ArticleModel.fromMap(m)).toList();
@@ -98,8 +106,8 @@ class ArticleLocalDatasource {
     await db.update(
       'articles',
       article.toMap(),
-      where: 'id = ?',
-      whereArgs: [article.id],
+      where: 'id = ?${_userId != null ? " AND user_id = ?" : ""}',
+      whereArgs: _userId != null ? [article.id, _userId!] : [article.id],
     );
   }
 
@@ -111,8 +119,8 @@ class ArticleLocalDatasource {
         'is_read': isRead ? 1 : 0,
         'updated_at': DateTime.now().toIso8601String(),
       },
-      where: 'id = ?',
-      whereArgs: [id],
+      where: 'id = ?${_userId != null ? " AND user_id = ?" : ""}',
+      whereArgs: _userId != null ? [id, _userId!] : [id],
     );
   }
 
@@ -124,8 +132,8 @@ class ArticleLocalDatasource {
         'is_favorite': isFavorite ? 1 : 0,
         'updated_at': DateTime.now().toIso8601String(),
       },
-      where: 'id = ?',
-      whereArgs: [id],
+      where: 'id = ?${_userId != null ? " AND user_id = ?" : ""}',
+      whereArgs: _userId != null ? [id, _userId!] : [id],
     );
   }
 
@@ -137,8 +145,8 @@ class ArticleLocalDatasource {
         'read_progress': progress,
         'updated_at': DateTime.now().toIso8601String(),
       },
-      where: 'id = ?',
-      whereArgs: [id],
+      where: 'id = ?${_userId != null ? " AND user_id = ?" : ""}',
+      whereArgs: _userId != null ? [id, _userId!] : [id],
     );
   }
 
@@ -147,8 +155,8 @@ class ArticleLocalDatasource {
     await db.update(
       'articles',
       {'is_deleted': 1, 'updated_at': DateTime.now().toIso8601String()},
-      where: 'id = ?',
-      whereArgs: [id],
+      where: 'id = ?${_userId != null ? " AND user_id = ?" : ""}',
+      whereArgs: _userId != null ? [id, _userId!] : [id],
     );
   }
 
@@ -157,24 +165,29 @@ class ArticleLocalDatasource {
     await db.update(
       'articles',
       {'is_deleted': 1, 'updated_at': DateTime.now().toIso8601String()},
-      where: 'feed_id = ?',
-      whereArgs: [feedId],
+      where: 'feed_id = ?${_userId != null ? " AND user_id = ?" : ""}',
+      whereArgs: _userId != null ? [feedId, _userId!] : [feedId],
     );
   }
 
   Future<int> getUnreadCountByFeed(String feedId) async {
     final db = await _db;
+    final userIdClause = _userId != null ? "AND user_id = ?" : "";
+    final args = _userId != null ? [feedId, _userId!] : [feedId];
     final result = await db.rawQuery(
-      'SELECT COUNT(*) as count FROM articles WHERE feed_id = ? AND is_read = 0 AND is_deleted = 0',
-      [feedId],
+      'SELECT COUNT(*) as count FROM articles WHERE feed_id = ? AND is_read = 0 AND is_deleted = 0 $userIdClause',
+      args,
     );
     return Sqflite.firstIntValue(result) ?? 0;
   }
 
   Future<int> getTotalUnreadCount() async {
     final db = await _db;
+    final userIdClause = _userId != null ? "AND user_id = ?" : "";
+    final args = _userId != null ? [_userId!] : [];
     final result = await db.rawQuery(
-      'SELECT COUNT(*) as count FROM articles WHERE is_read = 0 AND is_deleted = 0',
+      'SELECT COUNT(*) as count FROM articles WHERE is_read = 0 AND is_deleted = 0 $userIdClause',
+      args,
     );
     return Sqflite.firstIntValue(result) ?? 0;
   }

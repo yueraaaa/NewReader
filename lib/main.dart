@@ -93,7 +93,7 @@ class RealReaderApp extends StatelessWidget {
     if (supabaseUrl.isNotEmpty && supabaseAnonKey.isNotEmpty) {
       final supabaseClient = supabase.Supabase.instance.client;
       supabaseDatasource = SupabaseDatasource(supabaseClient);
-      syncService = SyncService(supabaseDatasource!, database);
+      syncService = SyncService(supabaseDatasource, database);
     }
 
     // Create repositories
@@ -115,6 +115,7 @@ class RealReaderApp extends StatelessWidget {
         BlocProvider(create: (_) => ArticleBloc(
           articleDatasource: articleDatasource,
           supabaseDatasource: supabaseDatasource,
+          authBloc: context.read<AuthBloc>(),
         )),
         BlocProvider(create: (_) => AiBloc()),
       ],

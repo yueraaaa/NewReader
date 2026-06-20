@@ -1,17 +1,22 @@
+import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../data/datasources/local/article_local_datasource.dart';
 import '../../../data/datasources/remote/supabase_datasource.dart';
 import '../../../data/models/article_model.dart';
+import '../auth/auth_bloc.dart';
+import '../auth/auth_state.dart';
 import 'article_event.dart';
 import 'article_state.dart';
 
 class ArticleBloc extends Bloc<ArticleEvent, ArticleState> {
   final ArticleLocalDatasource _articleDatasource;
   final SupabaseDatasource? _supabaseDatasource;
+  StreamSubscription<AuthState>? _authSubscription;
 
   ArticleBloc({
     ArticleLocalDatasource? articleDatasource,
     SupabaseDatasource? supabaseDatasource,
+    AuthBloc? authBloc,
   })  : _articleDatasource = articleDatasource ?? ArticleLocalDatasource(),
         _supabaseDatasource = supabaseDatasource,
         super(ArticleInitial()) {
@@ -25,6 +30,24 @@ class ArticleBloc extends Bloc<ArticleEvent, ArticleState> {
     on<LoadUnreadCount>(_onLoadUnreadCount);
     on<LoadArticleById>(_onLoadArticleById);
     on<DeleteArticlesByFeedId>(_onDeleteArticlesByFeedId);
+
+    if (authBloc != null) {
+      _authSubscription = authBloc.stream.listen(_onAuthStateChanged);
+    }
+  }
+
+  void _onAuthStateChanged(AuthState authState) {
+    String? userId;
+    if (authState is AuthAuthenticated) {
+      userId = authState.user.id;
+    }
+    _articleDatasource.setUserId(userId);
+  }
+
+  @override
+  Future<void> close() {
+    _authSubscription?.cancel();
+    return super.close();
   }
 
   bool get _isLoggedIn => _supabaseDatasource != null;
