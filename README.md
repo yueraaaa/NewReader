@@ -1,117 +1,142 @@
-# NewReader
+# REAL READER
 
-精致、安全的 RSS 阅读器，内置 AI 摘要与翻译、TTS 语音朗读、全文提取、阅读兴趣分析。支持 macOS 15+ 与 iOS 18+。
+一款跨平台 RSS 阅读器，基于 Flutter 构建。集成 AI 翻译/摘要（Minimax）、云端同步（Supabase），采用高端杂志风格的 UI 设计系统。
 
-![Swift](https://img.shields.io/badge/Swift-6.0-FA7343?logo=swift)
-![macOS](https://img.shields.io/badge/macOS-15%2B-000000?logo=apple)
-![iOS](https://img.shields.io/badge/iOS-18%2B-000000?logo=apple)
-![License](https://img.shields.io/badge/license-MIT-blue)
+## 功能特性
 
-[🌐 产品介绍](https://newreader.netlify.app) · [📦 下载最新版](https://github.com/yueraaaa/NewReader/releases/latest) · [📖 使用文档](https://newreader.netlify.app/docs)
+- **RSS 订阅管理** — 添加、编辑、删除、分类管理 RSS 订阅源
+- **文章阅读** — 列表展示、已读/未读标记、收藏、阅读进度记录
+- **OPML 导入/导出** — 标准 OPML 格式，支持从其他阅读器迁移
+- **AI 增强** — 一键翻译成中文、智能摘要、语音朗读
+- **云端同步** — Supabase 实时同步，多设备无缝衔接
+- **第三方登录** — Apple / GitHub / Email 一键登录
+- **无广告 · 无注册限制 · 轻量化**
 
-[English](README_EN.md) · [中文](#-特性)
+## 支持平台
 
----
+- macOS
+- Windows
+- iOS
 
-## ✨ 特性
+## 技术栈
 
-| 特性 | 说明 |
+| 类别 | 技术 |
 |------|------|
-| **多格式订阅** | 支持 RSS 2.0、Atom、JSON Feed，自动解析 |
-| **AI 摘要** | OpenAI 兼容 API，一键生成文章摘要 |
-| **多语翻译** | 中文、英语、日语、韩语互译 |
-| **TTS 语音朗读** | Apple 系统语音 + 自定义 TTS API 双引擎，断点续播 |
-| **全文提取** | 从摘要 Feed 自动拉取完整正文 |
-| **离线缓存** | 本地缓存文章，断网可读 |
-| **OPML 导入导出** | 迁移订阅源一键完成 |
-| **崩溃上报** | 崩溃自动上传 Supabase，邮件实时通知 |
-| **iCloud 同步** | SwiftData + CloudKit，跨设备自动同步 |
-| **分类管理** | 新建分类收纳订阅源，可折叠、重命名、删除 |
-| **工作台分析** | AI 分析阅读兴趣，生成关键词关系图谱 |
-| **主题切换** | 浅色 / 深色 / 跟随系统，即时生效 |
-| **键盘导航** | J/K 键浏览文章，⌘F 聚焦搜索，全键盘高效操作 |
-| **日期分组** | 文章按今天 / 昨天 / 本周自动分组，快速定位 |
-| **安全优先** | Keychain 加密、WKWebView 沙箱、SSRF 防护、HTML 深度消毒 |
+| 框架 | Flutter 3.x / Dart 3.x |
+| 状态管理 | flutter_bloc |
+| 本地存储 | sqflite (SQLite) |
+| 云端服务 | Supabase |
+| AI 服务 | Minimax API |
+| RSS 解析 | webfeed_revised |
+| 路由 | go_router |
 
-## 🔒 安全性
+## 快速开始
 
-- **API Key**：使用 macOS / iOS Keychain 加密存储，明文不落磁盘
-- **WKWebView**：禁用 JavaScript + Content-Security-Policy，阻止脚本注入
-- **URL 校验**：协议白名单（仅 http/https）+ 全量私有 IP / IPv6 拦截，防 SSRF
-- **HTML 消毒**：移除 script / iframe / 事件处理器 / javascript: / base / form / meta refresh
-- **OPML 限制**：导入文件大小上限 5MB，防内存耗尽
-- **App Sandbox**：macOS App Sandbox 启用，进程级隔离
+### 安装依赖
 
-## 🆕 v1.3.0 更新
+```bash
+flutter pub get
+```
 
-- 🛡️ **Cloudflare Turnstile** 隐形人机验证（登录 + 每次 AI 调用）
-- 📱 **每设备每天 5 次** AI 限额（Keychain UUID 标识设备）
-- 👤 **每账号每天 50 次** AI 限额（保留原行为）
-- 📊 **billing-watchdog** Edge Function：监控 Supabase 免费额度（80% 警告 / 95% 自动暂停）
-- 🔄 **ai-proxy 自动恢复**：用量降回阈值后自动取消暂停
-- 🐛 修复 `stripThinking` 残留 `</think>` 尾巴、KeychainHelper 重复键、`try?` 静默失败、TTS 错误响应泄露
-- 📖 新文档 [`docs/SECURITY_SETUP.md`](docs/SECURITY_SETUP.md)（维护者部署指南）
-
-详见 [`CODE_AUDIT_REPORT.md`](CODE_AUDIT_REPORT.md) 完整审计与修复记录。
-
-## 🛠 技术栈
-
-Swift 6 · SwiftUI · SwiftData · FeedKit · WKWebView · AVFoundation · Supabase · CloudKit
-
-## 🚀 构建
+### 运行
 
 ```bash
 # macOS
-swift build -c release
-cp .build/release/NewReaderMac NewReader.app/Contents/MacOS/NewReaderMac
-open NewReader.app
+flutter run -d macos
 
-# 或使用打包脚本
-bash scripts/package-macos.sh
+# Windows
+flutter run -d windows
+
+# iOS
+flutter run -d iphone
 ```
 
-**依赖**：macOS 15+ / iOS 18+，Xcode 16+。
-
-### 🔑 本地开发 Secret 配置
-
-`SupabaseURL` / `SupabasePublishableKey` / `FeedbackEmail` 在运行时由 `SecretsLoader` 解析，顺序为：
-
-1. `Bundle.main.Info.plist`（打包脚本会把 `Sources/NewReaderMac/Secrets.plist` 合并进 bundle 的 Info.plist）
-2. `~/Library/Application Support/NewReader/secrets.plist`（开发模式用，`swift run` / Xcode debug）
-
-**首次配置**：
+### 构建
 
 ```bash
-# 1. 复制模板
-cp Sources/NewReaderMac/Secrets.plist.template ~/Library/Application\ Support/NewReader/secrets.plist
-
-# 2. 编辑填入真实值
-open ~/Library/Application\ Support/NewReader/secrets.plist
+flutter build macos
+flutter build ios
+flutter build windows
 ```
 
-打包脚本 `scripts/package-macos.sh` 会在检测到 `Sources/NewReaderMac/Secrets.plist` 时自动镜像一份到用户目录，方便在两种运行方式之间切换。`Secrets.plist` 已在 `.gitignore` 中，不会被提交。
+## 配置 API
 
-## 📦 安装
+首次使用需要在应用内配置或在环境变量中设置：
 
-### macOS
+| 变量 | 说明 |
+|------|------|
+| `SUPABASE_URL` | Supabase 项目 URL |
+| `SUPABASE_ANON_KEY` | Supabase Anonymous Key |
+| `MINIMAX_API_KEY` | Minimax API Key |
+| `MINIMAX_GROUP_ID` | Minimax Group ID |
 
-从 [Releases](https://github.com/yueraaaa/NewReader/releases) 下载 `NewReader.dmg`，打开后将 **NewReader.app** 拖入 `/Applications`。
+或在应用内「设置 > API 配置」页面直接输入。
 
-首次运行时，在 **系统设置 → 隐私与安全性** 中点击「仍要打开」。
+## 登录与同步
 
-### iOS
+### 使用模式
 
-通过 Xcode 编译安装到设备。打开 `Package.swift`，选择 **NewReaderiOS** target，连接 iPhone 后运行。
+| 场景 | 是否需要登录 | 云端同步 |
+|------|-------------|---------|
+| 未配置 Supabase | ❌ 不需要 | ❌ 不可用 |
+| 已配置 Supabase | ✅ 需要 | ✅ 可用 |
 
-## 🔒 维护者部署
+### 登录流程
 
-如果你是项目维护者（不是终端用户），需要在 Supabase + Cloudflare 部署凭据才能让客户端正常运行：见 [`docs/SECURITY_SETUP.md`](docs/SECURITY_SETUP.md)。
+```
+应用启动
+    │
+    ▼
+检查 Supabase 配置是否完整
+    │
+    ├─ 否 → 直接进入主界面（离线模式，所有数据存储在本地）
+    │
+    └─ 是 → 显示登录页面
+              │
+              ▼
+        选择登录方式：Apple / GitHub / 邮箱
+              │
+              ▼
+           登录成功
+              │
+              ▼
+         进入主界面（启用云端同步）
+```
 
-包括：
-- Cloudflare Turnstile 凭据（防批量注册）
-- device-id + per-user 限速（防滥用）
-- billing-watchdog 调度（防超预算）
+### 第三方登录
 
-## 📄 许可
+- **Apple 登录**：通过 Supabase OAuth，一键登录
+- **GitHub 登录**：通过 Supabase OAuth，一键登录
+- **邮箱登录**：输入邮箱 + 密码，或注册新账号
+
+### 数据同步
+
+- **本地优先**：所有操作先写入本地 SQLite，立即响应
+- **静默同步**：后台异步推送到 Supabase，网络错误不影响使用
+- **多设备同步**：登录后，所有设备数据自动保持一致
+
+如需多设备同步功能，请在「设置 > API 配置」中配置 Supabase 并登录。
+
+## 项目结构
+
+```
+lib/
+├── core/              # 核心：主题、路由、配置
+├── data/              # 数据层：模型、数据源、仓库实现
+├── domain/           # 业务层：实体、仓库接口
+└── presentation/      # 表现层：页面、组件、BLoC
+```
+
+## 设计系统
+
+UI 设计遵循 "The Editorial Sanctuary" 理念：
+- **Newsreader** 衬线体用于文章正文
+- **Inter** 无衬线体用于界面标签
+- 浅色/深色双模式（深色不使用纯黑）
+- 无边框分隔，通过背景色阶区分层级
+
+详见 `UI/desktop/stitch/slate_serif/DESIGN.md`
+
+## License
 
 MIT License
